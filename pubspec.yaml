@@ -1,0 +1,21 @@
+name: winter_ark
+environment:
+  sdk: "^3.6.0"
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_test:
+    sdk: flutter
+
+
+
+
+
+
+
+
+
+
+
+
+
