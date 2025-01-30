@@ -1,11 +1,20 @@
 name: winter_ark
+
 environment:
   sdk: "^3.6.0"
+
 dependencies:
   flutter:
     sdk: flutter
+  get: ^4.6.6  # GetX for navigation
+
+dev_dependencies:
   flutter_test:
     sdk: flutter
+
+flutter:
+  uses-material-design: true
+
 
 
 
