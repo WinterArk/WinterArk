@@ -1,4 +1,4 @@
-package com.example.winter_ark
+package com.example.winterark
 
 import io.flutter.embedding.android.FlutterActivity
 
