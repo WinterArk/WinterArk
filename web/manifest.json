@@ -1,6 +1,6 @@
 {
-    "name": "winter_ark",
-    "short_name": "winter_ark",
+    "name": "winterark",
+    "short_name": "winterark",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

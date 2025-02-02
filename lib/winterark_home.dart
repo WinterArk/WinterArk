@@ -1,45 +1,44 @@
-
+// winterark_home.dart
 import 'package:flutter/material.dart';
+import 'login_screen.dart';
 
-class LandingPage extends StatelessWidget {
+class WinterArkHome extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,  // Set dark background
+      backgroundColor: Colors.black,
       body: SafeArea(
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // WinterArk Title
+              // App title
               Text(
                 'WinterArk',
                 style: TextStyle(
                   fontSize: 60,
                   fontWeight: FontWeight.bold,
-                  color: Colors.blue,  // Restore blue title
+                  color: Colors.white,
                 ),
               ),
               SizedBox(height: 20),
-              // Snowflake Icons
+              // Snowflakes decoration
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.ac_unit, color: Colors.blue, size: 30),
+                  Icon(Icons.ac_unit, color: Color(0xFFADD8E6), size: 30),
                   SizedBox(width: 10),
-                  Icon(Icons.ac_unit, color: Colors.blue, size: 40),
+                  Icon(Icons.ac_unit, color: Color(0xFFADD8E6), size: 40),
                   SizedBox(width: 10),
-                  Icon(Icons.ac_unit, color: Colors.blue, size: 30),
+                  Icon(Icons.ac_unit, color: Color(0xFFADD8E6), size: 30),
                 ],
               ),
               SizedBox(height: 20),
-              // Motivational Quote
+              // Quote
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 30),
                 child: Text(
-                  'The frost bites, but you bite back harder. '
-                  'Winter is your proving ground—where grit meets grind and legends are born. '
-                  'While the world sleeps, you conquer.',
+                  'The frost bites, but you bite back harder. Winter is your proving ground—where grit meets grind and legends are born. While the world sleeps, you conquer.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 16,
@@ -49,51 +48,51 @@ class LandingPage extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 30),
-              // Sign Up & Sign In Buttons
+              // Buttons for Sign up and Sign in
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   ElevatedButton(
                     onPressed: () {
-                      Navigator.pushNamed(context, '/main');  // Go to Home Page
+                      // Navigate to login screen in sign-up mode.
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => LoginScreen(isSignUp: true),
+                        ),
+                      );
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,  // Restore blue button
+                      backgroundColor: Color(0xFFADD8E6),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20),
                       ),
                     ),
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 10,
-                      ),
-                      child: Text(
-                        'Sign up',
-                        style: TextStyle(color: Colors.white),  // White text
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      child: Text('Sign up', style: TextStyle(color: Colors.black)),
                     ),
                   ),
                   SizedBox(width: 20),
                   ElevatedButton(
                     onPressed: () {
-                      Navigator.pushNamed(context, '/main');  // Go to Home Page
+                      // Navigate to login screen in sign-in mode.
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => LoginScreen(isSignUp: false),
+                        ),
+                      );
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,  // Restore blue button
+                      backgroundColor: Color(0xFFADD8E6),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20),
                       ),
                     ),
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 10,
-                      ),
-                      child: Text(
-                        'Sign in',
-                        style: TextStyle(color: Colors.white),  // White text
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      child: Text('Sign in', style: TextStyle(color: Colors.black)),
                     ),
                   ),
                 ],
