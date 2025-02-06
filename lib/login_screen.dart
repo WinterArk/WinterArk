@@ -1,7 +1,10 @@
 // login_screen.dart
+// ignore_for_file: use_build_context_synchronously, prefer_const_constructors, use_super_parameters, library_private_types_in_public_api
+
 import 'package:flutter/material.dart';
 import 'api_service.dart'; // Make sure this file exists and is set up.
 import 'home_page.dart';
+import 'verification_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   final bool isSignUp;
@@ -50,66 +53,93 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _handleSignUp() async {
-    if (!_tosAccepted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('You must accept the Terms of Service.')),
-      );
-      return;
-    }
+  if (!_tosAccepted) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('You must accept the Terms of Service.')),
+    );
+    return;
+  }
 
+  setState(() {
+    _isLoading = true;
+  });
+  try {
+    // Call the signUp API
+    await ApiService.signUp(
+      _nameController.text.trim(),
+      _emailController.text.trim(),
+      _passwordController.text.trim(),
+    );
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Account created successfully! Check your email for the verification code.'),
+      ),
+    );
+    // Navigate to the verification screen with the user's email
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => VerificationScreen(email: _emailController.text.trim()),
+      ),
+    );
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(e.toString())),
+    );
+  } finally {
     setState(() {
-      _isLoading = true;
+      _isLoading = false;
     });
-    try {
-      await ApiService.signUp(
-        _nameController.text.trim(),
-        _emailController.text.trim(),
-        _passwordController.text.trim(),
-      );
+  }
+}
+
+Future<void> _handleSignIn() async {
+  setState(() {
+    _isLoading = true;
+  });
+  try {
+    // Attempt to sign in
+    await ApiService.signIn(
+      _emailController.text.trim(),
+      _passwordController.text.trim(),
+    );
+    // If signIn succeeds, show success and go to home page
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Logged in successfully!')),
+    );
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const HomePage()),
+    );
+  } catch (e) {
+    // Convert the error to string
+    String errorMessage = e.toString().toLowerCase();
+    // Check if the error indicates that the account is not verified
+    if (errorMessage.contains("verify")) {
+      // Display a message or prompt the user
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Account created successfully!')),
+        const SnackBar(content: Text('Your account is not verified. Please check your email.')),
       );
+      // Navigate to the verification screen, passing the email for convenience
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const HomePage()),
+        MaterialPageRoute(
+          builder: (context) => VerificationScreen(email: _emailController.text.trim()),
+        ),
       );
-    } catch (e) {
+    } else {
+      // For other errors, show the error message
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(e.toString())),
       );
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
     }
-  }
-
-  Future<void> _handleSignIn() async {
+  } finally {
     setState(() {
-      _isLoading = true;
+      _isLoading = false;
     });
-    try {
-      await ApiService.signIn(
-        _emailController.text.trim(),
-        _passwordController.text.trim(),
-      );
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Logged in successfully!')),
-      );
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const HomePage()),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
-      );
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
   }
+}
+
 
   @override
   void dispose() {
