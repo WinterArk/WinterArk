@@ -2,9 +2,12 @@
 import 'package:flutter/material.dart';
 import 'workout_planner.dart';
 import 'past_workouts.dart';
+import 'gymbuddy.dart'; // GymBuddyScreen import
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  final String userId;
+
+  const HomePage({Key? key, required this.userId}) : super(key: key);
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -13,17 +16,19 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
 
-  final List<Widget> _pages = [
-    DashboardPage(),
-    WorkoutTrackerScreen(),
-    PastWorkoutsCalendar(),
-  ];
-
   @override
   Widget build(BuildContext context) {
+    // Provide the real userId to GymBuddyScreen
+    final List<Widget> pages = [
+      const DashboardPage(),
+      WorkoutTrackerScreen(),
+      PastWorkoutsCalendar(),
+      GymBuddyScreen(currentUserId: widget.userId),
+    ];
+
     return Scaffold(
       backgroundColor: Colors.black,
-      body: _pages[_currentIndex],
+      body: pages[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         backgroundColor: Colors.black,
@@ -47,6 +52,10 @@ class _HomePageState extends State<HomePage> {
             icon: Icon(Icons.calendar_today),
             label: "Past Workouts",
           ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.people),
+            label: "Gym Buddies",
+          ),
         ],
       ),
     );
@@ -56,7 +65,6 @@ class _HomePageState extends State<HomePage> {
 /// A simple Dashboard page.
 class DashboardPage extends StatelessWidget {
   const DashboardPage({Key? key}) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -66,7 +74,7 @@ class DashboardPage extends StatelessWidget {
         centerTitle: true,
       ),
       backgroundColor: Colors.black,
-      body: Center(
+      body: const Center(
         child: Text(
           'Welcome to WinterArk Home!',
           style: TextStyle(color: Colors.white, fontSize: 20),

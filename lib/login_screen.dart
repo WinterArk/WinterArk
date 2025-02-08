@@ -2,7 +2,7 @@
 // ignore_for_file: use_build_context_synchronously, prefer_const_constructors, use_super_parameters, library_private_types_in_public_api
 
 import 'package:flutter/material.dart';
-import 'api_service.dart'; // Make sure this file exists and is set up.
+import 'api_service.dart';
 import 'home_page.dart';
 import 'verification_screen.dart';
 import 'winterark_home.dart';
@@ -63,21 +63,42 @@ class _LoginScreenState extends State<LoginScreen> {
       _isLoading = true;
     });
     try {
-      await ApiService.signUp(
+      // 1) Make the signup API call
+      final signUpResponse = await ApiService.signUp(
         _nameController.text.trim(),
         _usernameOrEmailController.text.trim(),
         _emailController.text.trim(),
         _passwordController.text.trim(),
       );
+
+      // 2) Extract the user object from response
+      // signUpResponse should look like:
+      // {
+      //   "message": "...",
+      //   "user": {
+      //     "_id": "64abc1234def56789abc1234",
+      //     "name": "...",
+      //     ...
+      //   }
+      // }
+      final user = signUpResponse['user'];
+      final newUserId = user['_id'] as String;
+
+      // 3) Show success
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Account created successfully! Check your email for the verification code.'),
         ),
       );
+
+      // 4) Navigate to VerificationScreen, passing both the email & the newly created userId
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => VerificationScreen(email: _emailController.text.trim()),
+          builder: (context) => VerificationScreen(
+            email: _emailController.text.trim(),
+            userId: newUserId,
+          ),
         ),
       );
     } catch (e) {
@@ -96,16 +117,27 @@ class _LoginScreenState extends State<LoginScreen> {
       _isLoading = true;
     });
     try {
-      await ApiService.signIn(
+      // 1) Call signIn() and capture its JSON
+      final responseData = await ApiService.signIn(
         _usernameOrEmailController.text.trim(),
         _passwordController.text.trim(),
       );
+
+      // 2) Extract user object, then grab the _id
+      final user = responseData['user'];
+      final userId = user['_id'] as String;
+
+      // 3) Notify success
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Logged in successfully!')),
       );
+
+      // 4) Pass userId to HomePage
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const HomePage()),
+        MaterialPageRoute(
+          builder: (context) => HomePage(userId: userId),
+        ),
       );
     } catch (e) {
       String errorMessage = e.toString().toLowerCase();
@@ -116,7 +148,11 @@ class _LoginScreenState extends State<LoginScreen> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => VerificationScreen(email: _emailController.text.trim()),
+            builder: (context) => VerificationScreen(
+              email: _emailController.text.trim(),
+              // userId is unknown in login error scenario, so you could pass an empty string or handle differently
+              userId: '',
+            ),
           ),
         );
       } else {

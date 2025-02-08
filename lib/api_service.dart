@@ -1,10 +1,10 @@
-// api_service.dart
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class ApiService {
   static const String BASE_URL = 'http://18.234.214.233:3000';
 
+  // 1) SIGN UP a new user
   static Future<Map<String, dynamic>> signUp(
       String name, String username, String email, String password) async {
     final url = Uri.parse('$BASE_URL/api/users/register');
@@ -26,7 +26,9 @@ class ApiService {
     }
   }
 
-  static Future<Map<String, dynamic>> signIn(String identifier, String password) async {
+  // 2) SIGN IN an existing user
+  static Future<Map<String, dynamic>> signIn(
+      String identifier, String password) async {
     final url = Uri.parse('$BASE_URL/api/users/login');
     final response = await http.post(
       url,
@@ -44,6 +46,7 @@ class ApiService {
     }
   }
 
+  // 3) VERIFY user account
   static Future<Map<String, dynamic>> verify(String email, String code) async {
     final url = Uri.parse('$BASE_URL/api/users/verify');
     final response = await http.post(
@@ -62,20 +65,81 @@ class ApiService {
     }
   }
 
+  // 4) RESEND verification email
   static Future<Map<String, dynamic>> resendVerification(String email) async {
     final url = Uri.parse('$BASE_URL/api/users/resend-verification');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
-      body: json.encode({
-        "email": email,
-      }),
+      body: json.encode({"email": email}),
     );
 
     if (response.statusCode == 200) {
       return json.decode(response.body);
     } else {
       throw Exception('Failed to resend verification email: ${response.body}');
+    }
+  }
+
+  // 5) SEARCH users
+  static Future<List<dynamic>> searchUsers(String query, String filter) async {
+    final url = Uri.parse('$BASE_URL/api/users/search?query=$query&filter=$filter');
+    final response = await http.get(
+      url,
+      headers: {"Content-Type": "application/json"},
+    );
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to search users: ${response.body}');
+    }
+  }
+
+  // 6) ADD gym buddy
+  static Future<Map<String, dynamic>> addGymBuddy(String userId, String buddyId) async {
+    final url = Uri.parse('$BASE_URL/api/gymbuddies');
+    final response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: json.encode({
+        "userId": userId,
+        "buddyId": buddyId,
+      }),
+    );
+    if (response.statusCode == 201) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to add gym buddy: ${response.body}');
+    }
+  }
+
+  // 7) FETCH a user's gym buddies
+  static Future<List<dynamic>> fetchUserBuddies(String userId) async {
+    final url = Uri.parse('$BASE_URL/api/gymbuddies/$userId');
+    final response = await http.get(
+      url,
+      headers: {"Content-Type": "application/json"},
+    );
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to fetch buddies: ${response.body}');
+    }
+  }
+
+  // 8) UPDATE buddy status (accept/decline)
+  static Future<Map<String, dynamic>> updateBuddyStatus(String docId, String newStatus) async {
+    final url = Uri.parse('$BASE_URL/api/gymbuddies/$docId');
+    final response = await http.patch(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: json.encode({"status": newStatus}),
+    );
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to update buddy status: ${response.body}');
     }
   }
 }
