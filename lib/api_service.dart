@@ -1,25 +1,19 @@
 // api_service.dart
-// ignore_for_file: constant_identifier_names
-
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class ApiService {
-  // Use the correct BASE_URL for your emulator or device.
-  // For localhost
-  // http://10.0.2.2:3000
-  // Web Server
-  // http://18.234.214.233:3000
   static const String BASE_URL = 'http://18.234.214.233:3000';
 
-  // Updated Sign Up Method that accepts a name
-  static Future<Map<String, dynamic>> signUp(String name, String email, String password) async {
+  static Future<Map<String, dynamic>> signUp(
+      String name, String username, String email, String password) async {
     final url = Uri.parse('$BASE_URL/api/users/register');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
       body: json.encode({
-        "name": name,        // Now including name
+        "name": name,
+        "username": username,
         "email": email,
         "password": password,
       }),
@@ -32,14 +26,13 @@ class ApiService {
     }
   }
 
-  // Sign In Method remains the same
-  static Future<Map<String, dynamic>> signIn(String email, String password) async {
+  static Future<Map<String, dynamic>> signIn(String identifier, String password) async {
     final url = Uri.parse('$BASE_URL/api/users/login');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
       body: json.encode({
-        "email": email,
+        "identifier": identifier,
         "password": password,
       }),
     );
@@ -51,7 +44,6 @@ class ApiService {
     }
   }
 
-   // Verify Method for confirming email verification code
   static Future<Map<String, dynamic>> verify(String email, String code) async {
     final url = Uri.parse('$BASE_URL/api/users/verify');
     final response = await http.post(
@@ -70,7 +62,6 @@ class ApiService {
     }
   }
 
-   // Resend Verification method
   static Future<Map<String, dynamic>> resendVerification(String email) async {
     final url = Uri.parse('$BASE_URL/api/users/resend-verification');
     final response = await http.post(
