@@ -1,5 +1,5 @@
 // verification_screen.dart
-// ignore_for_file: use_build_context_synchronously, use_super_parameters, library_private_types_in_public_api
+// ignore_for_file: use_build_context_synchronously, prefer_const_constructors, library_private_types_in_public_api
 
 import 'package:flutter/material.dart';
 import 'api_service.dart';
@@ -7,8 +7,13 @@ import 'home_page.dart';
 
 class VerificationScreen extends StatefulWidget {
   final String email;
+  final String userId; // <-- Add userId to constructor so we can go directly to HomePage
 
-  const VerificationScreen({Key? key, required this.email}) : super(key: key);
+  const VerificationScreen({
+    Key? key,
+    required this.email,
+    required this.userId,
+  }) : super(key: key);
 
   @override
   _VerificationScreenState createState() => _VerificationScreenState();
@@ -24,16 +29,23 @@ class _VerificationScreenState extends State<VerificationScreen> {
       _isLoading = true;
     });
     try {
+      // 1) Attempt to verify on the backend
       await ApiService.verify(
         widget.email,
         _codeController.text.trim(),
       );
+
+      // 2) If successful, show a success message
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Account verified successfully!')),
       );
+
+      // 3) Navigate directly to HomePage, passing userId
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const HomePage()),
+        MaterialPageRoute(
+          builder: (context) => HomePage(userId: widget.userId),
+        ),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -46,7 +58,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
     }
   }
 
-  // New method to handle resending verification email
+  // Handle resending verification code
   Future<void> _handleResendVerification() async {
     setState(() {
       _isResending = true;
@@ -102,12 +114,11 @@ class _VerificationScreenState extends State<VerificationScreen> {
                   : const Text('Verify'),
             ),
             const SizedBox(height: 20),
-            // Resend Verification button
             ElevatedButton(
               onPressed: _isResending ? null : _handleResendVerification,
               child: _isResending
                   ? const CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white))
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white))
                   : const Text('Resend Verification Email'),
             ),
           ],
