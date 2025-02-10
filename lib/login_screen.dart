@@ -6,6 +6,7 @@ import 'api_service.dart';
 import 'home_page.dart';
 import 'verification_screen.dart';
 import 'winterark_home.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
   final bool isSignUp;
@@ -51,6 +52,11 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
+  Future<void> saveUserId(String userId) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('userId', userId);
+  }
+
   Future<void> _handleSignUp() async {
     if (!_tosAccepted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -71,18 +77,10 @@ class _LoginScreenState extends State<LoginScreen> {
         _passwordController.text.trim(),
       );
 
-      // 2) Extract the user object from response
-      // signUpResponse should look like:
-      // {
-      //   "message": "...",
-      //   "user": {
-      //     "_id": "64abc1234def56789abc1234",
-      //     "name": "...",
-      //     ...
-      //   }
-      // }
+      // 2) Extract the user object from response and save userId to shared preferences
       final user = signUpResponse['user'];
       final newUserId = user['_id'] as String;
+      await saveUserId(newUserId);
 
       // 3) Show success
       ScaffoldMessenger.of(context).showSnackBar(
@@ -90,7 +88,7 @@ class _LoginScreenState extends State<LoginScreen> {
           content: Text('Account created successfully! Check your email for the verification code.'),
         ),
       );
-
+      
       // 4) Navigate to VerificationScreen, passing both the email & the newly created userId
       Navigator.pushReplacement(
         context,
@@ -101,7 +99,10 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ),
       );
-    } catch (e) {
+      // Save userId to shared preferences
+      await saveUserId(user.id);
+    } 
+    catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(e.toString())),
       );
@@ -123,9 +124,10 @@ class _LoginScreenState extends State<LoginScreen> {
         _passwordController.text.trim(),
       );
 
-      // 2) Extract user object, then grab the _id
+      // 2) Extract user object, then grab the _id and save userId to shared preferences
       final user = responseData['user'];
       final userId = user['_id'] as String;
+      await saveUserId(userId);
 
       // 3) Notify success
       ScaffoldMessenger.of(context).showSnackBar(
@@ -139,7 +141,8 @@ class _LoginScreenState extends State<LoginScreen> {
           builder: (context) => HomePage(userId: userId),
         ),
       );
-    } catch (e) {
+    } 
+    catch (e) {
       String errorMessage = e.toString().toLowerCase();
       if (errorMessage.contains("verify")) {
         ScaffoldMessenger.of(context).showSnackBar(

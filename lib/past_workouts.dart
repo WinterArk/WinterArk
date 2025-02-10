@@ -1,19 +1,35 @@
-import 'package:flutter/material.dart';
+// ignore_for_file: use_build_context_synchronously
 
-void main() {
-  runApp(const MyApp());
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'api_service.dart';
+
+// Helper function to convert month/day to YYYY-MM-DD format.
+String getDateString(String monthName, int day) {
+  final currentYear = DateTime.now().year;
+  final monthsMap = {
+    "January": "01",
+    "February": "02",
+    "March": "03",
+    "April": "04",
+    "May": "05",
+    "June": "06",
+    "July": "07",
+    "August": "08",
+    "September": "09",
+    "October": "10",
+    "November": "11",
+    "December": "12",
+  };
+
+  final monthNum = monthsMap[monthName] ?? "01";
+  final dayStr = day.toString().padLeft(2, '0');
+  return "$currentYear-$monthNum-$dayStr";
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: PastWorkoutsCalendar(),
-    );
-  }
+Future<String?> getUserId() async {
+  final prefs = await SharedPreferences.getInstance();
+  return prefs.getString('userId');
 }
 
 class PastWorkoutsCalendar extends StatelessWidget {
@@ -34,70 +50,154 @@ class PastWorkoutsCalendar extends StatelessWidget {
     {"name": "December", "days": 31},
   ];
 
-  void _showInsights(BuildContext context, String date) {
-    showModalBottomSheet(
+  void _showWorkoutsForDate(BuildContext context, String monthName, int day) async {
+    final dateStr = getDateString(monthName, day);
+    final userId = await getUserId();
+    if (userId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("User not logged in.")),
+      );
+      return;
+    }
+    try {
+      final workouts = await ApiService.getWorkoutsForDay(userId, dateStr);
+      showModalBottomSheet(
+        context: context,
+        backgroundColor: Colors.black,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+        ),
+        builder: (BuildContext context) {
+          return Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: workouts.isEmpty
+                ? const Center(
+                    child: Text(
+                      'No workouts recorded for this day.',
+                      style: TextStyle(color: Colors.white, fontSize: 18),
+                    ),
+                  )
+                : ListView.builder(
+                    itemCount: workouts.length,
+                    itemBuilder: (context, index) {
+                      final workout = workouts[index];
+                      // Build the basic details string
+                      final String details = "${workout['exercise_type']} - ${workout['sets']} sets x ${workout['reps']} reps, ${workout['weight']} lbs";
+                      // If notes exist and are not empty, add them on a new line
+                      final String notes = (workout['notes'] != null && workout['notes'].toString().trim().isNotEmpty)
+                          ? "\n${workout['notes']}"
+                          : "";
+                      return ListTile(
+                        title: Text(
+                          workout['exercise_name'] ?? "Unknown Exercise",
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                        subtitle: Text(
+                          details + notes,
+                          style: const TextStyle(color: Colors.white70),
+                        ),
+                        // Open the options dialog
+                        onTap: () => _showWorkoutOptions(context, workout), 
+                      );
+                    },
+                  ),
+          );
+        },
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error fetching workouts: $e")),
+      );
+    }
+  }
+
+  void _showWorkoutOptions(BuildContext context, Map<String, dynamic> workout) {
+  // Create controllers pre-filled with the current values
+  final TextEditingController exerciseNameController = TextEditingController(text: workout['exercise_name']);
+  final TextEditingController setsController = TextEditingController(text: workout['sets'].toString());
+  final TextEditingController repsController = TextEditingController(text: workout['reps'].toString());
+  final TextEditingController weightController = TextEditingController(text: workout['weight'].toString());
+    showDialog(
       context: context,
-      backgroundColor: Colors.black,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-      ),
-      builder: (BuildContext context) {
-        return Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Title
-              Text(
-                'Workout Insights for $date',
-                style: const TextStyle(
-                  fontSize: 24,
-                  color: Colors.lightBlue,
-                  fontWeight: FontWeight.bold,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Edit Workout"),
+          content: SingleChildScrollView(
+            child: Column(
+              children: [
+                TextField(
+                  controller: exerciseNameController,
+                  decoration: const InputDecoration(labelText: "Exercise Name"),
                 ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 20),
-              // Description
-              const Text(
-                'Here’s what you accomplished on this day. You can add more details here, like calories burned, exercises completed, or milestones achieved!',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.white70,
+                TextField(
+                  controller: setsController,
+                  decoration: const InputDecoration(labelText: "Sets"),
+                  keyboardType: TextInputType.number,
                 ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 30),
-              // Close Button
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.lightBlue, // Corrected parameter
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 40),
-                  shadowColor: Colors.lightBlueAccent,
-                  elevation: 10,
+                TextField(
+                  controller: repsController,
+                  decoration: const InputDecoration(labelText: "Reps"),
+                  keyboardType: TextInputType.number,
                 ),
-                child: const Text(
-                  'Close',
-                  style: TextStyle(
-                    fontSize: 18,
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                  ),
+                TextField(
+                  controller: weightController,
+                  decoration: const InputDecoration(labelText: "Weight"),
+                  keyboardType: TextInputType.number,
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
+          actions: [
+            // Delete button
+            TextButton(
+              onPressed: () async {
+                try {
+                  await ApiService.deleteWorkout(workout['_id']);
+                  Navigator.of(context).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Workout deleted successfully.")),
+                  );
+                  // Refresh the workouts list here.
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Failed to delete workout: $e")),
+                  );
+                }
+              },
+              child: const Text("Delete", style: TextStyle(color: Colors.red)),
+            ),
+            // Update button
+            TextButton(
+              onPressed: () async {
+                final updateData = {
+                  "exercise_name": exerciseNameController.text.trim(),
+                  "sets": int.tryParse(setsController.text.trim()),
+                  "reps": int.tryParse(repsController.text.trim()),
+                  "weight": double.tryParse(weightController.text.trim()),
+                };
+
+                try {
+                  await ApiService.updateWorkout(workout['_id'], updateData);
+                  Navigator.of(context).pop(); // Close the dialog
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Workout updated successfully.")),
+                  );
+                  // Refresh the workouts list here.
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Failed to update workout: $e")),
+                  );
+                }
+              },
+              child: const Text("Update"),
+            ),
+          ],
         );
       },
     );
   }
+
+
 
   bool _isToday(int monthIndex, int day) {
     DateTime today = DateTime.now();
@@ -152,9 +252,9 @@ class PastWorkoutsCalendar extends StatelessWidget {
                     final isToday = _isToday(index, dayIndex + 1);
 
                     return GestureDetector(
-                      onTap: () => _showInsights(
+                      onTap: () => _showWorkoutsForDate(
                         context,
-                        '${month['name']} ${dayIndex + 1}',
+                        month['name'], dayIndex + 1
                       ),
                       child: Container(
                         width: 40,
