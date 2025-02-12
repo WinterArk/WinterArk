@@ -16,9 +16,10 @@ class _WorkoutTrackerScreenState extends State<WorkoutTrackerScreen> {
   bool sendRoasts = false;
   DateTime? selectedDate;
   TimeOfDay? selectedTime;
-
+  
   // New state variables for workout details
   final List<String> trainingStyles = ['strength', 'size', 'endurance', 'flexibility'];
+  String selectedWeightUnit = "lbs";
   String? selectedExerciseType;
   String? selectedTrainingStyle;
   final TextEditingController _exerciseNameController = TextEditingController();
@@ -73,7 +74,7 @@ class _WorkoutTrackerScreenState extends State<WorkoutTrackerScreen> {
       selectedTime!.hour,
       selectedTime!.minute,
     );
-
+    
     // Retrieve the currently logged in user ID from SharedPreferences
     final String? userId = await getUserId();
     if (userId == null) {
@@ -82,7 +83,7 @@ class _WorkoutTrackerScreenState extends State<WorkoutTrackerScreen> {
       );
       return;
     }
-
+    
     try {
       final result = await ApiService.addWorkout(
         userId: userId,
@@ -91,6 +92,7 @@ class _WorkoutTrackerScreenState extends State<WorkoutTrackerScreen> {
         sets: int.parse(_setsController.text.trim()),
         reps: int.parse(_repsController.text.trim()),
         weight: double.parse(_weightController.text.trim()),
+        weightUnit: selectedWeightUnit,
         date: workoutDate,
         notes: _notesController.text.trim(), 
         //trainingStyle: selectedTrainingStyle!, 
@@ -232,6 +234,26 @@ class _WorkoutTrackerScreenState extends State<WorkoutTrackerScreen> {
                       border: OutlineInputBorder(),
                     ),
                   ),
+                ),
+                const SizedBox(width: 8),
+                // Dropdown Button for Weight Unit
+                DropdownButton<String>(
+                  value: selectedWeightUnit,
+                  dropdownColor: Colors.grey[800],
+                  style: const TextStyle(color: Colors.white),
+                  items: <String>["lbs", "kg"].map((String unit) {
+                    return DropdownMenuItem<String>(
+                      value: unit,
+                      child: Text(unit),
+                    );
+                  }).toList(),
+                  onChanged: (String? newValue) {
+                    if (newValue != null) {
+                      setState(() {
+                        selectedWeightUnit = newValue;
+                      });
+                    }
+                  },
                 ),
               ],
             ),

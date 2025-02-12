@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'api_service.dart';
+import 'package:intl/intl.dart';
 
 // Helper function to convert month/day to YYYY-MM-DD format.
 String getDateString(String monthName, int day) {
@@ -32,8 +33,14 @@ Future<String?> getUserId() async {
   return prefs.getString('userId');
 }
 
-class PastWorkoutsCalendar extends StatelessWidget {
+class PastWorkoutsCalendar extends StatefulWidget {
   const PastWorkoutsCalendar({Key? key}) : super(key: key);
+
+  @override
+  _PastWorkoutsCalendarState createState() => _PastWorkoutsCalendarState();
+}
+
+class _PastWorkoutsCalendarState extends State<PastWorkoutsCalendar> {
 
   final List<Map<String, dynamic>> months = const [
     {"name": "January", "days": 31},
@@ -81,8 +88,11 @@ class PastWorkoutsCalendar extends StatelessWidget {
                     itemCount: workouts.length,
                     itemBuilder: (context, index) {
                       final workout = workouts[index];
+                      final utcDate = DateTime.parse(workout['date'] as String);
+                      // Format the time portion using intl's DateFormat.jm()
+                      final String timeStr = DateFormat.jm().format(utcDate);
                       // Build the basic details string
-                      final String details = "${workout['exercise_type']} - ${workout['sets']} sets x ${workout['reps']} reps, ${workout['weight']} lbs";
+                      final String details = "${workout['exercise_type']} - ${workout['sets']} sets x ${workout['reps']} reps, ${workout['weight']} ${workout['weightUnit']} at $timeStr";
                       // If notes exist and are not empty, add them on a new line
                       final String notes = (workout['notes'] != null && workout['notes'].toString().trim().isNotEmpty)
                           ? "\n${workout['notes']}"
@@ -117,6 +127,7 @@ class PastWorkoutsCalendar extends StatelessWidget {
   final TextEditingController setsController = TextEditingController(text: workout['sets'].toString());
   final TextEditingController repsController = TextEditingController(text: workout['reps'].toString());
   final TextEditingController weightController = TextEditingController(text: workout['weight'].toString());
+  String localWeightUnit = workout['weightUnit'] ?? 'lbs';
     showDialog(
       context: context,
       builder: (context) {
@@ -144,6 +155,30 @@ class PastWorkoutsCalendar extends StatelessWidget {
                   decoration: const InputDecoration(labelText: "Weight"),
                   keyboardType: TextInputType.number,
                 ),
+                const SizedBox(height: 10),
+                Row(
+                    children: [
+                      const Text("Unit: "),
+                      DropdownButton<String>(
+                        value: localWeightUnit,
+                        dropdownColor: Colors.grey[800],
+                        style: const TextStyle(color: Colors.white),
+                        items: <String>["lbs", "kg"].map((String unit) {
+                          return DropdownMenuItem<String>(
+                            value: unit,
+                            child: Text(unit),
+                          );
+                        }).toList(),
+                        onChanged: (String? newValue) {
+                          if (newValue != null) {
+                            setState(() {
+                              localWeightUnit = newValue;
+                            });
+                          }
+                        },
+                      ),
+                    ],
+                  ),
               ],
             ),
           ),
@@ -174,6 +209,7 @@ class PastWorkoutsCalendar extends StatelessWidget {
                   "sets": int.tryParse(setsController.text.trim()),
                   "reps": int.tryParse(repsController.text.trim()),
                   "weight": double.tryParse(weightController.text.trim()),
+                  "weightUnit": localWeightUnit,
                 };
 
                 try {
@@ -197,8 +233,6 @@ class PastWorkoutsCalendar extends StatelessWidget {
     );
   }
 
-
-
   bool _isToday(int monthIndex, int day) {
     DateTime today = DateTime.now();
     // Check if the current month and day match the given month and day
@@ -211,12 +245,6 @@ class PastWorkoutsCalendar extends StatelessWidget {
       backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: Colors.black,
-        leading: IconButton(
-          icon: const Icon(Icons.close, color: Colors.lightBlue),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
         title: const Text(
           'Past Workouts',
           style: TextStyle(color: Colors.lightBlue),
