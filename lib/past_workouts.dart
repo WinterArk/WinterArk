@@ -34,7 +34,14 @@ Future<String?> getUserId() async {
 }
 
 class PastWorkoutsCalendar extends StatefulWidget {
-  const PastWorkoutsCalendar({Key? key}) : super(key: key);
+  final String? buddyId;
+  final String? buddyName;
+  // const PastWorkoutsCalendar({Key? key}) : super(key: key);
+  const PastWorkoutsCalendar({
+    Key? key,
+    this.buddyId, // if null, it might mean "my workouts"
+    this.buddyName,
+  }) : super(key: key);
 
   @override
   _PastWorkoutsCalendarState createState() => _PastWorkoutsCalendarState();
@@ -58,8 +65,10 @@ class _PastWorkoutsCalendarState extends State<PastWorkoutsCalendar> {
   ];
 
   void _showWorkoutsForDate(BuildContext context, String monthName, int day) async {
+    // day++;
     final dateStr = getDateString(monthName, day);
-    final userId = await getUserId();
+    // Use buddyId if provided; otherwise, use the current user's id.
+    final String? userId = widget.buddyId ?? await getUserId();
     if (userId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("User not logged in.")),
@@ -89,6 +98,7 @@ class _PastWorkoutsCalendarState extends State<PastWorkoutsCalendar> {
                     itemBuilder: (context, index) {
                       final workout = workouts[index];
                       final utcDate = DateTime.parse(workout['date'] as String);
+                      // final localDate = utcDate.toLocal();
                       // Format the time portion using intl's DateFormat.jm()
                       final String timeStr = DateFormat.jm().format(utcDate);
                       // Build the basic details string
@@ -107,7 +117,9 @@ class _PastWorkoutsCalendarState extends State<PastWorkoutsCalendar> {
                           style: const TextStyle(color: Colors.white70),
                         ),
                         // Open the options dialog
-                        onTap: () => _showWorkoutOptions(context, workout), 
+                        onTap: widget.buddyId == null
+                            ? () => _showWorkoutOptions(context, workout)
+                            : null,                        
                       );
                     },
                   ),
@@ -245,9 +257,11 @@ class _PastWorkoutsCalendarState extends State<PastWorkoutsCalendar> {
       backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: Colors.black,
-        title: const Text(
-          'Past Workouts',
-          style: TextStyle(color: Colors.lightBlue),
+        title: Text(
+          widget.buddyName != null
+              ? '${widget.buddyName}\'s Past Workouts'
+              : 'Past Workouts',
+          style: const TextStyle(color: Colors.lightBlue),
         ),
         centerTitle: true,
       ),
