@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'api_service.dart';
+import 'past_workouts.dart';
 
 class GymBuddyScreen extends StatefulWidget {
   final String currentUserId; // The logged-in user's id
@@ -242,12 +243,30 @@ class _GymBuddyScreenState extends State<GymBuddyScreen> {
         final otherName = theOther['name'] ?? 'Unnamed';
         final otherUsername = theOther['username'] ?? 'No username';
         return Card(
-          color: Colors.grey[850],
-          child: ListTile(
-            title: Text(otherName, style: const TextStyle(color: Colors.white)),
-            subtitle: Text(otherUsername, style: const TextStyle(color: Colors.white70)),
+        color: Colors.grey[850],
+        child: ListTile(
+          title: Text(otherName, style: const TextStyle(color: Colors.white)),
+          subtitle: Text(
+            theOther['username'] ?? 'No username',
+            style: const TextStyle(color: Colors.white70),
           ),
-        );
+          trailing: IconButton(
+            icon: const Icon(Icons.calendar_today, color: Colors.blueAccent),
+            onPressed: () {
+              // Navigate to the GymBuddyWorkoutsPage for this buddy.
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => PastWorkoutsCalendar(
+                    buddyId: theOther['_id'],
+                    buddyName: otherName,
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
       }).toList(),
     );
   }
