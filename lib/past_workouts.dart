@@ -1,11 +1,12 @@
-// past_workouts.dart
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'api_service.dart';
+import 'package:intl/intl.dart';
+import 'package:multi_select_flutter/multi_select_flutter.dart';
 
-/// Helper function to convert month/day to YYYY-MM-DD format.
+// Helper function to convert month/day to YYYY-MM-DD format.
 String getDateString(String monthName, int day) {
   final currentYear = DateTime.now().year;
   final monthsMap = {
@@ -36,17 +37,19 @@ Future<String?> getUserId() async {
 class PastWorkoutsCalendar extends StatefulWidget {
   final String? buddyId;
   final String? buddyName;
+  // const PastWorkoutsCalendar({Key? key}) : super(key: key);
   const PastWorkoutsCalendar({
-    super.key,
+    Key? key,
     this.buddyId, // if null, it might mean "my workouts"
     this.buddyName,
-  });
+  }) : super(key: key);
 
   @override
   _PastWorkoutsCalendarState createState() => _PastWorkoutsCalendarState();
 }
 
 class _PastWorkoutsCalendarState extends State<PastWorkoutsCalendar> {
+
   final List<Map<String, dynamic>> months = const [
     {"name": "January", "days": 31},
     {"name": "February", "days": 28},
@@ -63,7 +66,9 @@ class _PastWorkoutsCalendarState extends State<PastWorkoutsCalendar> {
   ];
 
   void _showWorkoutsForDate(BuildContext context, String monthName, int day) async {
+    // day++;
     final dateStr = getDateString(monthName, day);
+    // Use buddyId if provided; otherwise, use the current user's id.
     final String? userId = widget.buddyId ?? await getUserId();
     if (userId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -84,35 +89,41 @@ class _PastWorkoutsCalendarState extends State<PastWorkoutsCalendar> {
             padding: const EdgeInsets.all(20.0),
             child: workouts.isEmpty
                 ? const Center(
-              child: Text(
-                'No workouts recorded for this day.',
-                style: TextStyle(color: Colors.white, fontSize: 18),
-              ),
-            )
+                    child: Text(
+                      'No workouts recorded for this day.',
+                      style: TextStyle(color: Colors.white, fontSize: 18),
+                    ),
+                  )
                 : ListView.builder(
-              itemCount: workouts.length,
-              itemBuilder: (context, index) {
-                final workout = workouts[index];
-                final String timeStr = workout['pacificDateTime'] ?? workout['date'];
-                final String details = "${workout['exercise_type']} - ${workout['sets']} sets x ${workout['reps']} reps, ${workout['weight']} ${workout['weightUnit']} at $timeStr";
-                final String notes = (workout['notes'] != null && workout['notes'].toString().trim().isNotEmpty)
-                    ? "\n${workout['notes']}"
-                    : "";
-                return ListTile(
-                  title: Text(
-                    workout['exercise_name'] ?? "Unknown Exercise",
-                    style: const TextStyle(color: Colors.white),
+                    itemCount: workouts.length,
+                    itemBuilder: (context, index) {
+                      final workout = workouts[index];
+                      final utcDate = DateTime.parse(workout['date'] as String);
+                      // final localDate = utcDate.toLocal();
+                      // Format the time portion using intl's DateFormat.jm()
+                      final String timeStr = DateFormat.jm().format(utcDate);
+                      // Build the basic details string
+                      final String details = "${workout['exercise_type']} - ${workout['sets']} sets x ${workout['reps']} reps, ${workout['weight']} ${workout['weightUnit']} at $timeStr";
+                      // If notes exist and are not empty, add them on a new line
+                      final String notes = (workout['notes'] != null && workout['notes'].toString().trim().isNotEmpty)
+                          ? "\n${workout['notes']}"
+                          : "";
+                      return ListTile(
+                        title: Text(
+                          workout['exercise_name'] ?? "Unknown Exercise",
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                        subtitle: Text(
+                          details + notes,
+                          style: const TextStyle(color: Colors.white70),
+                        ),
+                        // Open the options dialog
+                        onTap: widget.buddyId == null
+                            ? () => _showWorkoutOptions(context, workout)
+                            : null,                        
+                      );
+                    },
                   ),
-                  subtitle: Text(
-                    details + notes,
-                    style: const TextStyle(color: Colors.white70),
-                  ),
-                  onTap: widget.buddyId == null
-                      ? () => _showWorkoutOptions(context, workout)
-                      : null,
-                );
-              },
-            ),
           );
         },
       );
@@ -124,11 +135,12 @@ class _PastWorkoutsCalendarState extends State<PastWorkoutsCalendar> {
   }
 
   void _showWorkoutOptions(BuildContext context, Map<String, dynamic> workout) {
-    final TextEditingController exerciseNameController = TextEditingController(text: workout['exercise_name']);
-    final TextEditingController setsController = TextEditingController(text: workout['sets'].toString());
-    final TextEditingController repsController = TextEditingController(text: workout['reps'].toString());
-    final TextEditingController weightController = TextEditingController(text: workout['weight'].toString());
-    String localWeightUnit = workout['weightUnit'] ?? 'lbs';
+  // Create controllers pre-filled with the current values
+  final TextEditingController exerciseNameController = TextEditingController(text: workout['exercise_name']);
+  final TextEditingController setsController = TextEditingController(text: workout['sets'].toString());
+  final TextEditingController repsController = TextEditingController(text: workout['reps'].toString());
+  final TextEditingController weightController = TextEditingController(text: workout['weight'].toString());
+  String localWeightUnit = workout['weightUnit'] ?? 'lbs';
     showDialog(
       context: context,
       builder: (context) {
@@ -158,32 +170,33 @@ class _PastWorkoutsCalendarState extends State<PastWorkoutsCalendar> {
                 ),
                 const SizedBox(height: 10),
                 Row(
-                  children: [
-                    const Text("Unit: "),
-                    DropdownButton<String>(
-                      value: localWeightUnit,
-                      dropdownColor: Colors.grey[800],
-                      style: const TextStyle(color: Colors.white),
-                      items: <String>["lbs", "kg"].map((String unit) {
-                        return DropdownMenuItem<String>(
-                          value: unit,
-                          child: Text(unit),
-                        );
-                      }).toList(),
-                      onChanged: (String? newValue) {
-                        if (newValue != null) {
-                          setState(() {
-                            localWeightUnit = newValue;
-                          });
-                        }
-                      },
-                    ),
-                  ],
-                ),
+                    children: [
+                      const Text("Unit: "),
+                      DropdownButton<String>(
+                        value: localWeightUnit,
+                        dropdownColor: Colors.grey[800],
+                        style: const TextStyle(color: Colors.white),
+                        items: <String>["lbs", "kg"].map((String unit) {
+                          return DropdownMenuItem<String>(
+                            value: unit,
+                            child: Text(unit),
+                          );
+                        }).toList(),
+                        onChanged: (String? newValue) {
+                          if (newValue != null) {
+                            setState(() {
+                              localWeightUnit = newValue;
+                            });
+                          }
+                        },
+                      ),
+                    ],
+                  ),
               ],
             ),
           ),
           actions: [
+            // Delete button
             TextButton(
               onPressed: () async {
                 try {
@@ -192,6 +205,7 @@ class _PastWorkoutsCalendarState extends State<PastWorkoutsCalendar> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text("Workout deleted successfully.")),
                   );
+                  // Refresh the workouts list here.
                 } catch (e) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text("Failed to delete workout: $e")),
@@ -200,6 +214,7 @@ class _PastWorkoutsCalendarState extends State<PastWorkoutsCalendar> {
               },
               child: const Text("Delete", style: TextStyle(color: Colors.red)),
             ),
+            // Update button
             TextButton(
               onPressed: () async {
                 final updateData = {
@@ -212,10 +227,11 @@ class _PastWorkoutsCalendarState extends State<PastWorkoutsCalendar> {
 
                 try {
                   await ApiService.updateWorkout(workout['_id'], updateData);
-                  Navigator.of(context).pop();
+                  Navigator.of(context).pop(); // Close the dialog
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text("Workout updated successfully.")),
                   );
+                  // Refresh the workouts list here.
                 } catch (e) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text("Failed to update workout: $e")),
@@ -232,6 +248,7 @@ class _PastWorkoutsCalendarState extends State<PastWorkoutsCalendar> {
 
   bool _isToday(int monthIndex, int day) {
     DateTime today = DateTime.now();
+    // Check if the current month and day match the given month and day
     return today.month == (monthIndex + 1) && today.day == day;
   }
 
@@ -256,6 +273,7 @@ class _PastWorkoutsCalendarState extends State<PastWorkoutsCalendar> {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Month Header
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: Text(
@@ -267,6 +285,7 @@ class _PastWorkoutsCalendarState extends State<PastWorkoutsCalendar> {
                   ),
                 ),
               ),
+              // Days Grid
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Wrap(
@@ -274,16 +293,24 @@ class _PastWorkoutsCalendarState extends State<PastWorkoutsCalendar> {
                   runSpacing: 8.0,
                   children: List.generate(month['days'], (dayIndex) {
                     final isToday = _isToday(index, dayIndex + 1);
+
                     return GestureDetector(
-                      onTap: () => _showWorkoutsForDate(context, month['name'], dayIndex + 1),
+                      onTap: () => _showWorkoutsForDate(
+                        context,
+                        month['name'], dayIndex + 1
+                      ),
                       child: Container(
                         width: 40,
                         height: 40,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          color: isToday ? Colors.lightBlue : Colors.grey[900],
+                          color: isToday
+                              ? Colors.lightBlue
+                              : Colors.grey[900],
                           borderRadius: BorderRadius.circular(5),
-                          border: isToday ? Border.all(color: Colors.white, width: 2) : null,
+                          border: isToday
+                              ? Border.all(color: Colors.white, width: 2)
+                              : null,
                         ),
                         child: Text(
                           '${dayIndex + 1}',
