@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'login_screen.dart';
 
 class WinterArkHome extends StatelessWidget {
+  const WinterArkHome({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -27,7 +29,7 @@ class WinterArkHome extends StatelessWidget {
               // Snowflakes decoration
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: [
+                children: const [
                   Icon(Icons.ac_unit, color: Color(0xFFADD8E6), size: 30),
                   SizedBox(width: 10),
                   Icon(Icons.ac_unit, color: Color(0xFFADD8E6), size: 40),

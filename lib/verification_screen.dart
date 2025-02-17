@@ -10,10 +10,10 @@ class VerificationScreen extends StatefulWidget {
   final String userId; // <-- Add userId to constructor so we can go directly to HomePage
 
   const VerificationScreen({
-    Key? key,
+    super.key,
     required this.email,
     required this.userId,
-  }) : super(key: key);
+  });
 
   @override
   _VerificationScreenState createState() => _VerificationScreenState();

@@ -1,12 +1,17 @@
 // main.dart
 import 'package:flutter/material.dart';
+import 'package:timezone/data/latest.dart' as tz;
 import 'winterark_home.dart';
 
 void main() {
-  runApp(WinterArkApp());
+  // Initialize time zone data
+  tz.initializeTimeZones();
+  runApp(const WinterArkApp());
 }
 
 class WinterArkApp extends StatelessWidget {
+  const WinterArkApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -16,7 +21,7 @@ class WinterArkApp extends StatelessWidget {
         scaffoldBackgroundColor: Colors.black,
         primaryColor: Colors.blueAccent,
       ),
-      home: WinterArkHome(),
+      home: const WinterArkHome(),
     );
   }
 }

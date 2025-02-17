@@ -4,7 +4,7 @@ import 'api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class WorkoutTrackerScreen extends StatefulWidget {
-  const WorkoutTrackerScreen({Key? key}) : super(key: key);
+  const WorkoutTrackerScreen({super.key});
 
   @override
   _WorkoutTrackerScreenState createState() => _WorkoutTrackerScreenState();
@@ -132,7 +132,7 @@ class _WorkoutTrackerScreenState extends State<WorkoutTrackerScreen> {
         padding: const EdgeInsets.all(16.0),
         child: ListView(
           children: [
-            Center(
+            const Center(
               child: Text(
                 "Plan Your Workout",
                 style: TextStyle(

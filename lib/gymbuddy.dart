@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'api_service.dart';
 import 'past_workouts.dart';
+import 'chat_screen.dart'; // Import the new chat screen
 
 class GymBuddyScreen extends StatefulWidget {
   final String currentUserId; // The logged-in user's id
-  const GymBuddyScreen({Key? key, required this.currentUserId}) : super(key: key);
+  const GymBuddyScreen({super.key, required this.currentUserId});
 
   @override
   _GymBuddyScreenState createState() => _GymBuddyScreenState();
@@ -22,20 +23,17 @@ class _GymBuddyScreenState extends State<GymBuddyScreen> {
   List<dynamic> connectedBuddies = [];
   bool isLoadingBuddies = false;
 
-  // Automatically load buddy data when screen first appears
   @override
   void initState() {
     super.initState();
     _loadUserBuddies();
   }
 
-  // Fetch all GymBuddy docs that involve this user (either as userId or buddyId).
+  // Fetch all GymBuddy docs that involve this user (either as requester or recipient)
   Future<void> _loadUserBuddies() async {
     setState(() => isLoadingBuddies = true);
     try {
       final buddies = await ApiService.fetchUserBuddies(widget.currentUserId);
-
-      // We'll categorize them into incoming/outgoing/connected
       final userId = widget.currentUserId;
 
       final newIncoming = <dynamic>[];
@@ -43,24 +41,19 @@ class _GymBuddyScreenState extends State<GymBuddyScreen> {
       final newConnected = <dynamic>[];
 
       for (var doc in buddies) {
-        final docStatus = doc['status']; // 'pending', 'connected', 'removed', etc.
-        final userIdObj = doc['userId'];  // => { _id, name, username, email }
-        final buddyIdObj = doc['buddyId']; // => { _id, name, username, email }
+        final docStatus = doc['status'];
+        final userIdObj = doc['userId'];
+        final buddyIdObj = doc['buddyId'];
 
         if (docStatus == 'connected') {
-          // Connected docs go to newConnected
           newConnected.add(doc);
         } else if (docStatus == 'pending') {
-          // Check which side is the "owner" vs. "recipient"
           if (userIdObj['_id'] == userId) {
-            // If the doc userId == me => I sent the request => Outgoing
             newOutgoing.add(doc);
           } else if (buddyIdObj['_id'] == userId) {
-            // If the doc buddyId == me => I'm receiving => Incoming
             newIncoming.add(doc);
           }
         }
-        // If doc.status == 'removed' or anything else, you can skip or handle
       }
 
       setState(() {
@@ -92,7 +85,7 @@ class _GymBuddyScreenState extends State<GymBuddyScreen> {
     });
     try {
       final results = await ApiService.searchUsers(query, searchFilter);
-      // Remove myself from results
+      // Remove current user from results
       results.removeWhere((user) => user['_id'] == widget.currentUserId);
       setState(() {
         searchResults = results;
@@ -117,10 +110,8 @@ class _GymBuddyScreenState extends State<GymBuddyScreen> {
         const SnackBar(content: Text('Gym buddy request sent!')),
       );
       setState(() {
-        // Remove from search results
         searchResults.removeWhere((user) => user['_id'] == buddyId);
       });
-      // Reload so we see it under Outgoing
       _loadUserBuddies();
     } catch (e) {
       print('Error adding gym buddy: $e');
@@ -168,21 +159,50 @@ class _GymBuddyScreenState extends State<GymBuddyScreen> {
     super.dispose();
   }
 
+  // Build connected buddies using a dedicated widget that shows an unread badge.
+  Widget _buildConnectedBuddies() {
+    if (connectedBuddies.isEmpty) {
+      return const Text('No connected buddies',
+          style: TextStyle(color: Colors.white70));
+    }
+    return Column(
+      children: connectedBuddies.map((doc) {
+        final docUserId = doc['userId']['_id'];
+        final bool amUserId = (docUserId == widget.currentUserId);
+        final theOther = amUserId ? doc['buddyId'] : doc['userId'];
+        final otherName = theOther['name'] ?? 'Unnamed';
+        final otherUsername = theOther['username'] ?? 'No username';
+        return ConnectedBuddyCard(
+          currentUserId: widget.currentUserId,
+          buddy: theOther,
+          buddyName: otherName,
+          buddyUsername: otherUsername,
+          onChatOpened: () async {
+            // Refresh buddies (and thus unread counts) after returning from chat
+            await _loadUserBuddies();
+          },
+        );
+      }).toList(),
+    );
+  }
+
   Widget _buildIncomingRequests() {
     if (incomingRequests.isEmpty) {
-      return const Text('No incoming requests', style: TextStyle(color: Colors.white70));
+      return const Text('No incoming requests',
+          style: TextStyle(color: Colors.white70));
     }
     return Column(
       children: incomingRequests.map((doc) {
         final docId = doc['_id'];
-        final user = doc['userId']; // the sender
+        final user = doc['userId'];
         final userName = user['name'] ?? 'Unnamed';
         final userUsername = user['username'] ?? 'No username';
         return Card(
           color: Colors.grey[850],
           child: ListTile(
             title: Text(userName, style: const TextStyle(color: Colors.white)),
-            subtitle: Text(userUsername, style: const TextStyle(color: Colors.white70)),
+            subtitle: Text(userUsername,
+                style: const TextStyle(color: Colors.white70)),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -204,11 +224,12 @@ class _GymBuddyScreenState extends State<GymBuddyScreen> {
 
   Widget _buildOutgoingRequests() {
     if (outgoingRequests.isEmpty) {
-      return const Text('No outgoing requests', style: TextStyle(color: Colors.white70));
+      return const Text('No outgoing requests',
+          style: TextStyle(color: Colors.white70));
     }
     return Column(
       children: outgoingRequests.map((doc) {
-        final buddy = doc['buddyId']; // the receiver
+        final buddy = doc['buddyId'];
         final docId = doc['_id'];
         final buddyName = buddy['name'] ?? 'Unnamed';
         final buddyUsername = buddy['username'] ?? 'No username';
@@ -216,57 +237,14 @@ class _GymBuddyScreenState extends State<GymBuddyScreen> {
           color: Colors.grey[850],
           child: ListTile(
             title: Text(buddyName, style: const TextStyle(color: Colors.white)),
-            subtitle: Text(buddyUsername, style: const TextStyle(color: Colors.white70)),
-            // If you want to let user cancel the request, you can do a delete or set status=removed
+            subtitle: Text(buddyUsername,
+                style: const TextStyle(color: Colors.white70)),
             trailing: IconButton(
               icon: const Icon(Icons.close, color: Colors.red),
               onPressed: () => _declineRequest(docId),
             ),
           ),
         );
-      }).toList(),
-    );
-  }
-
-  Widget _buildConnectedBuddies() {
-    if (connectedBuddies.isEmpty) {
-      return const Text('No connected buddies', style: TextStyle(color: Colors.white70));
-    }
-    return Column(
-      children: connectedBuddies.map((doc) {
-        final docUserId = doc['userId']['_id'];
-        final docBuddyId = doc['buddyId']['_id'];
-        // figure out which one is "the other person"
-        final bool amUserId = (docUserId == widget.currentUserId);
-        final theOther = amUserId ? doc['buddyId'] : doc['userId'];
-
-        final otherName = theOther['name'] ?? 'Unnamed';
-        final otherUsername = theOther['username'] ?? 'No username';
-        return Card(
-        color: Colors.grey[850],
-        child: ListTile(
-          title: Text(otherName, style: const TextStyle(color: Colors.white)),
-          subtitle: Text(
-            theOther['username'] ?? 'No username',
-            style: const TextStyle(color: Colors.white70),
-          ),
-          trailing: IconButton(
-            icon: const Icon(Icons.calendar_today, color: Colors.blueAccent),
-            onPressed: () {
-              // Navigate to the GymBuddyWorkoutsPage for this buddy.
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => PastWorkoutsCalendar(
-                    buddyId: theOther['_id'],
-                    buddyName: otherName,
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-      );
       }).toList(),
     );
   }
@@ -338,7 +316,6 @@ class _GymBuddyScreenState extends State<GymBuddyScreen> {
               ],
             ),
             const SizedBox(height: 20),
-
             // ====== MAIN CONTENT ======
             Expanded(
               child: SingleChildScrollView(
@@ -363,7 +340,8 @@ class _GymBuddyScreenState extends State<GymBuddyScreen> {
                                 style: const TextStyle(color: Colors.white70),
                               ),
                               trailing: IconButton(
-                                icon: const Icon(Icons.person_add, color: Colors.blueAccent),
+                                icon: const Icon(Icons.person_add,
+                                    color: Colors.blueAccent),
                                 onPressed: () {
                                   _addGymBuddy(user['_id']);
                                 },
@@ -373,7 +351,6 @@ class _GymBuddyScreenState extends State<GymBuddyScreen> {
                         }).toList(),
                       ),
                     const SizedBox(height: 20),
-
                     // Incoming Requests
                     const Text(
                       'Incoming Requests',
@@ -383,9 +360,7 @@ class _GymBuddyScreenState extends State<GymBuddyScreen> {
                       const Center(child: CircularProgressIndicator())
                     else
                       _buildIncomingRequests(),
-
                     const SizedBox(height: 20),
-
                     // Outgoing Requests
                     const Text(
                       'Outgoing Requests',
@@ -395,9 +370,7 @@ class _GymBuddyScreenState extends State<GymBuddyScreen> {
                       const Center(child: CircularProgressIndicator())
                     else
                       _buildOutgoingRequests(),
-
                     const SizedBox(height: 20),
-
                     // Connected Buddies
                     const Text(
                       'Connected Buddies',
@@ -410,6 +383,117 @@ class _GymBuddyScreenState extends State<GymBuddyScreen> {
                   ],
                 ),
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// New widget to show a connected buddy with chat icon and unread badge.
+class ConnectedBuddyCard extends StatelessWidget {
+  final String currentUserId;
+  final Map buddy;
+  final String buddyName;
+  final String buddyUsername;
+  final VoidCallback onChatOpened;
+
+  const ConnectedBuddyCard({
+    Key? key,
+    required this.currentUserId,
+    required this.buddy,
+    required this.buddyName,
+    required this.buddyUsername,
+    required this.onChatOpened,
+  }) : super(key: key);
+
+  Future<int> _fetchUnreadCount() async {
+    // Create or retrieve chat between currentUserId and buddy
+    final chat = await ApiService.createChat(currentUserId, buddy['_id']);
+    final unreadCount = await ApiService.getUnreadCount(chat['_id'], currentUserId);
+    return unreadCount;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: Colors.grey[850],
+      child: ListTile(
+        title: Text(buddyName, style: const TextStyle(color: Colors.white)),
+        subtitle:
+        Text(buddyUsername, style: const TextStyle(color: Colors.white70)),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            FutureBuilder<int>(
+              future: _fetchUnreadCount(),
+              builder: (context, snapshot) {
+                int unreadCount = 0;
+                if (snapshot.hasData) {
+                  unreadCount = snapshot.data!;
+                }
+                return Stack(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.chat, color: Colors.green),
+                      onPressed: () async {
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ChatScreen(
+                              currentUserId: currentUserId,
+                              buddyId: buddy['_id'],
+                              buddyName: buddyName,
+                            ),
+                          ),
+                        );
+                        onChatOpened();
+                      },
+                    ),
+                    if (unreadCount > 0)
+                      Positioned(
+                        right: 4,
+                        top: 4,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: const BoxDecoration(
+                            color: Colors.red,
+                            shape: BoxShape.circle,
+                          ),
+                          constraints: const BoxConstraints(
+                            minWidth: 20,
+                            minHeight: 20,
+                          ),
+                          child: Center(
+                            child: Text(
+                              '$unreadCount',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                );
+              },
+            ),
+            IconButton(
+              icon: const Icon(Icons.calendar_today, color: Colors.blueAccent),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => PastWorkoutsCalendar(
+                      buddyId: buddy['_id'],
+                      buddyName: buddyName,
+                    ),
+                  ),
+                );
+              },
             ),
           ],
         ),
