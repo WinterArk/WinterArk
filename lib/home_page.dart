@@ -8,7 +8,7 @@ import 'sign_out_prompt.dart';
 class HomePage extends StatefulWidget {
   final String userId;
 
-  const HomePage({Key? key, required this.userId}) : super(key: key);
+  const HomePage({super.key, required this.userId});
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -22,8 +22,8 @@ class _HomePageState extends State<HomePage> {
     // Provide the real userId to GymBuddyScreen
     final List<Widget> pages = [
       const DashboardPage(),
-      WorkoutTrackerScreen(),
-      PastWorkoutsCalendar(),
+      const WorkoutTrackerScreen(),
+      const PastWorkoutsCalendar(),
       GymBuddyScreen(currentUserId: widget.userId),
     ];
 
@@ -67,7 +67,7 @@ class _HomePageState extends State<HomePage> {
 
 /// A simple Dashboard page.
 class DashboardPage extends StatelessWidget {
-  const DashboardPage({Key? key}) : super(key: key);
+  const DashboardPage({super.key});
   @override
   Widget build(BuildContext context) {
     return Scaffold(
