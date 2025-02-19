@@ -11,13 +11,18 @@ class ExerciseEntry {
   final TextEditingController setsController = TextEditingController();
   final TextEditingController repsController = TextEditingController();
   final TextEditingController weightController = TextEditingController();
-  
+  final TextEditingController notesController = TextEditingController();
+
+  bool showNotes = false;
+  String weightUnit;
+  ExerciseEntry({this.weightUnit = "lbs"});
+
   void dispose() {
     exerciseNameController.dispose();
     setsController.dispose();
     repsController.dispose();
     weightController.dispose();
-    
+    notesController.dispose();
   }
 }
 
@@ -38,10 +43,8 @@ class _WorkoutTrackerScreenState extends State<WorkoutTrackerScreen> {
   // New state variables for workout details
   final List<String> trainingStyles = ['strength', 'size', 'endurance', 'flexibility'];
   List<ExerciseEntry> exerciseEntries = [];
-  String selectedWeightUnit = "lbs";
   String? selectedExerciseType;
   String? selectedTrainingStyle;
-  final TextEditingController _notesController = TextEditingController();
 
   List<String> workoutSplitOptions = [
   'Push',
@@ -78,12 +81,11 @@ class _WorkoutTrackerScreenState extends State<WorkoutTrackerScreen> {
     for (var entry in exerciseEntries) {
       entry.dispose();
     }
-    _notesController.dispose();
     super.dispose();
   }
 
 
-  Future<void> _submitWorkout() async {
+Future<void> _submitWorkout() async {
   // Validate that at least one exercise entry is filled out.
   bool valid = false;
   for (var entry in exerciseEntries) {
@@ -163,9 +165,9 @@ class _WorkoutTrackerScreenState extends State<WorkoutTrackerScreen> {
         sets: int.parse(entry.setsController.text.trim()),
         reps: int.parse(entry.repsController.text.trim()),
         weight: double.parse(entry.weightController.text.trim()),
-        weightUnit: selectedWeightUnit,
+        weightUnit: entry.weightUnit,
         date: workoutDate,
-        notes: _notesController.text.trim(),
+        notes: entry.notesController.text.trim(),
         // trainingStyle: selectedTrainingStyle,
       );
     } catch (e) {
@@ -185,7 +187,6 @@ class _WorkoutTrackerScreenState extends State<WorkoutTrackerScreen> {
         entry.dispose();
       }
       exerciseEntries = [ExerciseEntry()];
-      _notesController.clear();
       selectedWorkoutSplits.clear();
       customWorkoutSplitController.clear();
     });
@@ -339,47 +340,88 @@ class _WorkoutTrackerScreenState extends State<WorkoutTrackerScreen> {
                                   ),
                                 ),
                                 const SizedBox(width: 10),
-                                Expanded(
-                                  flex: 3,
-                                  child: Row(
-                                    children: [
-                                      SizedBox(
-                                        width: 80,
-                                        child: TextField(
-                                          controller: entry.weightController,
-                                          keyboardType: TextInputType.number,
-                                          style: const TextStyle(color: Colors.white),
-                                          decoration: const InputDecoration(
-                                            labelText: "Weight",
-                                            labelStyle: TextStyle(color: Colors.white70),
-                                            border: OutlineInputBorder(),
-                                          ),
+                                Row(
+                                  children: [
+                                    // Weight TextField with fixed width
+                                    SizedBox(
+                                      width: 90,
+                                      child: TextField(
+                                        controller: entry.weightController,
+                                        keyboardType: TextInputType.number,
+                                        style: const TextStyle(color: Colors.white),
+                                        decoration: const InputDecoration(
+                                          labelText: "Weight",
+                                          labelStyle: TextStyle(color: Colors.white70),
+                                          border: OutlineInputBorder(),
                                         ),
                                       ),
-                                      const SizedBox(width: 8),
-                                      DropdownButton<String>(
-                                        value: selectedWeightUnit,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    // Weight unit dropdown with fixed width
+                                    SizedBox(
+                                      width: 50,
+                                      child: DropdownButton<String>(
+                                        isExpanded: true,
+                                        value: entry.weightUnit,
                                         dropdownColor: Colors.grey[800],
-                                        style: const TextStyle(color: Colors.white),
+                                        style: const TextStyle(color: Colors.white, fontSize: 16),
                                         items: <String>["lbs", "kg"].map((String unit) {
                                           return DropdownMenuItem<String>(
                                             value: unit,
-                                            child: Text(unit),
+                                            child: Center(
+                                              child: Text(
+                                                unit,
+                                                textAlign: TextAlign.center,
+                                                style: const TextStyle(color: Colors.white),
+                                              ),
+                                            ),
                                           );
                                         }).toList(),
                                         onChanged: (String? newValue) {
                                           if (newValue != null) {
                                             setState(() {
-                                              selectedWeightUnit = newValue;
+                                              entry.weightUnit = newValue;
                                             });
                                           }
                                         },
                                       ),
-                                    ],
-                                  ),
+                                    ),
+                                  ],
                                 ),
+                                SizedBox(
+                                  width: 30,
+                                  child: IconButton(
+                                    icon: Icon(
+                                      entry.showNotes ? Icons.note : Icons.note_add,
+                                      color: Colors.yellowAccent,
+                                    ),
+                                    onPressed: () {
+                                      setState(() {
+                                        entry.showNotes = !entry.showNotes;
+                                      });
+                                    },
+                                  ),
+                                ), 
                               ],
                             ),
+                            if (entry.showNotes) 
+                              Padding(
+                                padding: const EdgeInsets.only(top: 8),
+                                child: TextField(
+                                  controller: entry.notesController,
+                                  style: const TextStyle(color: Colors.white),
+                                  decoration: const InputDecoration(
+                                    label: Center(
+                                      child: Text(
+                                        "Notes",
+                                        style: TextStyle(color: Colors.white70),
+                                      ),
+                                    ),
+                                    border: OutlineInputBorder(),
+                                  ),
+                                  maxLines: 2,
+                                ),
+                              ),
                           ],
                         ),
                       ),
@@ -544,35 +586,6 @@ class _WorkoutTrackerScreenState extends State<WorkoutTrackerScreen> {
             //     ],
             //   ),
             // ),
-            const SizedBox(height: 20),
-            // Text field for Notes
-            Card(
-              color: Colors.grey[850],
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: TextField(
-                  controller: _notesController,
-                  style: const TextStyle(color: Colors.white),
-                  decoration: const InputDecoration(
-                    label: Center(
-                      child: Text(
-                        "Notes",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.white70),
-                      ),
-                    ),
-                    border: OutlineInputBorder(),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.blueAccent),
-                    ),
-                  ),
-                  maxLines: 3,
-                ),
-              ),
-            ),
             const SizedBox(height: 20),
             // Submit Workout Button
             ElevatedButton(
