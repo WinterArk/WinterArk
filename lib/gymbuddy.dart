@@ -200,6 +200,7 @@ class _GymBuddyScreenState extends State<GymBuddyScreen> {
         return Card(
           color: Colors.grey[850],
           child: ListTile(
+            key: Key('incoming-request-$docId'),
             title: Text(userName, style: const TextStyle(color: Colors.white)),
             subtitle: Text(userUsername,
                 style: const TextStyle(color: Colors.white70)),
@@ -207,10 +208,12 @@ class _GymBuddyScreenState extends State<GymBuddyScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 IconButton(
+                  key: Key('accept-request-$docId'),
                   icon: const Icon(Icons.check, color: Colors.green),
                   onPressed: () => _acceptRequest(docId),
                 ),
                 IconButton(
+                  key: Key('decline-request-$docId'),
                   icon: const Icon(Icons.close, color: Colors.red),
                   onPressed: () => _declineRequest(docId),
                 ),
@@ -236,10 +239,12 @@ class _GymBuddyScreenState extends State<GymBuddyScreen> {
         return Card(
           color: Colors.grey[850],
           child: ListTile(
+            key: Key('outgoing-request-$docId'),
             title: Text(buddyName, style: const TextStyle(color: Colors.white)),
             subtitle: Text(buddyUsername,
                 style: const TextStyle(color: Colors.white70)),
             trailing: IconButton(
+              key: Key('cancel-outgoing-$docId'),
               icon: const Icon(Icons.close, color: Colors.red),
               onPressed: () => _declineRequest(docId),
             ),
@@ -266,6 +271,7 @@ class _GymBuddyScreenState extends State<GymBuddyScreen> {
               children: [
                 Expanded(
                   child: TextField(
+                    key: const Key('gymbuddy-search'),
                     controller: _searchController,
                     style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
@@ -278,6 +284,7 @@ class _GymBuddyScreenState extends State<GymBuddyScreen> {
                         borderSide: BorderSide.none,
                       ),
                       suffixIcon: IconButton(
+                        key: const Key('gymbuddy-search-btn'),
                         icon: const Icon(Icons.search, color: Colors.white),
                         onPressed: _searchUsers,
                       ),
@@ -329,6 +336,7 @@ class _GymBuddyScreenState extends State<GymBuddyScreen> {
                       Column(
                         children: searchResults.map((user) {
                           return Card(
+                            key: Key('gymbuddy-result-${user['_id']}'),
                             color: Colors.grey[900],
                             child: ListTile(
                               title: Text(
@@ -340,6 +348,7 @@ class _GymBuddyScreenState extends State<GymBuddyScreen> {
                                 style: const TextStyle(color: Colors.white70),
                               ),
                               trailing: IconButton(
+                                key: Key('gymbuddy-add-${user['_id']}'),
                                 icon: const Icon(Icons.person_add,
                                     color: Colors.blueAccent),
                                 onPressed: () {

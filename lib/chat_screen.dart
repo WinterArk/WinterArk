@@ -201,6 +201,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 ),
                 Expanded(
                   child: TextField(
+                    key: const Key('chat-message-input'),
                     controller: _messageController,
                     style: const TextStyle(color: Colors.white),
                     decoration: const InputDecoration(
@@ -211,6 +212,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   ),
                 ),
                 IconButton(
+                  key: const Key('chat-send-button'),
                   icon: const Icon(Icons.send, color: Colors.blueAccent),
                   onPressed: _sendMessage,
                 ),

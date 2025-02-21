@@ -149,20 +149,24 @@ class _PastWorkoutsCalendarState extends State<PastWorkoutsCalendar> {
             child: Column(
               children: [
                 TextField(
+                  key: const Key('edit-exercise-name'),
                   controller: exerciseNameController,
                   decoration: const InputDecoration(labelText: "Exercise Name"),
                 ),
                 TextField(
+                  key: const Key('edit-sets'),
                   controller: setsController,
                   decoration: const InputDecoration(labelText: "Sets"),
                   keyboardType: TextInputType.number,
                 ),
                 TextField(
+                  key: const Key('edit-reps'),
                   controller: repsController,
                   decoration: const InputDecoration(labelText: "Reps"),
                   keyboardType: TextInputType.number,
                 ),
                 TextField(
+                  key: const Key('edit-weight'),
                   controller: weightController,
                   decoration: const InputDecoration(labelText: "Weight"),
                   keyboardType: TextInputType.number,
@@ -172,6 +176,7 @@ class _PastWorkoutsCalendarState extends State<PastWorkoutsCalendar> {
                     children: [
                       const Text("Unit: "),
                       DropdownButton<String>(
+                        key: const Key('edit-weight-unit'),
                         value: localWeightUnit,
                         dropdownColor: Colors.grey[800],
                         style: const TextStyle(color: Colors.white),
@@ -197,6 +202,7 @@ class _PastWorkoutsCalendarState extends State<PastWorkoutsCalendar> {
           actions: [
             // Delete button
             TextButton(
+              key: const Key('delete-workout'),
               onPressed: () async {
                 try {
                   await ApiService.deleteWorkout(workout['_id']);
@@ -215,6 +221,7 @@ class _PastWorkoutsCalendarState extends State<PastWorkoutsCalendar> {
             ),
             // Update button
             TextButton(
+              key: const Key('update-workout'),
               onPressed: () async {
                 final updateData = {
                   "exercise_name": exerciseNameController.text.trim(),
@@ -294,6 +301,7 @@ class _PastWorkoutsCalendarState extends State<PastWorkoutsCalendar> {
                     final isToday = _isToday(index, dayIndex + 1);
 
                     return GestureDetector(
+                      key: Key('${month['name']}-date-${dayIndex + 1}'),
                       onTap: () => _showWorkoutsForDate(
                         context,
                         month['name'], dayIndex + 1

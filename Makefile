@@ -21,6 +21,9 @@ run:
 	@echo "Running the app on device $(DEVICE)..."
 	$(FLUTTER) run -d $(DEVICE)
 
+integration_test:
+	flutter drive --driver=test_driver/integration_test_driver.dart --target=integration_test/workout_tracker_test.dart --device-id $(DEVICE)
+
 # Build the app for release
 build-release:
 	@echo "Building the app for release..."
@@ -62,3 +65,4 @@ help:
 	@echo "  help           Show this help message"
 
 .PHONY: all clean get-deps run build-release build-debug format analyze test help
+.PHONY: integration_test

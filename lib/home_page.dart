@@ -41,21 +41,30 @@ class _HomePageState extends State<HomePage> {
               _currentIndex = index;
             });
           },
-          items: const [
+          items: [
             BottomNavigationBarItem(
               icon: Icon(Icons.home),
               label: "Home",
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.fitness_center),
+              icon: Container(
+                key: Key('nav-workout-tracker'),
+                child: Icon(Icons.fitness_center),
+              ),
               label: "Workouts",
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.calendar_today),
+              icon: Container(
+                key: Key('nav-past-workouts'),
+                child: Icon(Icons.calendar_today),
+              ),
               label: "Past Workouts",
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.people),
+              icon: Container(
+                key: Key('nav-gym-buddies'),
+                child: Icon(Icons.people),
+              ),
               label: "Gym Buddies",
             ),
           ],
