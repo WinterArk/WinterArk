@@ -27,8 +27,9 @@ class ExerciseEntry {
 }
 
 class WorkoutTrackerScreen extends StatefulWidget {
+  static final GlobalKey<FormFieldState> workoutSplitKey = GlobalKey<FormFieldState>();
   const WorkoutTrackerScreen({super.key});
-
+  
   @override
   _WorkoutTrackerScreenState createState() => _WorkoutTrackerScreenState();
 }
@@ -219,6 +220,7 @@ Future<void> _submitWorkout() async {
             const SizedBox(height: 20),
             // Body Parts Buttons
             MultiSelectDialogField<String>(
+              key: WorkoutTrackerScreen.workoutSplitKey,
               items: workoutSplitOptions
                   .map((option) => MultiSelectItem<String>(option, option))
                   .toList(),
@@ -296,6 +298,7 @@ Future<void> _submitWorkout() async {
                         child: Column(
                           children: [
                             TextField(
+                              key: const Key('exercise-name'),
                               controller: entry.exerciseNameController,
                               style: const TextStyle(color: Colors.white),
                               decoration: const InputDecoration(
@@ -315,6 +318,7 @@ Future<void> _submitWorkout() async {
                                 Expanded(
                                   flex: 2,
                                   child: TextField(
+                                    key: const Key('exercise-sets'),
                                     controller: entry.setsController,
                                     keyboardType: TextInputType.number,
                                     style: const TextStyle(color: Colors.white),
@@ -329,6 +333,7 @@ Future<void> _submitWorkout() async {
                                 Expanded(
                                   flex: 2,
                                   child: TextField(
+                                    key: const Key('exercise-reps'),
                                     controller: entry.repsController,
                                     keyboardType: TextInputType.number,
                                     style: const TextStyle(color: Colors.white),
@@ -346,6 +351,7 @@ Future<void> _submitWorkout() async {
                                     SizedBox(
                                       width: 90,
                                       child: TextField(
+                                        key: const Key('exercise-weight'),
                                         controller: entry.weightController,
                                         keyboardType: TextInputType.number,
                                         style: const TextStyle(color: Colors.white),
@@ -361,6 +367,7 @@ Future<void> _submitWorkout() async {
                                     SizedBox(
                                       width: 50,
                                       child: DropdownButton<String>(
+                                        key: const Key('weight-unit'),
                                         isExpanded: true,
                                         value: entry.weightUnit,
                                         dropdownColor: Colors.grey[800],
@@ -391,6 +398,7 @@ Future<void> _submitWorkout() async {
                                 SizedBox(
                                   width: 30,
                                   child: IconButton(
+                                    key: const Key('notes-toggle'),
                                     icon: Icon(
                                       entry.showNotes ? Icons.note : Icons.note_add,
                                       color: Colors.yellowAccent,
@@ -408,6 +416,7 @@ Future<void> _submitWorkout() async {
                               Padding(
                                 padding: const EdgeInsets.only(top: 8),
                                 child: TextField(
+                                  key: const Key('exercise-notes'),
                                   controller: entry.notesController,
                                   style: const TextStyle(color: Colors.white),
                                   decoration: const InputDecoration(
@@ -498,6 +507,7 @@ Future<void> _submitWorkout() async {
                 // Date Picker Button
                 Expanded(
                   child: ElevatedButton(
+                    key: const Key('pick-date'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.grey[800],
                       foregroundColor: Colors.white,
@@ -529,6 +539,7 @@ Future<void> _submitWorkout() async {
                 // Time Picker Button
                 Expanded(
                   child: ElevatedButton(
+                    key: const Key('pick-time'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.grey[800],
                       foregroundColor: Colors.white,
@@ -589,6 +600,7 @@ Future<void> _submitWorkout() async {
             const SizedBox(height: 20),
             // Submit Workout Button
             ElevatedButton(
+              key: const Key('submit-workout'),
               onPressed: _submitWorkout,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blueAccent,

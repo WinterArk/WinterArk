@@ -255,6 +255,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 10),
               TextField(
+                key: const Key('login-username-email'),
                 controller: _usernameOrEmailController,
                 style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(
@@ -273,6 +274,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 10),
               TextField(
+                key: const Key('login-password'),
                 controller: _passwordController,
                 obscureText: true,
                 style: const TextStyle(color: Colors.white),
@@ -293,6 +295,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               const SizedBox(height: 20),
               ElevatedButton(
+                key: const Key('login-button'),
                 onPressed: _isLoading
                     ? null
                     : _isSignUp

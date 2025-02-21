@@ -79,6 +79,7 @@ class WinterArkHome extends StatelessWidget {
                   ),
                   SizedBox(width: 20),
                   ElevatedButton(
+                    key: const Key('sign-in-button'),
                     onPressed: () {
                       // Navigate to login screen in sign-in mode.
                       Navigator.push(
