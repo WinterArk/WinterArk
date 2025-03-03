@@ -1,10 +1,10 @@
 // workout_planner.dart
 // ignore_for_file: prefer_const_constructors
-
 import 'package:flutter/material.dart';
 import 'api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
+import 'exercise_selection.dart';
 
 class ExerciseEntry {
   final TextEditingController exerciseNameController = TextEditingController();
@@ -297,20 +297,12 @@ Future<void> _submitWorkout() async {
                         padding: const EdgeInsets.all(16.0),
                         child: Column(
                           children: [
-                            TextField(
-                              key: const Key('exercise-name'),
-                              controller: entry.exerciseNameController,
-                              style: const TextStyle(color: Colors.white),
-                              decoration: const InputDecoration(
-                                label: Center(
-                                  child: Text(
-                                    "Exercise Name",
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(color: Colors.white70),
-                                  ),
-                                ),
-                                border: OutlineInputBorder(),
-                              ),
+                            ExerciseSelectionWidget(
+                              onSelectionChanged: (finalExerciseName) {
+                                setState(() {
+                                  entry.exerciseNameController.text = finalExerciseName;
+                                });
+                              },
                             ),
                             const SizedBox(height: 10),
                             Row(
