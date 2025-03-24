@@ -39,7 +39,7 @@ class PastWorkoutsCalendar extends StatefulWidget {
   // const PastWorkoutsCalendar({Key? key}) : super(key: key);
   const PastWorkoutsCalendar({
     Key? key,
-    this.buddyId, // if null, it might mean "my workouts"
+    this.buddyId, 
     this.buddyName,
   }) : super(key: key);
 
@@ -63,11 +63,43 @@ class _PastWorkoutsCalendarState extends State<PastWorkoutsCalendar> {
     {"name": "November", "days": 30},
     {"name": "December", "days": 31},
   ];
+  Map<String, List<dynamic>> workoutsByDate = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchWorkoutsForCalendar();
+  }
+
+  Future<void> _fetchWorkoutsForCalendar() async {
+    final String? userId = widget.buddyId ?? await getUserId();
+    if (userId == null) return;
+    try {
+      // Assume ApiService.getWorkouts(userId) returns all workouts for the user.
+      final List<dynamic> allWorkouts = await ApiService.getPastWorkouts(userId);
+      Map<String, List<dynamic>> grouped = {};
+      for (var workout in allWorkouts) {
+        // Parse the workout date and format it.
+        final DateTime dt = DateTime.parse(workout['date']);
+        final String dateKey = DateFormat('yyyy-MM-dd').format(dt);
+        if (!grouped.containsKey(dateKey)) {
+          grouped[dateKey] = [];
+        }
+        grouped[dateKey]!.add(workout);
+      }
+      setState(() {
+        workoutsByDate = grouped;
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error fetching workouts: $e")),
+      );
+    }
+  }
 
   void _showWorkoutsForDate(BuildContext context, String monthName, int day) async {
     // day++;
     final dateStr = getDateString(monthName, day);
-    // Use buddyId if provided; otherwise, use the current user's id.
     final String? userId = widget.buddyId ?? await getUserId();
     if (userId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -298,7 +330,10 @@ class _PastWorkoutsCalendarState extends State<PastWorkoutsCalendar> {
                   spacing: 8.0,
                   runSpacing: 8.0,
                   children: List.generate(month['days'], (dayIndex) {
-                    final isToday = _isToday(index, dayIndex + 1);
+                    final int dayNumber = dayIndex + 1;
+                    final String dateKey = getDateString(month['name'], dayNumber);
+                    final bool hasWorkout = workoutsByDate.containsKey(dateKey);
+                    final isToday = _isToday(index, dayNumber);
 
                     return GestureDetector(
                       key: Key('${month['name']}-date-${dayIndex + 1}'),
@@ -319,14 +354,30 @@ class _PastWorkoutsCalendarState extends State<PastWorkoutsCalendar> {
                               ? Border.all(color: Colors.white, width: 2)
                               : null,
                         ),
-                        child: Text(
-                          '${dayIndex + 1}',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: isToday ? Colors.black : Colors.white,
-                            fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
-                          ),
-                        ),
+                        child: () {
+                          if (hasWorkout) {
+                            // Determine if any workout on this day is scheduled in the future.
+                            final DateTime now = DateTime.now();
+                            final bool isFutureWorkout = workoutsByDate[dateKey]!.any((workout) {
+                              final DateTime wDate = DateTime.parse(workout['date'] as String);
+                              return wDate.isAfter(now);
+                            });
+                            return Icon(
+                              isFutureWorkout ? Icons.fastfood : Icons.fitness_center,
+                              size: 20,
+                              color: isToday ? Colors.black : Colors.white,
+                            );
+                          } else {
+                            return Text(
+                              '$dayNumber',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: isToday ? Colors.black : Colors.white,
+                                fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
+                              ),
+                            );
+                          }
+                        }(),
                       ),
                     );
                   }),
