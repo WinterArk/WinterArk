@@ -15,8 +15,10 @@ class ExerciseEntry {
 
   bool showNotes = false;
   String weightUnit;
-  ExerciseEntry({this.weightUnit = "lbs"});
 
+  ExerciseEntry({
+    this.weightUnit = "lbs",
+  });
   void dispose() {
     exerciseNameController.dispose();
     setsController.dispose();
@@ -27,8 +29,12 @@ class ExerciseEntry {
 }
 
 class WorkoutTrackerScreen extends StatefulWidget {
+  final List<Map<String, dynamic>>? prefillWorkouts;
   static final GlobalKey<FormFieldState> workoutSplitKey = GlobalKey<FormFieldState>();
-  const WorkoutTrackerScreen({super.key});
+
+  const WorkoutTrackerScreen({Key? key, this.prefillWorkouts}) : super(key: key);
+
+  
   
   @override
   _WorkoutTrackerScreenState createState() => _WorkoutTrackerScreenState();
@@ -68,12 +74,49 @@ class _WorkoutTrackerScreenState extends State<WorkoutTrackerScreen> {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('userId');
   }
-  
+
   @override
   void initState() {
     super.initState();
-    // Start with one exercise entry.
-    exerciseEntries.add(ExerciseEntry());
+    if (widget.prefillWorkouts != null && widget.prefillWorkouts!.isNotEmpty) {
+      String rawSplit = widget.prefillWorkouts!.first['exercise_type'] ?? "";
+      // Split into parts 
+      List<String> splits = rawSplit
+          .split(',')
+          .map((s) => s.trim())
+          .where((s) => s.isNotEmpty)
+          .toList();
+      // Predefined splits in your options 
+      final List<String> predefined = workoutSplitOptions
+          .map((s) => s.toLowerCase())
+          .toList();
+      // Custom split
+      bool hasCustom = splits.any((s) => !predefined.contains(s.toLowerCase()));
+      if (hasCustom) {
+        selectedWorkoutSplits = ["Custom"];
+        // If multiple custom values exist, join them
+        customWorkoutSplitController.text = splits.join(', ');
+      } else {
+        // Otherwise, capitalize each predefined value.
+        selectedWorkoutSplits =
+            splits.map((s) => s[0].toUpperCase() + s.substring(1).toLowerCase()).toList();
+      }
+      
+      // Prefill exercise entries as before...
+      for (var workout in widget.prefillWorkouts!) {
+        ExerciseEntry entry = ExerciseEntry();
+        entry.exerciseNameController.text = workout['exercise_name'] ?? "";
+        entry.setsController.text = workout['sets']?.toString() ?? "";
+        entry.repsController.text = workout['reps']?.toString() ?? "";
+        entry.weightController.text = workout['weight']?.toString() ?? "";
+        entry.notesController.text = workout['notes'] ?? "";
+        entry.weightUnit = workout['weightUnit'] ?? "lbs";
+        exerciseEntries.add(entry);
+      }
+    } else {
+      // No prefill data.
+      exerciseEntries.add(ExerciseEntry());
+    }
   }
 
   @override
@@ -221,6 +264,7 @@ Future<void> _submitWorkout() async {
             // Body Parts Buttons
             MultiSelectDialogField<String>(
               key: WorkoutTrackerScreen.workoutSplitKey,
+              initialValue: selectedWorkoutSplits, 
               items: workoutSplitOptions
                   .map((option) => MultiSelectItem<String>(option, option))
                   .toList(),
@@ -297,12 +341,20 @@ Future<void> _submitWorkout() async {
                         padding: const EdgeInsets.all(16.0),
                         child: Column(
                           children: [
-                            ExerciseSelectionWidget(
-                              onSelectionChanged: (finalExerciseName) {
-                                setState(() {
-                                  entry.exerciseNameController.text = finalExerciseName;
-                                });
-                              },
+                            TextField(
+                              key: const Key('exercise-name'),
+                              controller: entry.exerciseNameController,
+                              style: const TextStyle(color: Colors.white),
+                              decoration: const InputDecoration(
+                                label: Center(
+                                  child: Text(
+                                    "Exercise Name",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(color: Colors.white70),
+                                  ),
+                                ),
+                                border: OutlineInputBorder(),
+                              ),
                             ),
                             const SizedBox(height: 10),
                             Row(

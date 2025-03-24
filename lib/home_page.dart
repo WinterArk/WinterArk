@@ -1,6 +1,6 @@
 // home_page.dart
 import 'package:flutter/material.dart';
-import 'workout_planner.dart';
+import 'workout_planner_lp.dart';
 import 'past_workouts.dart';
 import 'gymbuddy.dart'; // GymBuddyScreen import
 import 'sign_out_prompt.dart'; 
@@ -22,7 +22,7 @@ class _HomePageState extends State<HomePage> {
     // Provide the real userId to GymBuddyScreen
     final List<Widget> pages = [
       const DashboardPage(),
-      const WorkoutTrackerScreen(),
+      const WorkoutTrackerLandingPage(),
       const PastWorkoutsCalendar(),
       GymBuddyScreen(currentUserId: widget.userId),
     ];
