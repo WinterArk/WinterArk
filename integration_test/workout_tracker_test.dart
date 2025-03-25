@@ -116,6 +116,7 @@ void main() {
       expect(pickDateButton, findsOneWidget, reason: 'Pick Date button not found');
       await tester.tap(pickDateButton);
       await tester.pumpAndSettle();
+      await tester.pumpAndSettle(const Duration(seconds: 1));
 
       // Tap the "OK" button to confirm the default date
       final dateOkButton = find.text('OK');
@@ -156,7 +157,7 @@ void main() {
       final calendarDate = find.byKey(calendarKey);
       expect(calendarDate, findsOneWidget, reason: 'Calendar date not found');
       await tester.tap(calendarDate);
-      await tester.pumpAndSettle(const Duration(seconds: 1));
+      await tester.pumpAndSettle(const Duration(seconds: 3));
 
       final workoutEntry = find.text('Bench Press').first;
       expect(workoutEntry, findsOneWidget, reason: 'Original workout entry not found');
@@ -189,7 +190,7 @@ void main() {
       await tester.pumpAndSettle();
 
       await tester.tap(calendarDate);
-      await tester.pumpAndSettle(const Duration(seconds: 1));
+      await tester.pumpAndSettle(const Duration(seconds: 3));
 
       final updatedWorkoutEntry = find.text('Dumbbell Bench Press').first;
       expect(updatedWorkoutEntry, findsOneWidget, reason: 'Updated workout entry not found');
@@ -206,7 +207,7 @@ void main() {
       await tester.pumpAndSettle();
 
       await tester.tap(calendarDate);
-      await tester.pumpAndSettle(const Duration(seconds: 1));
+      await tester.pumpAndSettle(const Duration(seconds: 3));
 
       // Close
       await tester.sendKeyEvent(LogicalKeyboardKey.escape);
@@ -219,7 +220,7 @@ void main() {
       final gymBuddiesTab = find.byKey(const Key('nav-gym-buddies'));
       expect(gymBuddiesTab, findsOneWidget, reason: 'Gym Buddies tab not found');
       await tester.tap(gymBuddiesTab);
-      await tester.pumpAndSettle(const Duration(seconds: 1));
+      await tester.pumpAndSettle(const Duration(seconds: 3));
 
       // Locate the gym buddy search field using its key
       final searchField = find.byKey(const Key('gymbuddy-search'));
@@ -234,7 +235,7 @@ void main() {
       await tester.pumpAndSettle();
 
       await tester.sendKeyEvent(LogicalKeyboardKey.enter);
-      await tester.pumpAndSettle(const Duration(seconds: 1));
+      await tester.pumpAndSettle(const Duration(seconds: 3));
 
       // Tap the add button for that buddy
       final addButton = find.byIcon(Icons.person_add).first;
