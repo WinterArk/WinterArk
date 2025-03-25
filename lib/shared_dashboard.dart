@@ -4,7 +4,7 @@ import 'api_service.dart';
 
 class SharedDashboard extends StatefulWidget {
   final String userId;
-  const SharedDashboard({Key? key, required this.userId}) : super(key: key);
+  const SharedDashboard({super.key, required this.userId});
 
   @override
   _SharedDashboardState createState() => _SharedDashboardState();
@@ -37,14 +37,14 @@ class _SharedDashboardState extends State<SharedDashboard> {
   }
 
   void _showNewPostDialog() {
-    final TextEditingController _postController = TextEditingController();
+    final TextEditingController postController = TextEditingController();
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
           title: const Text('Create New Post'),
           content: TextField(
-            controller: _postController,
+            controller: postController,
             decoration: const InputDecoration(
               hintText: 'Enter post description',
             ),
@@ -56,7 +56,7 @@ class _SharedDashboardState extends State<SharedDashboard> {
             ),
             ElevatedButton(
               onPressed: () async {
-                final description = _postController.text.trim();
+                final description = postController.text.trim();
                 if (description.isNotEmpty) {
                   try {
                     final newPost =
@@ -123,8 +123,7 @@ class _SharedDashboardState extends State<SharedDashboard> {
 class WorkoutPostCard extends StatefulWidget {
   final dynamic post;
   final String userId;
-  const WorkoutPostCard({Key? key, required this.post, required this.userId})
-      : super(key: key);
+  const WorkoutPostCard({super.key, required this.post, required this.userId});
 
   @override
   _WorkoutPostCardState createState() => _WorkoutPostCardState();
@@ -171,7 +170,7 @@ class _WorkoutPostCardState extends State<WorkoutPostCard> {
   }
 
   void _showEditDialog() {
-    final TextEditingController _editController =
+    final TextEditingController editController =
     TextEditingController(text: currentPost['description']);
     showDialog(
       context: context,
@@ -179,7 +178,7 @@ class _WorkoutPostCardState extends State<WorkoutPostCard> {
         return AlertDialog(
           title: const Text('Edit Post'),
           content: TextField(
-            controller: _editController,
+            controller: editController,
             decoration: const InputDecoration(
               hintText: 'Update post description',
             ),
@@ -191,7 +190,7 @@ class _WorkoutPostCardState extends State<WorkoutPostCard> {
             ),
             ElevatedButton(
               onPressed: () async {
-                final newDesc = _editController.text.trim();
+                final newDesc = editController.text.trim();
                 if (newDesc.isNotEmpty) {
                   try {
                     final updatedPost =

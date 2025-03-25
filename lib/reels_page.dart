@@ -6,7 +6,7 @@ import 'shared_dashboard.dart';
 
 class ReelsPage extends StatefulWidget {
   final String userId;
-  const ReelsPage({Key? key, required this.userId}) : super(key: key);
+  const ReelsPage({super.key, required this.userId});
 
   @override
   _ReelsPageState createState() => _ReelsPageState();

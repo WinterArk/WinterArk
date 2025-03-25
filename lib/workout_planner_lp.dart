@@ -3,7 +3,7 @@ import 'workout_planner.dart';
 import 'reuse_workout_page.dart';
 
 class WorkoutTrackerLandingPage extends StatelessWidget {
-  const WorkoutTrackerLandingPage({Key? key}) : super(key: key);
+  const WorkoutTrackerLandingPage({super.key});
 
   @override
   Widget build(BuildContext context) {

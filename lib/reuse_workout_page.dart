@@ -6,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 
 class WorkoutReusePage extends StatefulWidget {
-  const WorkoutReusePage({Key? key}) : super(key: key);
+  const WorkoutReusePage({super.key});
 
   @override
   _WorkoutReusePageState createState() => _WorkoutReusePageState();

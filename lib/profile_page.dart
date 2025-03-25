@@ -4,7 +4,7 @@ import 'api_service.dart';
 
 class ProfilePage extends StatefulWidget {
   final String userId;
-  const ProfilePage({Key? key, required this.userId}) : super(key: key);
+  const ProfilePage({super.key, required this.userId});
 
   @override
   _ProfilePageState createState() => _ProfilePageState();

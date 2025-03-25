@@ -409,13 +409,13 @@ class ConnectedBuddyCard extends StatelessWidget {
   final VoidCallback onChatOpened;
 
   const ConnectedBuddyCard({
-    Key? key,
+    super.key,
     required this.currentUserId,
     required this.buddy,
     required this.buddyName,
     required this.buddyUsername,
     required this.onChatOpened,
-  }) : super(key: key);
+  });
 
   Future<int> _fetchUnreadCount() async {
     // Create or retrieve chat between currentUserId and buddy
