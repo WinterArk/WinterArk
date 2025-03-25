@@ -1,6 +1,6 @@
 // home_page.dart
 import 'package:flutter/material.dart';
-import 'workout_planner.dart';
+import 'workout_planner_lp.dart';
 import 'past_workouts.dart';
 import 'gymbuddy.dart';
 import 'reels_page.dart';
@@ -24,6 +24,8 @@ class _HomePageState extends State<HomePage> {
     final List<Widget> pages = [
       ReelsPage(userId: widget.userId),
       const WorkoutTrackerScreen(),
+      const DashboardPage(),
+      const WorkoutTrackerLandingPage(),
       const PastWorkoutsCalendar(),
       GymBuddyScreen(currentUserId: widget.userId),
       ProfilePage(userId: widget.userId),

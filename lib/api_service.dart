@@ -245,6 +245,17 @@ class ApiService {
     }
   }
 
+  // 12.5) Get past workouts for a user
+  static Future<List<dynamic>> getPastWorkouts(String userId) async {
+    final url = Uri.parse('$BASE_URL/api/workouts/$userId');
+    final response = await http.get(url, headers: {"Content-Type": "application/json"});
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to fetch workouts: ${response.body}');
+    }
+  }
+
   // 13) Create or retrieve a chat between two users
   static Future<Map<String, dynamic>> createChat(
       String userId1, String userId2) async {
