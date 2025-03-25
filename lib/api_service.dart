@@ -5,9 +5,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class ApiService {
-  // http://18.234.214.233:3000
-  // http://10.0.2.2:3000
-  // http://localhost:3000/
+  // static const String BASE_URL = 'http://18.234.214.233:3000';
+  // static const String BASE_URL = 'http://10.0.2.2:3000';
   static const String BASE_URL = 'http://18.234.214.233:3000';
 
   // 1) SIGN UP a new user
@@ -118,6 +117,17 @@ class ApiService {
       return json.decode(response.body);
     } else {
       throw Exception('Failed to add gym buddy: ${response.body}');
+    }
+  }
+
+  // NEW: Get user profile by ID
+  static Future<Map<String, dynamic>> getUserProfile(String userId) async {
+    final url = Uri.parse('$BASE_URL/api/users/$userId');
+    final response = await http.get(url, headers: {"Content-Type": "application/json"});
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to fetch user profile: ${response.body}');
     }
   }
 
@@ -317,6 +327,148 @@ class ApiService {
       return data['unread_count'] as int;
     } else {
       throw Exception('Failed to get unread count: ${response.body}');
+    }
+  }
+
+  // 18) CREATE a new post (for Shared Dashboard)
+  static Future<Map<String, dynamic>> createPost(String userId, String description) async {
+    final url = Uri.parse('$BASE_URL/api/posts');
+    final response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: json.encode({
+        "userId": userId,
+        "description": description,
+      }),
+    );
+    if (response.statusCode == 201) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to create post: ${response.body}');
+    }
+  }
+
+  // 19) FETCH posts for Shared Dashboard
+  static Future<List<dynamic>> fetchPosts() async {
+    final url = Uri.parse('$BASE_URL/api/posts');
+    final response = await http.get(url, headers: {"Content-Type": "application/json"});
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to fetch posts: ${response.body}');
+    }
+  }
+
+  // 20) Like a post
+  static Future<Map<String, dynamic>> likePost(String postId, String userId) async {
+    final url = Uri.parse('$BASE_URL/api/posts/$postId/like');
+    final response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: json.encode({"userId": userId}),
+    );
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to like post: ${response.body}');
+    }
+  }
+
+  // 21) Dislike a post
+  static Future<Map<String, dynamic>> dislikePost(String postId, String userId) async {
+    final url = Uri.parse('$BASE_URL/api/posts/$postId/dislike');
+    final response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: json.encode({"userId": userId}),
+    );
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to dislike post: ${response.body}');
+    }
+  }
+
+  // 22) Comment on a post
+  static Future<Map<String, dynamic>> commentOnPost(String postId, String userId, String text) async {
+    final url = Uri.parse('$BASE_URL/api/posts/$postId/comment');
+    final response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: json.encode({
+        "userId": userId,
+        "text": text,
+      }),
+    );
+    if (response.statusCode == 201) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to comment on post: ${response.body}');
+    }
+  }
+
+  static Future<Map<String, dynamic>> updatePost(String postId, String description) async {
+    final url = Uri.parse('$BASE_URL/api/posts/$postId');
+    final response = await http.put(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: json.encode({"description": description}),
+    );
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to update post: ${response.body}');
+    }
+  }
+
+  // 22) DELETE a post
+  static Future<Map<String, dynamic>> deletePost(String postId) async {
+    final url = Uri.parse('$BASE_URL/api/posts/$postId');
+    final response = await http.delete(url, headers: {"Content-Type": "application/json"});
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to delete post: ${response.body}');
+    }
+  }
+
+  // 23) FETCH reels
+  static Future<List<dynamic>> fetchReels() async {
+    final url = Uri.parse('$BASE_URL/api/reels');
+    final response = await http.get(url, headers: {"Content-Type": "application/json"});
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to fetch reels: ${response.body}');
+    }
+  }
+
+  // 24) Like a reel
+  static Future<Map<String, dynamic>> likeReel(String reelId) async {
+    final url = Uri.parse('$BASE_URL/api/reels/$reelId/like');
+    final response = await http.post(url, headers: {"Content-Type": "application/json"});
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to like reel: ${response.body}');
+    }
+  }
+
+  // 25) Comment on a reel
+  static Future<Map<String, dynamic>> commentOnReel(String reelId, String userId, String text) async {
+    final url = Uri.parse('$BASE_URL/api/reels/$reelId/comment');
+    final response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: json.encode({
+        "userId": userId,
+        "text": text,
+      }),
+    );
+    if (response.statusCode == 201) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to comment on reel: ${response.body}');
     }
   }
 }

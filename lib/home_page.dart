@@ -2,13 +2,14 @@
 import 'package:flutter/material.dart';
 import 'workout_planner_lp.dart';
 import 'past_workouts.dart';
-import 'gymbuddy.dart'; // GymBuddyScreen import
-import 'sign_out_prompt.dart'; 
+import 'gymbuddy.dart';
+import 'reels_page.dart';
+import 'profile_page.dart';  // Import ProfilePage
+import 'sign_out_prompt.dart';
 
 class HomePage extends StatefulWidget {
   final String userId;
-
-  const HomePage({super.key, required this.userId});
+  const HomePage({Key? key, required this.userId}) : super(key: key);
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -19,12 +20,15 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // Provide the real userId to GymBuddyScreen
+    // List of pages corresponding to each tab in the bottom navigation bar.
     final List<Widget> pages = [
+      ReelsPage(userId: widget.userId),
+      const WorkoutTrackerScreen(),
       const DashboardPage(),
       const WorkoutTrackerLandingPage(),
       const PastWorkoutsCalendar(),
       GymBuddyScreen(currentUserId: widget.userId),
+      ProfilePage(userId: widget.userId),
     ];
 
     return SignOutPrompt(
@@ -41,55 +45,28 @@ class _HomePageState extends State<HomePage> {
               _currentIndex = index;
             });
           },
-          items: [
+          items: const [
             BottomNavigationBarItem(
               icon: Icon(Icons.home),
               label: "Home",
             ),
             BottomNavigationBarItem(
-              icon: Container(
-                key: Key('nav-workout-tracker'),
-                child: Icon(Icons.fitness_center),
-              ),
+              icon: Icon(Icons.fitness_center),
               label: "Workouts",
             ),
             BottomNavigationBarItem(
-              icon: Container(
-                key: Key('nav-past-workouts'),
-                child: Icon(Icons.calendar_today),
-              ),
+              icon: Icon(Icons.calendar_today),
               label: "Past Workouts",
             ),
             BottomNavigationBarItem(
-              icon: Container(
-                key: Key('nav-gym-buddies'),
-                child: Icon(Icons.people),
-              ),
+              icon: Icon(Icons.people),
               label: "Gym Buddies",
             ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person),
+              label: "Profile",
+            ),
           ],
-        ),
-      )
-    );
-  }
-}
-
-/// A simple Dashboard page.
-class DashboardPage extends StatelessWidget {
-  const DashboardPage({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Dashboard'),
-        backgroundColor: Colors.blueAccent,
-        centerTitle: true,
-      ),
-      backgroundColor: Colors.black,
-      body: const Center(
-        child: Text(
-          'Welcome to WinterArk Home!',
-          style: TextStyle(color: Colors.white, fontSize: 20),
         ),
       ),
     );
