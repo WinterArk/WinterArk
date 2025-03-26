@@ -23,8 +23,6 @@ class _HomePageState extends State<HomePage> {
     // List of pages corresponding to each tab in the bottom navigation bar.
     final List<Widget> pages = [
       ReelsPage(userId: widget.userId),
-      const WorkoutTrackerScreen(),
-      const DashboardPage(),
       const WorkoutTrackerLandingPage(),
       const PastWorkoutsCalendar(),
       GymBuddyScreen(currentUserId: widget.userId),

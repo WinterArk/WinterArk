@@ -471,4 +471,43 @@ class ApiService {
       throw Exception('Failed to comment on reel: ${response.body}');
     }
   }
+
+  // 26) Get user streak count
+  static Future<int> getUserStreak(String userId) async {
+    final url = Uri.parse('$BASE_URL/api/streaks/$userId');
+    final response = await http.get(url, headers: {"Content-Type": "application/json"});
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      return data['streakCount'] ?? 0;
+    } else {
+      throw Exception("Failed to fetch streak: ${response.body}");
+    }
+  }
+
+  // 27) Update streak count
+  static Future<Map<String, dynamic>> updateStreak(String userId, String workoutDate) async {
+    final url = Uri.parse('$BASE_URL/api/streaks/$userId/update');
+    final response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: json.encode({
+        "workoutDate": workoutDate,
+      }),
+    );
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception("Failed to update streak: ${response.body}");
+    }
+}
+  // 28) Get streak leaderboard
+  static Future<List<dynamic>> getStreakLeaderboard() async {
+    final url = Uri.parse('$BASE_URL/api/streaks/leaderboard');
+    final response = await http.get(url, headers: {"Content-Type": "application/json"});
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to fetch streak leaderboard: ${response.body}');
+    }
+  }
 }

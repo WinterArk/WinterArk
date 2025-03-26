@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'api_service.dart';
 import 'package:intl/intl.dart';
+import 'streak_leaderboard.dart';
 
 // Helper function to convert month/day to YYYY-MM-DD format.
 String getDateString(String monthName, int day) {
@@ -32,6 +33,16 @@ Future<String?> getUserId() async {
   final prefs = await SharedPreferences.getInstance();
   return prefs.getString('userId');
 }
+
+Future<int> _getStreak() async {
+  String? userId = await getUserId();
+  if (userId == null) {
+      userId = await getUserId();
+  }
+  int? streak = await ApiService.getUserStreak(userId!);
+  return streak ?? 0;
+}
+
 
 class PastWorkoutsCalendar extends StatefulWidget {
   final String? buddyId;
@@ -303,7 +314,38 @@ class _PastWorkoutsCalendarState extends State<PastWorkoutsCalendar> {
           style: const TextStyle(color: Colors.lightBlue),
         ),
         centerTitle: true,
-      ),
+        actions: [
+          FutureBuilder<int>(
+            future: _getStreak(),
+            builder: (context, snapshot) {
+              int streak = snapshot.data ?? 0;
+              return IconButton(
+                icon: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.whatshot, color: Colors.orange),
+                    Text(
+                      '$streak',
+                      style: const TextStyle(
+                        color: Colors.orange,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const StreakLeaderboardPage(),
+                    ),
+                  );
+                },
+                );
+              },
+          ),
+        ],
+      ),  
       body: ListView.builder(
         itemCount: months.length,
         itemBuilder: (context, index) {

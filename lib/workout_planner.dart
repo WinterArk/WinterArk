@@ -223,6 +223,14 @@ Future<void> _submitWorkout() async {
   }
 
   if (allSuccess) {
+    try {
+      await ApiService.updateStreak(userId, workoutDate.toIso8601String());
+      // Optionally, you could show a message that the streak is updated.
+      print("Streak updated successfully.");
+    } 
+    catch (e) {
+      print("Error updating streak: $e");
+    }
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text("Workout added successfully!")),
     );
