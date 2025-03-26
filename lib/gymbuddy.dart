@@ -429,9 +429,31 @@ class ConnectedBuddyCard extends StatelessWidget {
     return Card(
       color: Colors.grey[850],
       child: ListTile(
-        title: Text(buddyName, style: const TextStyle(color: Colors.white)),
-        subtitle:
-        Text(buddyUsername, style: const TextStyle(color: Colors.white70)),
+        title: Row(
+          children: [
+            Text(buddyName, style: const TextStyle(color: Colors.white)),
+              const SizedBox(width: 8),
+                FutureBuilder<int>(
+                  future: ApiService.getUserStreak(buddy['_id']),
+                  builder: (context, snapshot) {
+                    int streak = snapshot.hasData ? snapshot.data! : 0;
+                    if (streak > 0) {
+                      return Row(
+                        children: [
+                          const Icon(Icons.local_fire_department, color: Colors.orange, size: 16),
+                          const SizedBox(width: 4),
+                          Text(streak.toString(),
+                              style: const TextStyle(color: Colors.white, fontSize: 12)),
+                        ],
+                      );
+                    } else {
+                      return const SizedBox.shrink();
+                    }
+                  },
+                ),
+            ],
+        ),
+        subtitle: Text(buddyUsername, style: const TextStyle(color: Colors.white70)),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
