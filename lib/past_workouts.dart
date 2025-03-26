@@ -49,10 +49,10 @@ class PastWorkoutsCalendar extends StatefulWidget {
   final String? buddyName;
   // const PastWorkoutsCalendar({Key? key}) : super(key: key);
   const PastWorkoutsCalendar({
-    Key? key,
+    super.key,
     this.buddyId, 
     this.buddyName,
-  }) : super(key: key);
+  });
 
   @override
   _PastWorkoutsCalendarState createState() => _PastWorkoutsCalendarState();

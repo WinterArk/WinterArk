@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
-import 'exercise_selection.dart';
 
 class ExerciseEntry {
   final TextEditingController exerciseNameController = TextEditingController();
@@ -32,7 +31,7 @@ class WorkoutTrackerScreen extends StatefulWidget {
   final List<Map<String, dynamic>>? prefillWorkouts;
   static final GlobalKey<FormFieldState> workoutSplitKey = GlobalKey<FormFieldState>();
 
-  const WorkoutTrackerScreen({Key? key, this.prefillWorkouts}) : super(key: key);
+  const WorkoutTrackerScreen({super.key, this.prefillWorkouts});
 
   
   

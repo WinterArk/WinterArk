@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 
 class ExerciseSelectionWidget extends StatefulWidget {
   final ValueChanged<String> onSelectionChanged;
-  const ExerciseSelectionWidget({Key? key, required this.onSelectionChanged})
-      : super(key: key);
+  const ExerciseSelectionWidget({super.key, required this.onSelectionChanged});
 
   @override
   _ExerciseSelectionWidgetState createState() =>

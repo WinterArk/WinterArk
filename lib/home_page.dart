@@ -9,7 +9,7 @@ import 'sign_out_prompt.dart';
 
 class HomePage extends StatefulWidget {
   final String userId;
-  const HomePage({Key? key, required this.userId}) : super(key: key);
+  const HomePage({super.key, required this.userId});
 
   @override
   _HomePageState createState() => _HomePageState();
