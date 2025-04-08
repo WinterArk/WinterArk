@@ -59,7 +59,10 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
-
+  assets: # add more demos here if needed
+    - assets/videos/demo1.mp4
+    - assets/videos/demo2.mp4
+    - assets/videos/demo3.mp4
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.

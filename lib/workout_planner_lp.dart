@@ -1,3 +1,4 @@
+// workout_planner_lp.dart
 import 'package:flutter/material.dart';
 import 'workout_planner.dart';
 import 'reuse_workout_page.dart';
@@ -11,6 +12,7 @@ class WorkoutTrackerLandingPage extends StatelessWidget {
     double buttonSize = MediaQuery.of(context).size.width * 0.3;
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,  // Disable the automatic back arrow.
         title: const Text("Workout Tracker"),
       ),
       body: Center(
@@ -22,7 +24,8 @@ class WorkoutTrackerLandingPage extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const WorkoutTrackerScreen()),
+                  MaterialPageRoute(
+                      builder: (context) => const WorkoutTrackerScreen()),
                 );
               },
               child: Container(
@@ -51,7 +54,8 @@ class WorkoutTrackerLandingPage extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const WorkoutReusePage()),
+                  MaterialPageRoute(
+                      builder: (context) => const WorkoutReusePage()),
                 );
               },
               child: Container(
