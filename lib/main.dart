@@ -17,7 +17,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   print('🔄 Background message: ${message.messageId}');
 }
 
-const String backendBaseUrl = 'http://10.0.0.116:3000';
+const String backendBaseUrl = 'http://18.234.214.233:3000';
 
 Future<String?> getCurrentUserId() async {
   final prefs = await SharedPreferences.getInstance();

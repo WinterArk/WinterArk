@@ -1,6 +1,7 @@
 // profile_page.dart
 import 'package:flutter/material.dart';
 import 'api_service.dart';
+import 'settings_page.dart';  // Import the settings page file
 
 class ProfilePage extends StatefulWidget {
   final String userId;
@@ -41,14 +42,24 @@ class _ProfilePageState extends State<ProfilePage> {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        title: Text(profile?['username'] ?? "Profile", style: const TextStyle(color: Colors.white)),
+        // Disable automatic back arrow
+        automaticallyImplyLeading: false,
+        title: Text(
+          profile?['username'] ?? "Profile",
+          style: const TextStyle(color: Colors.white),
+        ),
         centerTitle: true,
         backgroundColor: Colors.blue,
         actions: [
           IconButton(
             icon: const Icon(Icons.settings, color: Colors.white),
             onPressed: () {
-              // Navigate to settings or perform another action.
+              // Navigate to the Settings Page with userId
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => SettingsPage(userId: widget.userId)),
+              );
             },
           ),
         ],
@@ -56,7 +67,9 @@ class _ProfilePageState extends State<ProfilePage> {
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : errorMsg.isNotEmpty
-          ? Center(child: Text(errorMsg, style: const TextStyle(color: Colors.white)))
+          ? Center(
+          child: Text(errorMsg,
+              style: const TextStyle(color: Colors.white)))
           : Column(
         children: [
           Container(
@@ -67,43 +80,57 @@ class _ProfilePageState extends State<ProfilePage> {
                 CircleAvatar(
                   radius: 40,
                   backgroundColor: Colors.blue,
-                  child: const Icon(Icons.person, color: Colors.white, size: 40),
+                  child: const Icon(Icons.person,
+                      color: Colors.white, size: 40),
                 ),
                 const SizedBox(width: 20),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(profile?['username'] ?? "Username",
-                          style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                              color: Colors.white)),
+                      Text(
+                        profile?['username'] ?? "Username",
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                            color: Colors.white),
+                      ),
                       const SizedBox(height: 5),
-                      Text(profile?['bio'] ?? "Bio goes here...",
-                          style: const TextStyle(fontSize: 14, color: Colors.white)),
+                      Text(
+                        profile?['bio'] ?? "Bio goes here...",
+                        style: const TextStyle(
+                            fontSize: 14, color: Colors.white),
+                      ),
                       const SizedBox(height: 10),
                       Row(
                         children: [
-                          Text("Followers",
-                              style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white)),
+                          Text(
+                            "Followers",
+                            style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white),
+                          ),
                           const SizedBox(width: 10),
-                          Text(profile?['followers']?.toString() ?? "0",
-                              style: const TextStyle(
-                                  fontSize: 16, color: Colors.blue)),
+                          Text(
+                            profile?['followers']?.toString() ?? "0",
+                            style: const TextStyle(
+                                fontSize: 16, color: Colors.blue),
+                          ),
                           const SizedBox(width: 20),
-                          Text("Following",
-                              style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white)),
+                          Text(
+                            "Following",
+                            style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white),
+                          ),
                           const SizedBox(width: 10),
-                          Text(profile?['following']?.toString() ?? "0",
-                              style: const TextStyle(
-                                  fontSize: 16, color: Colors.blue)),
+                          Text(
+                            profile?['following']?.toString() ?? "0",
+                            style: const TextStyle(
+                                fontSize: 16, color: Colors.blue),
+                          ),
                         ],
                       ),
                     ],
@@ -115,7 +142,8 @@ class _ProfilePageState extends State<ProfilePage> {
           Expanded(
             child: GridView.builder(
               padding: const EdgeInsets.all(8.0),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              gridDelegate:
+              const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 3,
                 crossAxisSpacing: 4.0,
                 mainAxisSpacing: 4.0,
@@ -123,7 +151,8 @@ class _ProfilePageState extends State<ProfilePage> {
               // Assume profile['posts'] is an array of image URLs
               itemCount: profile?['posts']?.length ?? 0,
               itemBuilder: (context, index) {
-                final postImage = profile?['posts'][index] ?? 'https://via.placeholder.com/150';
+                final postImage = profile?['posts'][index] ??
+                    'https://via.placeholder.com/150';
                 return Container(
                   decoration: BoxDecoration(
                     color: Colors.blue,
