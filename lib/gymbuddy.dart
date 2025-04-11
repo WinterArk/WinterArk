@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'api_service.dart';
 import 'past_workouts.dart';
+<<<<<<< Updated upstream
 import 'chat_screen.dart'; // Import the new chat screen
+=======
+import 'chat_screen.dart'; // Import the chat screen
+import 'package:socket_io_client/socket_io_client.dart' as IO;
+>>>>>>> Stashed changes
 
 class GymBuddyScreen extends StatefulWidget {
   final String currentUserId; // The logged-in user's id
@@ -27,9 +32,14 @@ class _GymBuddyScreenState extends State<GymBuddyScreen> {
   void initState() {
     super.initState();
     _loadUserBuddies();
+    _connectSocket(); // 🔁 Setup real-time updates
   }
 
+<<<<<<< Updated upstream
   // Fetch all GymBuddy docs that involve this user (either as requester or recipient)
+=======
+
+>>>>>>> Stashed changes
   Future<void> _loadUserBuddies() async {
     setState(() => isLoadingBuddies = true);
     try {
@@ -71,7 +81,43 @@ class _GymBuddyScreenState extends State<GymBuddyScreen> {
     }
   }
 
+<<<<<<< Updated upstream
   // For searching new users
+=======
+  IO.Socket? socket;
+
+  void _connectSocket() {
+    final socket = IO.io('http://10.0.0.116:3000', <String, dynamic>{
+      'transports': ['websocket'],
+      'autoConnect': true,
+      'query': {'userId': widget.currentUserId},
+    });
+
+    socket.onConnect((_) {
+      print('[Socket] Connected to server');
+    });
+
+    // 🔁 Listen for ANY new message and reload unread counts
+    socket.on('new_message', (_) {
+      _loadUserBuddies(); // refresh buddy list and unread counts
+    });
+
+    socket.on('unread_count_update', (data) {
+      // This will ensure the UI reflects the new unread count
+      _loadUserBuddies();
+    });
+
+    socket.on('message_read', (_) {
+      _loadUserBuddies(); // refresh counts after read
+    });
+
+    socket.onDisconnect((_) {
+      print('[Socket] Disconnected');
+    });
+  }
+
+
+>>>>>>> Stashed changes
   void _searchUsers() async {
     final query = _searchController.text.trim();
     if (query.isEmpty) {
@@ -155,6 +201,8 @@ class _GymBuddyScreenState extends State<GymBuddyScreen> {
 
   @override
   void dispose() {
+    socket?.disconnect();
+    socket?.dispose();
     _searchController.dispose();
     super.dispose();
   }
@@ -400,8 +448,13 @@ class _GymBuddyScreenState extends State<GymBuddyScreen> {
   }
 }
 
+<<<<<<< Updated upstream
 // New widget to show a connected buddy with chat icon and unread badge.
 class ConnectedBuddyCard extends StatelessWidget {
+=======
+
+class ConnectedBuddyCard extends StatefulWidget {
+>>>>>>> Stashed changes
   final String currentUserId;
   final Map buddy;
   final String buddyName;
@@ -417,11 +470,71 @@ class ConnectedBuddyCard extends StatelessWidget {
     required this.onChatOpened,
   });
 
+<<<<<<< Updated upstream
   Future<int> _fetchUnreadCount() async {
     // Create or retrieve chat between currentUserId and buddy
     final chat = await ApiService.createChat(currentUserId, buddy['_id']);
     final unreadCount = await ApiService.getUnreadCount(chat['_id'], currentUserId);
     return unreadCount;
+=======
+  @override
+  State<ConnectedBuddyCard> createState() => _ConnectedBuddyCardState();
+}
+
+class _ConnectedBuddyCardState extends State<ConnectedBuddyCard> {
+  int unreadCount = 0;
+  String? chatId;
+  IO.Socket? socket;
+
+  @override
+  void initState() {
+    super.initState();
+    _setupChatAndSocket(); // ✅ Ensures real-time bubble updates
+  }
+
+  @override
+  void dispose() {
+    socket?.disconnect();
+    socket?.dispose();
+    super.dispose();
+  }
+
+  Future<void> _setupChatAndSocket() async {
+    try {
+      final chat = await ApiService.createChat(widget.currentUserId, widget.buddy['_id']);
+      chatId = chat['_id'];
+
+      final count = await ApiService.getUnreadCount(chatId!, widget.currentUserId);
+      setState(() => unreadCount = count);
+
+      socket = IO.io('http://10.0.0.116:3000', <String, dynamic>{
+        'transports': ['websocket'],
+        'autoConnect': true,
+      });
+
+      socket?.onConnect((_) {
+        if (chatId != null) {
+          socket?.emit('join', chatId);
+        }
+      });
+
+      socket?.on('new_message', (data) {
+        if (data['chatId'] == chatId && data['senderId'] == widget.buddy['_id']) {
+          setState(() => unreadCount++);
+        }
+      });
+
+      socket?.on('message_read', (data) {
+        if (data['chatId'] == chatId && data['readerId'] == widget.currentUserId) {
+          setState(() => unreadCount = 0);
+        }
+      });
+
+      socket?.onDisconnect((_) => print('BuddyCard Socket disconnected'));
+    } catch (e) {
+      print('Error setting up chat/socket: $e');
+    }
+>>>>>>> Stashed changes
   }
 
   @override
@@ -431,6 +544,7 @@ class ConnectedBuddyCard extends StatelessWidget {
       child: ListTile(
         title: Row(
           children: [
+<<<<<<< Updated upstream
             Text(buddyName, style: const TextStyle(color: Colors.white)),
               const SizedBox(width: 8),
                 FutureBuilder<int>(
@@ -452,65 +566,71 @@ class ConnectedBuddyCard extends StatelessWidget {
                   },
                 ),
             ],
+=======
+            Text(widget.buddyName, style: const TextStyle(color: Colors.white)),
+            const SizedBox(width: 8),
+            FutureBuilder<int>(
+              future: ApiService.getUserStreak(widget.buddy['_id']),
+              builder: (context, snapshot) {
+                int streak = snapshot.hasData ? snapshot.data! : 0;
+                return streak > 0
+                    ? Row(
+                  children: [
+                    const Icon(Icons.local_fire_department, color: Colors.orange, size: 16),
+                    const SizedBox(width: 4),
+                    Text('$streak', style: const TextStyle(color: Colors.white, fontSize: 12)),
+                  ],
+                )
+                    : const SizedBox.shrink();
+              },
+            ),
+          ],
+>>>>>>> Stashed changes
         ),
-        subtitle: Text(buddyUsername, style: const TextStyle(color: Colors.white70)),
+        subtitle: Text(widget.buddyUsername, style: const TextStyle(color: Colors.white70)),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            FutureBuilder<int>(
-              future: _fetchUnreadCount(),
-              builder: (context, snapshot) {
-                int unreadCount = 0;
-                if (snapshot.hasData) {
-                  unreadCount = snapshot.data!;
-                }
-                return Stack(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.chat, color: Colors.green),
-                      onPressed: () async {
-                        await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ChatScreen(
-                              currentUserId: currentUserId,
-                              buddyId: buddy['_id'],
-                              buddyName: buddyName,
-                            ),
-                          ),
-                        );
-                        onChatOpened();
-                      },
-                    ),
-                    if (unreadCount > 0)
-                      Positioned(
-                        right: 4,
-                        top: 4,
-                        child: Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: const BoxDecoration(
-                            color: Colors.red,
-                            shape: BoxShape.circle,
-                          ),
-                          constraints: const BoxConstraints(
-                            minWidth: 20,
-                            minHeight: 20,
-                          ),
-                          child: Center(
-                            child: Text(
-                              '$unreadCount',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 12,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
+            Stack(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.chat, color: Colors.green),
+                  onPressed: () async {
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ChatScreen(
+                          currentUserId: widget.currentUserId,
+                          buddyId: widget.buddy['_id'],
+                          buddyName: widget.buddyName,
                         ),
                       ),
-                  ],
-                );
-              },
+                    );
+                    setState(() => unreadCount = 0); // Reset count after opening chat
+                    widget.onChatOpened();
+                  },
+                ),
+                if (unreadCount > 0)
+                  Positioned(
+                    right: 4,
+                    top: 4,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: const BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
+                      ),
+                      constraints: const BoxConstraints(minWidth: 20, minHeight: 20),
+                      child: Center(
+                        child: Text(
+                          '$unreadCount',
+                          style: const TextStyle(color: Colors.white, fontSize: 12),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
             IconButton(
               icon: const Icon(Icons.calendar_today, color: Colors.blueAccent),
@@ -519,8 +639,8 @@ class ConnectedBuddyCard extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (context) => PastWorkoutsCalendar(
-                      buddyId: buddy['_id'],
-                      buddyName: buddyName,
+                      buddyId: widget.buddy['_id'],
+                      buddyName: widget.buddyName,
                     ),
                   ),
                 );

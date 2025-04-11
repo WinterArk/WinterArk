@@ -32,6 +32,11 @@ dependencies:
   flutter:
     sdk: flutter
   timezone: ^0.10.0
+  flutter_local_notifications: ^19.0.0
+  firebase_messaging: ^15.2.5
+  firebase_core: ^3.13.0
+  socket_io_client: ^3.1.1
+  android_intent_plus: ^5.3.0
   shared_preferences: ^2.0.13
   intl: ^0.20.2
   multi_select_flutter: ^4.1.3
