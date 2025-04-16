@@ -1,7 +1,9 @@
+// gymbuddy.dart
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'api_service.dart';
 import 'past_workouts.dart';
-import 'chat_screen.dart'; // Import the new chat screen
+import 'chat_screen.dart'; // Import the chat screen
 
 class GymBuddyScreen extends StatefulWidget {
   final String currentUserId; // The logged-in user's id
@@ -29,13 +31,11 @@ class _GymBuddyScreenState extends State<GymBuddyScreen> {
     _loadUserBuddies();
   }
 
-  // Fetch all GymBuddy docs that involve this user (either as requester or recipient)
   Future<void> _loadUserBuddies() async {
     setState(() => isLoadingBuddies = true);
     try {
       final buddies = await ApiService.fetchUserBuddies(widget.currentUserId);
       final userId = widget.currentUserId;
-
       final newIncoming = <dynamic>[];
       final newOutgoing = <dynamic>[];
       final newConnected = <dynamic>[];
@@ -71,7 +71,6 @@ class _GymBuddyScreenState extends State<GymBuddyScreen> {
     }
   }
 
-  // For searching new users
   void _searchUsers() async {
     final query = _searchController.text.trim();
     if (query.isEmpty) {
@@ -85,7 +84,6 @@ class _GymBuddyScreenState extends State<GymBuddyScreen> {
     });
     try {
       final results = await ApiService.searchUsers(query, searchFilter);
-      // Remove current user from results
       results.removeWhere((user) => user['_id'] == widget.currentUserId);
       setState(() {
         searchResults = results;
@@ -102,7 +100,6 @@ class _GymBuddyScreenState extends State<GymBuddyScreen> {
     }
   }
 
-  // Add a gym buddy request
   void _addGymBuddy(String buddyId) async {
     try {
       await ApiService.addGymBuddy(widget.currentUserId, buddyId);
@@ -121,7 +118,6 @@ class _GymBuddyScreenState extends State<GymBuddyScreen> {
     }
   }
 
-  // Accept (set status = connected)
   void _acceptRequest(String docId) async {
     try {
       await ApiService.updateBuddyStatus(docId, 'connected');
@@ -137,7 +133,6 @@ class _GymBuddyScreenState extends State<GymBuddyScreen> {
     }
   }
 
-  // Decline (set status = removed)
   void _declineRequest(String docId) async {
     try {
       await ApiService.updateBuddyStatus(docId, 'removed');
@@ -159,7 +154,6 @@ class _GymBuddyScreenState extends State<GymBuddyScreen> {
     super.dispose();
   }
 
-  // Build connected buddies using a dedicated widget that shows an unread badge.
   Widget _buildConnectedBuddies() {
     if (connectedBuddies.isEmpty) {
       return const Text('No connected buddies',
@@ -178,7 +172,6 @@ class _GymBuddyScreenState extends State<GymBuddyScreen> {
           buddyName: otherName,
           buddyUsername: otherUsername,
           onChatOpened: () async {
-            // Refresh buddies (and thus unread counts) after returning from chat
             await _loadUserBuddies();
           },
         );
@@ -259,6 +252,7 @@ class _GymBuddyScreenState extends State<GymBuddyScreen> {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
+        automaticallyImplyLeading: false, // Disable default back arrow
         title: const Text('Gym Buddies'),
         backgroundColor: Colors.black,
       ),
@@ -266,7 +260,6 @@ class _GymBuddyScreenState extends State<GymBuddyScreen> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // ====== Search UI ======
             Row(
               children: [
                 Expanded(
@@ -323,13 +316,11 @@ class _GymBuddyScreenState extends State<GymBuddyScreen> {
               ],
             ),
             const SizedBox(height: 20),
-            // ====== MAIN CONTENT ======
             Expanded(
               child: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Show search results first
                     if (isLoadingSearch)
                       const Center(child: CircularProgressIndicator())
                     else
@@ -360,7 +351,6 @@ class _GymBuddyScreenState extends State<GymBuddyScreen> {
                         }).toList(),
                       ),
                     const SizedBox(height: 20),
-                    // Incoming Requests
                     const Text(
                       'Incoming Requests',
                       style: TextStyle(color: Colors.white, fontSize: 18),
@@ -370,7 +360,6 @@ class _GymBuddyScreenState extends State<GymBuddyScreen> {
                     else
                       _buildIncomingRequests(),
                     const SizedBox(height: 20),
-                    // Outgoing Requests
                     const Text(
                       'Outgoing Requests',
                       style: TextStyle(color: Colors.white, fontSize: 18),
@@ -380,7 +369,6 @@ class _GymBuddyScreenState extends State<GymBuddyScreen> {
                     else
                       _buildOutgoingRequests(),
                     const SizedBox(height: 20),
-                    // Connected Buddies
                     const Text(
                       'Connected Buddies',
                       style: TextStyle(color: Colors.white, fontSize: 18),
@@ -400,7 +388,6 @@ class _GymBuddyScreenState extends State<GymBuddyScreen> {
   }
 }
 
-// New widget to show a connected buddy with chat icon and unread badge.
 class ConnectedBuddyCard extends StatelessWidget {
   final String currentUserId;
   final Map buddy;
@@ -418,7 +405,6 @@ class ConnectedBuddyCard extends StatelessWidget {
   });
 
   Future<int> _fetchUnreadCount() async {
-    // Create or retrieve chat between currentUserId and buddy
     final chat = await ApiService.createChat(currentUserId, buddy['_id']);
     final unreadCount = await ApiService.getUnreadCount(chat['_id'], currentUserId);
     return unreadCount;
@@ -432,26 +418,26 @@ class ConnectedBuddyCard extends StatelessWidget {
         title: Row(
           children: [
             Text(buddyName, style: const TextStyle(color: Colors.white)),
-              const SizedBox(width: 8),
-                FutureBuilder<int>(
-                  future: ApiService.getUserStreak(buddy['_id']),
-                  builder: (context, snapshot) {
-                    int streak = snapshot.hasData ? snapshot.data! : 0;
-                    if (streak > 0) {
-                      return Row(
-                        children: [
-                          const Icon(Icons.local_fire_department, color: Colors.orange, size: 16),
-                          const SizedBox(width: 4),
-                          Text(streak.toString(),
-                              style: const TextStyle(color: Colors.white, fontSize: 12)),
-                        ],
-                      );
-                    } else {
-                      return const SizedBox.shrink();
-                    }
-                  },
-                ),
-            ],
+            const SizedBox(width: 8),
+            FutureBuilder<int>(
+              future: ApiService.getUserStreak(buddy['_id']),
+              builder: (context, snapshot) {
+                int streak = snapshot.hasData ? snapshot.data! : 0;
+                if (streak > 0) {
+                  return Row(
+                    children: [
+                      const Icon(Icons.local_fire_department, color: Colors.orange, size: 16),
+                      const SizedBox(width: 4),
+                      Text(streak.toString(),
+                          style: const TextStyle(color: Colors.white, fontSize: 12)),
+                    ],
+                  );
+                } else {
+                  return const SizedBox.shrink();
+                }
+              },
+            ),
+          ],
         ),
         subtitle: Text(buddyUsername, style: const TextStyle(color: Colors.white70)),
         trailing: Row(
