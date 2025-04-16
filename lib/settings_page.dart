@@ -7,6 +7,7 @@ import 'api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
+
 class SettingsPage extends StatefulWidget {
   final String userId;
   const SettingsPage({Key? key, required this.userId}) : super(key: key);
@@ -41,6 +42,8 @@ class _SettingsPageState extends State<SettingsPage> {
 
   String selectedRoast = '🥶 Ice Cold';
 
+
+  // Show a confirmation dialog before signing out.
   Future<bool> _showSignOutConfirmation() async {
     return await showDialog<bool>(
       context: context,
@@ -86,6 +89,13 @@ class _SettingsPageState extends State<SettingsPage> {
       MaterialPageRoute(builder: (context) => const WinterArkHome()),
           (route) => false,
     );
+    if (confirmed) {
+      // Add any cleanup logic here (e.g., clearing tokens or user data)
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => WinterArkHome()),
+      );
+    }
   }
 
   @override
@@ -128,6 +138,7 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
+  // Custom header with a back button (goes to previous page, not sign out)
   Widget _buildCustomHeader() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 48, 20, 12),
@@ -164,6 +175,8 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
+
+  // Streak Badge Widget fetching live data.
   Widget _buildStreakBadge() {
     return FutureBuilder<int>(
       future: ApiService.getUserStreak(widget.userId),
@@ -252,6 +265,8 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
+
+  // Section Builder: If "Account" is tapped, navigates to Account Settings.
   Widget _buildSection(String title, List<_SettingsItem> items) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -318,6 +333,7 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
+  // Roast Notification Level Selector remains unchanged.
   Widget _buildRoastNotificationLevel() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -358,9 +374,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    foregroundColor: selectedRoast == roast
-                        ? frostBlue
-                        : Colors.white,
+                    foregroundColor: selectedRoast == roast ? frostBlue : Colors.white,
                   ),
                   child: Text(roast),
                 ),
@@ -384,4 +398,3 @@ class _SettingsItem {
     required this.label,
     this.highlight = false,
   });
-}
