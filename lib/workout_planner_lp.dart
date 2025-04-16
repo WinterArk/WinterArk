@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'workout_planner.dart';
 import 'reuse_workout_page.dart';
+import 'plan_future_workout.dart';
 
 class WorkoutTrackerLandingPage extends StatelessWidget {
   const WorkoutTrackerLandingPage({super.key});
@@ -16,46 +17,77 @@ class WorkoutTrackerLandingPage extends StatelessWidget {
         title: const Text("Workout Tracker"),
       ),
       body: Center(
-        child: Row(
+        child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // Create New Workout Button
-            InkWell(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const WorkoutTrackerScreen()),
-                );
-              },
-              child: Container(
-                width: buttonSize,
-                height: buttonSize,
-                decoration: BoxDecoration(
-                  color: Colors.grey[850],
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                    Icon(Icons.add, color: Colors.blue, size: 32),
-                    SizedBox(height: 8),
-                    Text(
-                      "New Workout",
-                      style: TextStyle(color: Colors.blue, fontSize: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const WorkoutTrackerScreen()),
+                    );
+                  },
+                  child: Container(
+                    width: buttonSize,
+                    height: buttonSize,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[850],
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                  ],
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: const [
+                        Icon(Icons.add, color: Colors.blue, size: 32),
+                        SizedBox(height: 8),
+                        Text(
+                          "New Workout",
+                          style: TextStyle(color: Colors.blue, fontSize: 16),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
+                const SizedBox(width: 20),
+                // Reuse Past Workout Button
+                InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const WorkoutReusePage()),
+                    );
+                  },
+                  child: Container(
+                    width: buttonSize,
+                    height: buttonSize,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[850],
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: const [
+                        Icon(Icons.history, color: Colors.green, size: 32),
+                        SizedBox(height: 8),
+                        Text(
+                          "Reuse Workout",
+                          style: TextStyle(color: Colors.green, fontSize: 16),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(width: 20),
-            // Reuse Past Workout Button
+            const SizedBox(height: 20),
             InkWell(
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                      builder: (context) => const WorkoutReusePage()),
+                  MaterialPageRoute(builder: (context) => const PlanWorkoutPage()),
                 );
               },
               child: Container(
@@ -68,11 +100,11 @@ class WorkoutTrackerLandingPage extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: const [
-                    Icon(Icons.history, color: Colors.green, size: 32),
+                    Icon(Icons.event_note, color: Color.fromARGB(255, 253, 180, 225), size: 32),
                     SizedBox(height: 8),
                     Text(
-                      "Reuse Workout",
-                      style: TextStyle(color: Colors.green, fontSize: 16),
+                      "Plan Workout",
+                      style: TextStyle(color: Color.fromARGB(255, 253, 180, 225), fontSize: 16),
                     ),
                   ],
                 ),
