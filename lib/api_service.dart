@@ -510,4 +510,30 @@ class ApiService {
       throw Exception('Failed to fetch streak leaderboard: ${response.body}');
     }
   }
+  // 29) Add planned workout
+  static Future<Map<String, dynamic>> addPlannedWorkout({
+    required String userId,
+    required String workoutName,
+    required List<String> muscleGroups,
+    required DateTime scheduledDatetime,
+    required bool roastEnabled,
+  }) async {
+    final url = Uri.parse('$BASE_URL/api/plannedWorkouts');
+    final response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: json.encode({
+        "user_id": userId,
+        "workout_name": workoutName,
+        "muscle_groups": muscleGroups,
+        "scheduled_datetime": scheduledDatetime.toIso8601String(),
+        "roast_enabled": roastEnabled,
+      }),
+    );
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to create planned workout: ${response.body}');
+    }
+  }
 }

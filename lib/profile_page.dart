@@ -1,6 +1,7 @@
 // profile_page.dart
 import 'package:flutter/material.dart';
 import 'api_service.dart';
+// import 'settings_page.dart';
 
 class ProfilePage extends StatefulWidget {
   final String userId;
@@ -48,7 +49,10 @@ class _ProfilePageState extends State<ProfilePage> {
           IconButton(
             icon: const Icon(Icons.settings, color: Colors.white),
             onPressed: () {
-              // Navigate to settings or perform another action.
+              // Navigator.push(
+              //   context,
+              //   MaterialPageRoute(builder: (context) => const SettingsPage()),
+              // );
             },
           ),
         ],
