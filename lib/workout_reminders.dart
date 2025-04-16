@@ -3,7 +3,7 @@ import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 
 class WorkoutReminderSettingsPage extends StatefulWidget {
-  const WorkoutReminderSettingsPage({Key? key}) : super(key: key);
+  const WorkoutReminderSettingsPage({super.key});
 
   @override
   _WorkoutReminderSettingsPageState createState() => _WorkoutReminderSettingsPageState();

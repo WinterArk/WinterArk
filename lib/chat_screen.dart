@@ -11,11 +11,11 @@ class ChatScreen extends StatefulWidget {
   final String buddyName;
 
   const ChatScreen({
-    Key? key,
+    super.key,
     required this.currentUserId,
     required this.buddyId,
     required this.buddyName,
-  }) : super(key: key);
+  });
 
   @override
   _ChatScreenState createState() => _ChatScreenState();
@@ -25,81 +25,73 @@ class _ChatScreenState extends State<ChatScreen> {
   String? chatId;
   List<dynamic> messages = [];
   bool isLoading = false;
-  final TextEditingController _messageController = TextEditingController();
-  final ScrollController _scrollController = ScrollController();
+  final _messageController = TextEditingController();
+  final _scrollController = ScrollController();
   IO.Socket? socket;
 
   @override
   void initState() {
     super.initState();
-    _initializeChat();
     _connectSocket();
+    _initializeChat();
   }
 
   void _connectSocket() {
-    socket = IO.io('http://18.234.214.233:3000', <String, dynamic>{
-      'transports': ['websocket'],
-      'autoConnect': false,
-    });
-    socket?.connect();
+    socket = IO.io(
+      'http://18.234.214.233:3000',
+      <String, dynamic>{
+        'transports': ['websocket'],
+        'autoConnect': false,
+      },
+    );
+    socket!.connect();
 
-    socket?.onConnect((_) {
+    socket!.on('connect', (_) {
       if (chatId != null) {
-        socket?.emit('join', chatId);
+        socket!.emit('join', chatId);
         globals.activeChatId = chatId;
       }
     });
 
-    socket?.on('new_message', (data) async {
-      final isFromOther = data['senderId'] != widget.currentUserId;
+    socket!.on('new_message', (data) async {
+      // 1) drop your own echoes
+      if (data['senderId'] == widget.currentUserId) return;
 
-      setState(() {
-        messages.add(data);
+      // 2) format & show it
+      final raw = data['timestamp'] as String;
+      final dt  = DateTime.parse(raw).toUtc().toLocal();
+      data['pacificTimestamp'] = DateFormat.jm().format(dt);
+
+      setState(() => messages.add(data));
+      _scrollToBottom();
+
+      // 3) immediately mark it as read on the server
+      await ApiService.markMessageAsRead(chatId!, data['_id']);
+      // 4) let the other side know you’ve seen it
+      socket!.emit('message_read', {
+        'chatId':     chatId,
+        'messageId':  data['_id'],
+        'readerId':   widget.currentUserId,
       });
+    });
 
-      // Real-time mark as read
-      if (isFromOther && data['read'] == false) {
-        await ApiService.markMessageAsRead(data['chatId'], data['_id']);
-        socket?.emit('message_read', {
-          'chatId': data['chatId'],
-          'messageId': data['_id'],
-          'readerId': widget.currentUserId,
+
+    socket!.on('message_read', (data) {
+      final msgId = data['messageId'] as String;
+      final rawTime = data['readTimestamp'] as String;
+      final dt = DateTime.parse(rawTime).toUtc().toLocal();
+      final formatted = DateFormat.jm().format(dt);
+
+      final idx = messages.indexWhere((m) => m['_id'] == msgId);
+      if (idx != -1) {
+        setState(() {
+          messages[idx]['read'] = true;
+          messages[idx]['pacificReadTime'] = formatted;
         });
       }
-
-      _scrollToBottom();
     });
 
-    socket?.on('message_read', (data) {
-      final String messageId = data['messageId'];
-      final String rawTime = data['readTimestamp'];
-      final DateTime utc = DateTime.parse(rawTime).toUtc();
-      final pacific = utc.toLocal(); // Adjust based on device time zone (assumes device is in Pacific)
-
-      final formatted = DateFormat.jm().format(pacific); // e.g., "6:46 AM"
-
-      setState(() {
-        final index = messages.indexWhere((m) => m['_id'] == messageId);
-        if (index != -1) {
-          messages[index]['read'] = true;
-          messages[index]['pacificReadTime'] = formatted;
-        }
-      });
-    });
-
-    socket?.onDisconnect((_) => print('🔌 Socket.IO disconnected'));
-  }
-
-  void _scrollToBottom() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_scrollController.hasClients) {
-        _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
-        );
-      }
-    });
+    socket!.on('disconnect', (_) => debugPrint('🔌 Socket disconnected'));
   }
 
   @override
@@ -116,16 +108,12 @@ class _ChatScreenState extends State<ChatScreen> {
     setState(() => isLoading = true);
     try {
       final chat = await ApiService.createChat(widget.currentUserId, widget.buddyId);
-      chatId = chat['_id'];
+      chatId = chat['_id'] as String;
       globals.activeChatId = chatId;
-
-      if (socket != null && socket!.connected) {
-        socket!.emit('join', chatId);
-      }
-
+      socket?.emit('join', chatId);
       await _loadMessages();
     } catch (e) {
-      print('Error initializing chat: $e');
+      debugPrint('Error initializing chat: $e');
     } finally {
       setState(() => isLoading = false);
     }
@@ -134,40 +122,80 @@ class _ChatScreenState extends State<ChatScreen> {
   Future<void> _loadMessages() async {
     if (chatId == null) return;
     try {
-      final msgs = await ApiService.getMessages(chatId!);
-      setState(() => messages = msgs);
+      final rawList = await ApiService.getMessages(chatId!);
+      final formatted = rawList.map((m) {
+        final raw = m['timestamp'] as String;
+        final dt  = DateTime.parse(raw).toUtc().toLocal();
+        m['pacificTimestamp'] = DateFormat.jm().format(dt);
+        return m;
+      }).toList();
 
-      for (var msg in msgs) {
-        if (msg['senderId'] != widget.currentUserId && msg['read'] == false) {
-          await ApiService.markMessageAsRead(chatId!, msg['_id']);
+      setState(() => messages = formatted);
+      _scrollToBottom();
+
+
+      for (var m in messages) {
+        if (m['senderId'] != widget.currentUserId && m['read'] == false) {
+          await ApiService.markMessageAsRead(chatId!, m['_id']);
           socket?.emit('message_read', {
             'chatId': chatId,
-            'messageId': msg['_id'],
+            'messageId': m['_id'],
             'readerId': widget.currentUserId,
           });
         }
       }
-
-      _scrollToBottom();
     } catch (e) {
-      print('Error loading messages: $e');
+      debugPrint('Error loading messages: $e');
     }
   }
 
-  Future<void> _sendMessage() async {
-    if (chatId == null || _messageController.text.trim().isEmpty) return;
-    final content = _messageController.text.trim();
+  void _sendMessage() {
+    final text = _messageController.text.trim();
+    if (chatId == null || text.isEmpty) return;
     _messageController.clear();
 
-    try {
-      await ApiService.sendMessage(chatId!, widget.currentUserId, content);
-    } catch (e) {
-      print('Error sending message: $e');
-    }
+    // 1) local echo
+    final now = DateTime.now();
+    final pacific = now.toLocal();
+    final newMsg = {
+      '_id': now.microsecondsSinceEpoch.toString(),  // temporary unique id
+      'chatId': chatId,
+      'senderId': widget.currentUserId,
+      'content': text,
+      'timestamp': now.toUtc().toIso8601String(),
+      'pacificTimestamp': DateFormat.jm().format(pacific),
+      'read': false,
+    };
+    setState(() => messages.add(newMsg));
+    _scrollToBottom();
+
+    // 2) emit over socket
+    socket?.emit('send_message', {
+      'chatId': chatId,
+      'senderId': widget.currentUserId,
+      'content': text,
+    });
+
+    // 3) persist via HTTP
+    ApiService.sendMessage(chatId!, widget.currentUserId, text).catchError((e) {
+      debugPrint('HTTP send error: $e');
+    });
   }
 
-  Widget _buildMessageItem(dynamic message) {
-    final bool isMe = message['senderId'] == widget.currentUserId;
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
+
+  Widget _buildMessageItem(dynamic msg) {
+    final isMe = msg['senderId'] == widget.currentUserId;
     return Align(
       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
@@ -178,20 +206,19 @@ class _ChatScreenState extends State<ChatScreen> {
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
-          crossAxisAlignment:
-          isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+          crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
           children: [
-            Text(message['content'], style: const TextStyle(color: Colors.white)),
+            Text(msg['content'] as String, style: const TextStyle(color: Colors.white)),
             const SizedBox(height: 4),
             Text(
-              "Sent: ${message['pacificTimestamp'] ?? message['timestamp']}",
+              'Sent: ${msg['pacificTimestamp']}',
               style: const TextStyle(color: Colors.white70, fontSize: 10),
             ),
-            if (isMe && message['read'] == true && message['pacificReadTime'] != null)
+            if (isMe && (msg['read'] as bool))
               Padding(
                 padding: const EdgeInsets.only(top: 4),
                 child: Text(
-                  "Seen: ${message['pacificReadTime']}",
+                  'Seen: ${msg['pacificReadTime'] ?? ''}',
                   style: const TextStyle(color: Colors.greenAccent, fontSize: 10),
                 ),
               ),
@@ -201,18 +228,11 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  List<Widget> _buildChatList() {
-    return messages.map((msg) => _buildMessageItem(msg)).toList();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      appBar: AppBar(
-        title: Text(widget.buddyName),
-        backgroundColor: Colors.black,
-      ),
+      appBar: AppBar(title: Text(widget.buddyName), backgroundColor: Colors.black),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : Column(
@@ -222,7 +242,7 @@ class _ChatScreenState extends State<ChatScreen> {
               onRefresh: _loadMessages,
               child: ListView(
                 controller: _scrollController,
-                children: _buildChatList(),
+                children: messages.map(_buildMessageItem).toList(),
               ),
             ),
           ),
@@ -233,9 +253,7 @@ class _ChatScreenState extends State<ChatScreen> {
               children: [
                 IconButton(
                   icon: const Icon(Icons.attach_file, color: Colors.white),
-                  onPressed: () {
-                    // TODO: Add attachments
-                  },
+                  onPressed: () {},
                 ),
                 Expanded(
                   child: TextField(

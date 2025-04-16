@@ -1,4 +1,4 @@
 // global_state.dart
-library global_state;
+library;
 
 String? activeChatId;

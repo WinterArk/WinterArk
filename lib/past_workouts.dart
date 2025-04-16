@@ -37,9 +37,7 @@ Future<String?> getUserId() async {
 
 Future<int> _getStreak() async {
   String? userId = await getUserId();
-  if (userId == null) {
-    userId = await getUserId();
-  }
+  userId ??= await getUserId();
   int? streak = await ApiService.getUserStreak(userId!);
   return streak ?? 0;
 }

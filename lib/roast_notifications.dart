@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class RoastNotificationsSettingsPage extends StatefulWidget {
-  const RoastNotificationsSettingsPage({Key? key}) : super(key: key);
+  const RoastNotificationsSettingsPage({super.key});
 
   @override
   _RoastNotificationsSettingsPageState createState() => _RoastNotificationsSettingsPageState();
