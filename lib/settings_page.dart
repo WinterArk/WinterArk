@@ -1,8 +1,12 @@
 // settings_page.dart
 import 'package:flutter/material.dart';
-import 'winterark_home.dart'; // For sign-out redirection
-import 'account_settings.dart'; // For account section navigation (if needed)
+import 'winterark_home.dart';
+import 'account_settings.dart'; // For account section navigation
+import 'notification_settings.dart'; // New file for notification features
 import 'api_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+
 
 class SettingsPage extends StatefulWidget {
   final String userId;
@@ -13,9 +17,9 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  final Color frostBlue = Color(0xFF3B82F6);
-  final Color cardGray = Color(0xFF1F2937);
-  final Color textSnow = Color(0xFFF9FAFB);
+  final Color frostBlue = const Color(0xFF3B82F6);
+  final Color cardGray = const Color(0xFF1F2937);
+  final Color textSnow = const Color(0xFFF9FAFB);
 
   final List<_SettingsItem> generalItems = [
     _SettingsItem(icon: Icons.notifications, label: 'Notifications'),
@@ -37,6 +41,7 @@ class _SettingsPageState extends State<SettingsPage> {
   ];
 
   String selectedRoast = '🥶 Ice Cold';
+
 
   // Show a confirmation dialog before signing out.
   Future<bool> _showSignOutConfirmation() async {
@@ -62,6 +67,28 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Future<void> _confirmAndSignOut() async {
     final confirmed = await _showSignOutConfirmation();
+    if (!confirmed) return;
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final deviceToken = await FirebaseMessaging.instance.getToken();
+      final userId = widget.userId;
+
+      if (deviceToken != null) {
+        await ApiService.removeDeviceToken(userId, deviceToken);
+        print("🧼 Device token removed from backend");
+      }
+
+      await prefs.clear(); // Optional: clear all local prefs
+    } catch (e) {
+      print("⚠️ Error during logout: $e");
+    }
+
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => const WinterArkHome()),
+          (route) => false,
+    );
     if (confirmed) {
       // Add any cleanup logic here (e.g., clearing tokens or user data)
       Navigator.pushReplacement(
@@ -81,7 +108,7 @@ class _SettingsPageState extends State<SettingsPage> {
           _buildStreakBadge(),
           Expanded(
             child: ListView(
-              padding: EdgeInsets.only(top: 0),
+              padding: const EdgeInsets.only(top: 0),
               children: [
                 _buildSection("General", generalItems),
                 _buildSection("Account", accountItems),
@@ -89,21 +116,20 @@ class _SettingsPageState extends State<SettingsPage> {
               ],
             ),
           ),
-          // Log Out Button now calls the confirmation prompt
           Padding(
             padding: const EdgeInsets.all(20),
             child: ElevatedButton.icon(
-              icon: Icon(Icons.logout),
-              label: Text('Log Out'),
+              icon: const Icon(Icons.logout),
+              label: const Text('Log Out'),
               onPressed: _confirmAndSignOut,
               style: ElevatedButton.styleFrom(
                 backgroundColor: frostBlue,
                 foregroundColor: Colors.white,
-                minimumSize: Size(double.infinity, 52),
+                minimumSize: const Size(double.infinity, 52),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                textStyle: TextStyle(fontWeight: FontWeight.w600),
+                textStyle: const TextStyle(fontWeight: FontWeight.w600),
               ),
             ),
           ),
@@ -123,7 +149,7 @@ class _SettingsPageState extends State<SettingsPage> {
             icon: Icon(Icons.arrow_back, color: frostBlue, size: 32),
             onPressed: () => Navigator.pop(context),
           ),
-          SizedBox(width: 12),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -136,7 +162,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     color: textSnow,
                   ),
                 ),
-                SizedBox(height: 6),
+                const SizedBox(height: 6),
                 Text(
                   "Welcome back, winter warrior — let’s personalize your grind.",
                   style: TextStyle(fontSize: 14, color: Colors.grey[400]),
@@ -149,6 +175,7 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
+
   // Streak Badge Widget fetching live data.
   Widget _buildStreakBadge() {
     return FutureBuilder<int>(
@@ -160,8 +187,8 @@ class _SettingsPageState extends State<SettingsPage> {
               color: cardGray,
               borderRadius: BorderRadius.circular(16),
             ),
-            margin: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-            padding: EdgeInsets.all(20),
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            padding: const EdgeInsets.all(20),
             child: Center(
               child: CircularProgressIndicator(
                 valueColor: AlwaysStoppedAnimation(frostBlue),
@@ -175,23 +202,23 @@ class _SettingsPageState extends State<SettingsPage> {
               color: cardGray,
               borderRadius: BorderRadius.circular(16),
             ),
-            margin: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-            padding: EdgeInsets.all(20),
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            padding: const EdgeInsets.all(20),
             child: Text(
               'Error loading streak.',
-              style: TextStyle(color: Colors.red),
+              style: const TextStyle(color: Colors.red),
             ),
           );
         }
         final streakCount = snapshot.data ?? 0;
-        double progressValue = (streakCount >= 10) ? 1.0 : streakCount / 10;
+        double progressValue = streakCount >= 10 ? 1.0 : streakCount / 10;
         return Container(
           decoration: BoxDecoration(
             color: cardGray,
             borderRadius: BorderRadius.circular(16),
           ),
-          margin: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-          padding: EdgeInsets.all(20),
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          padding: const EdgeInsets.all(20),
           child: Row(
             children: [
               Stack(
@@ -210,7 +237,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   Icon(Icons.local_fire_department, color: frostBlue, size: 28),
                 ],
               ),
-              SizedBox(width: 20),
+              const SizedBox(width: 20),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -223,7 +250,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         color: textSnow,
                       ),
                     ),
-                    SizedBox(height: 4),
+                    const SizedBox(height: 4),
                     Text(
                       'The ice never sleeps. You’re locked in.',
                       style: TextStyle(color: Colors.grey[400], fontSize: 14),
@@ -238,6 +265,7 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
+
   // Section Builder: If "Account" is tapped, navigates to Account Settings.
   Widget _buildSection(String title, List<_SettingsItem> items) {
     return Padding(
@@ -246,7 +274,8 @@ class _SettingsPageState extends State<SettingsPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
+            padding:
+            const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
             child: Text(
               title.toUpperCase(),
               style: TextStyle(
@@ -260,7 +289,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 (item) => Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12.0),
               child: ListTile(
-                contentPadding: EdgeInsets.symmetric(vertical: 4),
+                contentPadding: const EdgeInsets.symmetric(vertical: 4),
                 leading: Icon(
                   item.icon,
                   color: item.highlight ? frostBlue : Colors.white70,
@@ -269,26 +298,36 @@ class _SettingsPageState extends State<SettingsPage> {
                   item.label,
                   style: TextStyle(
                     fontSize: 16,
-                    fontWeight: item.highlight ? FontWeight.bold : FontWeight.normal,
+                    fontWeight:
+                    item.highlight ? FontWeight.bold : FontWeight.normal,
                     color: item.highlight ? frostBlue : textSnow,
                   ),
                 ),
                 onTap: () {
-                  if (item.label.toLowerCase() == "account") {
+                  // Navigate based on the label
+                  if (item.label.toLowerCase() == "notifications") {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => AccountSettingsPage(userId: widget.userId),
+                          builder: (context) =>
+                          const NotificationSettingsPage()),
+                    );
+                  } else if (item.label.toLowerCase() == "account") {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            AccountSettingsPage(userId: widget.userId),
                       ),
                     );
                   } else {
-                    // Handle other settings items if needed
+                    // Add additional handlers as needed.
                   }
                 },
               ),
             ),
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
         ],
       ),
     );
@@ -299,14 +338,14 @@ class _SettingsPageState extends State<SettingsPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
           child: Text(
             'ROAST NOTIFICATION LEVEL',
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: Colors.grey[500],
+              color: Colors.grey,
             ),
           ),
         ),
@@ -314,7 +353,7 @@ class _SettingsPageState extends State<SettingsPage> {
           height: 42,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            padding: EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             itemCount: roastLevels.length,
             itemBuilder: (context, index) {
               String roast = roastLevels[index];
@@ -328,7 +367,9 @@ class _SettingsPageState extends State<SettingsPage> {
                   },
                   style: OutlinedButton.styleFrom(
                     side: BorderSide(
-                      color: selectedRoast == roast ? frostBlue : Colors.white24,
+                      color: selectedRoast == roast
+                          ? frostBlue
+                          : Colors.white24,
                     ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
@@ -341,7 +382,7 @@ class _SettingsPageState extends State<SettingsPage> {
             },
           ),
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
       ],
     );
   }
@@ -357,4 +398,3 @@ class _SettingsItem {
     required this.label,
     this.highlight = false,
   });
-}

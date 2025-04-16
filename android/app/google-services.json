@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "657072074226",
+    "project_id": "winterark-a836e",
+    "storage_bucket": "winterark-a836e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:657072074226:android:62f3598f7a39d324dd0f6b",
+        "android_client_info": {
+          "package_name": "com.example.winterark"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCeSM4ubVFwo1dvMThaUSQdjlPwjKxnNp8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
