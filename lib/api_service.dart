@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class ApiService {
-  // static const String BASE_URL = 'http://18.234.214.233:3000';
+  // static const String BASE_URL = 'http://[IPV4 Address Goes here]:3000';
   // static const String BASE_URL = 'http://10.0.2.2:3000';
   static const String BASE_URL = 'http://18.234.214.233:3000';
 
@@ -508,6 +508,78 @@ class ApiService {
       return json.decode(response.body);
     } else {
       throw Exception('Failed to fetch streak leaderboard: ${response.body}');
+    }
+  }
+
+  // 29) Update username endpoint
+  static Future<Map<String, dynamic>> updateUsername(String userId, String newUsername) async {
+    final url = Uri.parse('$BASE_URL/api/users/$userId/username');
+    final response = await http.put(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: json.encode({ "username": newUsername }),
+    );
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception("Failed to update username: ${response.body}");
+    }
+  }
+
+// 30) Update password endpoint
+  static Future<Map<String, dynamic>> updatePassword(String userId, String oldPassword, String newPassword) async {
+    final url = Uri.parse('$BASE_URL/api/users/$userId/password');
+    final response = await http.put(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: json.encode({
+        "oldPassword": oldPassword,
+        "newPassword": newPassword,
+      }),
+    );
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception("Failed to update password: ${response.body}");
+    }
+  }
+
+// 31) Update profile picture endpoint (Placeholder)
+  static Future<Map<String, dynamic>> updateProfilePicture(String userId) async {
+    final url = Uri.parse('$BASE_URL/api/users/$userId/profile-picture');
+    final response = await http.put(
+      url,
+      headers: {"Content-Type": "application/json"},
+    );
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception("Failed to update profile picture: ${response.body}");
+
+  // 32) Add planned workout
+  static Future<Map<String, dynamic>> addPlannedWorkout({
+    required String userId,
+    required String workoutName,
+    required List<String> muscleGroups,
+    required DateTime scheduledDatetime,
+    required bool roastEnabled,
+  }) async {
+    final url = Uri.parse('$BASE_URL/api/plannedWorkouts');
+    final response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: json.encode({
+        "user_id": userId,
+        "workout_name": workoutName,
+        "muscle_groups": muscleGroups,
+        "scheduled_datetime": scheduledDatetime.toIso8601String(),
+        "roast_enabled": roastEnabled,
+      }),
+    );
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to create planned workout: ${response.body}');
     }
   }
 }
