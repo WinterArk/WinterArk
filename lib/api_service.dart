@@ -5,167 +5,148 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class ApiService {
-  
-  // static const String BASE_URL = 'http://[IPV4 Address Goes here]:3000';
-  // static const String BASE_URL = 'http://10.0.2.2:3000';
   static const String BASE_URL = 'http://18.234.214.233:3000';
-
-  // static const String BASE_URL = 'http://10.0.0.116:3000';
-
-  // static const String BASE_URL = 'http://10.0.2.2:3000';
-
 
   // 1) SIGN UP a new user
   static Future<Map<String, dynamic>> signUp(
-  String name, String username, String email, String password) async {
-  final url = Uri.parse('$BASE_URL/api/users/register');
-  final response = await http.post(
-  url,
-  headers: {"Content-Type": "application/jif son"},
-  body: json.encode({
-  "name": name,
-  "username": username,
-  "email": email,
-  "password": password,
-  }),
-  );
-
-  if (response.statusCode == 200 || response.statusCode == 201) {
-  return json.decode(response.body);
-  } else {
-  throw Exception('Failed to sign up: ${response.body}');
-  }
+      String name,
+      String username,
+      String email,
+      String password,
+      ) async {
+    final url = Uri.parse('$BASE_URL/api/users/register');
+    final response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: json.encode({
+        "name": name,
+        "username": username,
+        "email": email,
+        "password": password,
+      }),
+    );
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return json.decode(response.body) as Map<String, dynamic>;
+    }
+    throw Exception('Failed to sign up: ${response.body}');
   }
 
   // 2) SIGN IN an existing user
   static Future<Map<String, dynamic>> signIn(
-  String identifier, String password) async {
-  final url = Uri.parse('$BASE_URL/api/users/login');
-  final response = await http.post(
-  url,
-  headers: {"Content-Type": "application/json"},
-  body: json.encode({
-  "identifier": identifier,
-  "password": password,
-  }),
-  );
-
-  if (response.statusCode == 200) {
-  return json.decode(response.body);
-  } else {
-  throw Exception('Failed to sign in: ${response.body}');
-  }
+      String identifier,
+      String password,
+      ) async {
+    final url = Uri.parse('$BASE_URL/api/users/login');
+    final response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: json.encode({
+        "identifier": identifier,
+        "password": password,
+      }),
+    );
+    if (response.statusCode == 200) {
+      return json.decode(response.body) as Map<String, dynamic>;
+    }
+    throw Exception('Failed to sign in: ${response.body}');
   }
 
   // 3) VERIFY user account
-  static Future<Map<String, dynamic>> verify(String email, String code) async {
-  final url = Uri.parse('$BASE_URL/api/users/verify');
-  final response = await http.post(
-  url,
-  headers: {"Content-Type": "application/json"},
-  body: json.encode({
-  "email": email,
-  "code": code,
-  }),
-  );
-
-  if (response.statusCode == 200) {
-  return json.decode(response.body);
-  } else {
-  throw Exception('Verification failed: ${response.body}');
-  }
+  static Future<Map<String, dynamic>> verify(
+      String email,
+      String code,
+      ) async {
+    final url = Uri.parse('$BASE_URL/api/users/verify');
+    final response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: json.encode({"email": email, "code": code}),
+    );
+    if (response.statusCode == 200) {
+      return json.decode(response.body) as Map<String, dynamic>;
+    }
+    throw Exception('Verification failed: ${response.body}');
   }
 
   // 4) RESEND verification email
-  static Future<Map<String, dynamic>> resendVerification(String email) async {
-  final url = Uri.parse('$BASE_URL/api/users/resend-verification');
-  final response = await http.post(
-  url,
-  headers: {"Content-Type": "application/json"},
-  body: json.encode({"email": email}),
-  );
-
-  if (response.statusCode == 200) {
-  return json.decode(response.body);
-  } else {
-  throw Exception('Failed to resend verification email: ${response.body}');
-  }
+  static Future<Map<String, dynamic>> resendVerification(
+      String email,
+      ) async {
+    final url = Uri.parse('$BASE_URL/api/users/resend-verification');
+    final response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: json.encode({"email": email}),
+    );
+    if (response.statusCode == 200) {
+      return json.decode(response.body) as Map<String, dynamic>;
+    }
+    throw Exception('Failed to resend verification email: ${response.body}');
   }
 
   // 5) SEARCH users
-  static Future<List<dynamic>> searchUsers(String query, String filter) async {
-  final url =
-  Uri.parse('$BASE_URL/api/users/search?query=$query&filter=$filter');
-  final response = await http.get(
-  url,
-  headers: {"Content-Type": "application/json"},
-  );
-  if (response.statusCode == 200) {
-  return json.decode(response.body);
-  } else {
-  throw Exception('Failed to search users: ${response.body}');
-  }
+  static Future<List<dynamic>> searchUsers(
+      String query,
+      String filter,
+      ) async {
+    final url = Uri.parse('$BASE_URL/api/users/search?query=$query&filter=$filter');
+    final response = await http.get(
+      url,
+      headers: {"Content-Type": "application/json"},
+    );
+    if (response.statusCode == 200) {
+      return json.decode(response.body) as List<dynamic>;
+    }
+    throw Exception('Failed to search users: ${response.body}');
   }
 
   // 6) ADD gym buddy
   static Future<Map<String, dynamic>> addGymBuddy(
-  String userId, String buddyId) async {
-  final url = Uri.parse('$BASE_URL/api/gymbuddies');
-  final response = await http.post(
-  url,
-  headers: {"Content-Type": "application/json"},
-  body: json.encode({
-  "userId": userId,
-  "buddyId": buddyId,
-  }),
-  );
-  if (response.statusCode == 201) {
-  return json.decode(response.body);
-  } else {
-  throw Exception('Failed to add gym buddy: ${response.body}');
-  }
-  }
-
-  // NEW: Get user profile by ID
-  static Future<Map<String, dynamic>> getUserProfile(String userId) async {
-  final url = Uri.parse('$BASE_URL/api/users/$userId');
-  final response = await http.get(url, headers: {"Content-Type": "application/json"});
-  if (response.statusCode == 200) {
-  return json.decode(response.body);
-  } else {
-  throw Exception('Failed to fetch user profile: ${response.body}');
-  }
+      String userId,
+      String buddyId,
+      ) async {
+    final url = Uri.parse('$BASE_URL/api/gymbuddies');
+    final response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: json.encode({"userId": userId, "buddyId": buddyId}),
+    );
+    if (response.statusCode == 201) {
+      return json.decode(response.body) as Map<String, dynamic>;
+    }
+    throw Exception('Failed to add gym buddy: ${response.body}');
   }
 
   // 7) FETCH a user's gym buddies
-  static Future<List<dynamic>> fetchUserBuddies(String userId) async {
-  final url = Uri.parse('$BASE_URL/api/gymbuddies/$userId');
-  final response = await http.get(
-  url,
-  headers: {"Content-Type": "application/json"},
-  );
-
-  if (response.statusCode == 200) {
-  return json.decode(response.body);
-  } else {
-  throw Exception('Failed to fetch buddies: ${response.body}');
-  }
+  static Future<List<dynamic>> fetchUserBuddies(
+      String userId,
+      ) async {
+    final url = Uri.parse('$BASE_URL/api/gymbuddies/$userId');
+    final response = await http.get(
+      url,
+      headers: {"Content-Type": "application/json"},
+    );
+    if (response.statusCode == 200) {
+      return json.decode(response.body) as List<dynamic>;
+    }
+    throw Exception('Failed to fetch buddies: ${response.body}');
   }
 
   // 8) UPDATE buddy status (accept/decline)
   static Future<Map<String, dynamic>> updateBuddyStatus(
-  String docId, String newStatus) async {
-  final url = Uri.parse('$BASE_URL/api/gymbuddies/$docId');
-  final response = await http.patch(
-  url,
-  headers: {"Content-Type": "application/json"},
-  body: json.encode({"status": newStatus}),
-  );
-  if (response.statusCode == 200) {
-  return json.decode(response.body);
-  } else {
-  throw Exception('Failed to update buddy status: ${response.body}');
-  }
+      String docId,
+      String newStatus,
+      ) async {
+    final url = Uri.parse('$BASE_URL/api/gymbuddies/$docId');
+    final response = await http.patch(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: json.encode({"status": newStatus}),
+    );
+    if (response.statusCode == 200) {
+      return json.decode(response.body) as Map<String, dynamic>;
+    }
+    throw Exception('Failed to update buddy status: ${response.body}');
   }
 
   // 9) ADD WORKOUT
@@ -311,7 +292,7 @@ class ApiService {
   }
 
   // 16) Mark a message as read
-  static Future<Map<String, dynamic>> markMessageRead(
+  static Future<Map<String, dynamic>> markMessageAsRead(
   String chatId, String messageId) async {
   final url = Uri.parse('$BASE_URL/api/chat/$chatId/message/$messageId/read');
   final response =
@@ -517,72 +498,42 @@ class ApiService {
   }
   }
 
-  // 29) Update username endpoint
-  static Future<Map<String, dynamic>> updateUsername(String userId, String newUsername) async {
-  final url = Uri.parse('$BASE_URL/api/users/$userId/username');
-  final response = await http.put(
-  url,
-  headers: {"Content-Type": "application/json"},
-  body: json.encode({ "username": newUsername }),
-  );
-  if (response.statusCode == 200) {
-  return json.decode(response.body);
-  } else {
-  throw Exception("Failed to update username: ${response.body}");
-  }
-  }
-
-
-// 30) Update password endpoint
-  static Future<Map<String, dynamic>> updatePassword(String userId, String oldPassword, String newPassword) async {
-  final url = Uri.parse('$BASE_URL/api/users/$userId/password');
-  final response = await http.put(
-  url,
-  headers: {"Content-Type": "application/json"},
-  body: json.encode({
-  "oldPassword": oldPassword,
-  "newPassword": newPassword,
-  }),
-  );
-  if (response.statusCode == 200) {
-  return json.decode(response.body);
-  } else {
-  throw Exception("Failed to update password: ${response.body}");
-  }
-=======
-  // 29) Update username endpoint
-  static Future<Map<String, dynamic>> updateUsername(String userId, String newUsername) async {
+  // 31) Update username endpoint
+  static Future<Map<String, dynamic>> updateUsername(
+      String userId,
+      String newUsername,
+      ) async {
     final url = Uri.parse('$BASE_URL/api/users/$userId/username');
     final response = await http.put(
       url,
       headers: {"Content-Type": "application/json"},
-      body: json.encode({ "username": newUsername }),
+      body: json.encode({"username": newUsername}),
     );
     if (response.statusCode == 200) {
-      return json.decode(response.body);
-    } else {
-      throw Exception("Failed to update username: ${response.body}");
+      return json.decode(response.body) as Map<String, dynamic>;
     }
+    throw Exception('Failed to update username: ${response.body}');
   }
 
-// 30) Update password endpoint
-  static Future<Map<String, dynamic>> updatePassword(String userId, String oldPassword, String newPassword) async {
+  // 32) Update password endpoint
+  static Future<Map<String, dynamic>> updatePassword(
+      String userId,
+      String oldPassword,
+      String newPassword,
+      ) async {
     final url = Uri.parse('$BASE_URL/api/users/$userId/password');
     final response = await http.put(
       url,
       headers: {"Content-Type": "application/json"},
-      body: json.encode({
-        "oldPassword": oldPassword,
-        "newPassword": newPassword,
-      }),
+      body: json.encode({"oldPassword": oldPassword, "newPassword": newPassword}),
     );
     if (response.statusCode == 200) {
-      return json.decode(response.body);
-    } else {
-      throw Exception("Failed to update password: ${response.body}");
+      return json.decode(response.body) as Map<String, dynamic>;
     }
+    throw Exception('Failed to update password: ${response.body}');
   }
-   // 32) Add planned workout
+
+  // 33) Add planned workout
   static Future<Map<String, dynamic>> addPlannedWorkout({
     required String userId,
     required String workoutName,
@@ -603,54 +554,36 @@ class ApiService {
       }),
     );
     if (response.statusCode == 200 || response.statusCode == 201) {
-      return json.decode(response.body);
-    } else {
-      throw Exception('Failed to create planned workout: ${response.body}');
+      return json.decode(response.body) as Map<String, dynamic>;
     }
+    throw Exception('Failed to create planned workout: ${response.body}');
   }
 
-// 31) Update profile picture endpoint (Placeholder)
-  static Future<Map<String, dynamic>> updateProfilePicture(String userId) async {
-    final url = Uri.parse('$BASE_URL/api/users/$userId/profile-picture');
-    final response = await http.put(
-    url,
-    headers: {"Content-Type": "application/json"},
-    );
-    if (response.statusCode == 200) {
-    return json.decode(response.body);
-    } else {
-    throw Exception("Failed to update profile picture: ${response.body}");
-    }
-  }
-
-  static Future<void> removeDeviceToken(String userId, String deviceToken) async {
-    final url = Uri.parse('$BASE_URL/api/users/$userId/remove-device-token');
-    final response = await http.post(
-    url,
-    headers: {'Content-Type': 'application/json'},
-    body: jsonEncode({'deviceToken': deviceToken}),
-    );
-
-    if (response.statusCode != 200) {
-    throw Exception('Failed to remove device token');
-    }
-  }
-
-  static Future<void> markMessageAsRead(String chatId, String messageId) async {
-    final uri = Uri.parse('$BASE_URL/api/chat/$chatId/message/$messageId/read');
-    final resp = await http.patch(uri);
-    if (resp.statusCode != 200) {
-    throw Exception('Failed to mark message as read');
-    }
-    }
-
+  // 34) Update profile picture endpoint
+  static Future<Map<String, dynamic>> updateProfilePicture(
+      String userId,
+      ) async {
     final url = Uri.parse('$BASE_URL/api/users/$userId/profile-picture');
     final response = await http.put(
       url,
       headers: {"Content-Type": "application/json"},
     );
     if (response.statusCode == 200) {
-      return json.decode(response.body);
-    } else {
-      throw Exception("Failed to update profile picture: ${response.body}");
-   }
+      return json.decode(response.body) as Map<String, dynamic>;
+    }
+    throw Exception('Failed to update profile picture: ${response.body}');
+  }
+
+  // 35) GET a user's profile by ID
+  static Future<Map<String, dynamic>> getUserProfile(String userId) async {
+    final url = Uri.parse('$BASE_URL/api/users/$userId');
+    final response = await http.get(
+      url,
+      headers: {"Content-Type": "application/json"},
+    );
+    if (response.statusCode == 200) {
+      return json.decode(response.body) as Map<String, dynamic>;
+    }
+    throw Exception('Failed to fetch user profile: ${response.body}');
+  }
+}

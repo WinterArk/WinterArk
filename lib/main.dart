@@ -15,7 +15,6 @@ import 'package:http/http.dart' as http;
 import 'package:timezone/data/latest.dart' as tz;
 
 // Notification packages:
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:workmanager/workmanager.dart';
 
