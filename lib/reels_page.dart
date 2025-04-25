@@ -1,4 +1,3 @@
-// reels_page.dart
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'shared_dashboard.dart';
@@ -24,11 +23,14 @@ class _ReelsPageState extends State<ReelsPage> with WidgetsBindingObserver {
   bool isLoading = true;
   bool _isPlaying = true;
 
+  /// when false, videos never initialize/play
+  bool _showReels = false;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _initDemoControllers();
+    // _initDemoControllers();  // initialization deferred until toggle
   }
 
   Future<void> _initDemoControllers() async {
@@ -62,6 +64,19 @@ class _ReelsPageState extends State<ReelsPage> with WidgetsBindingObserver {
     for (var controller in _controllers) {
       controller.pause();
     }
+  }
+
+  /// Toggle showing/hiding reels
+  void _toggleShowReels() {
+    setState(() {
+      _showReels = !_showReels;
+      if (_showReels) {
+        isLoading = true;
+        _initDemoControllers();
+      } else {
+        _pauseAllVideos();
+      }
+    });
   }
 
   @override
@@ -100,7 +115,7 @@ class _ReelsPageState extends State<ReelsPage> with WidgetsBindingObserver {
         setState(() {
           _selectedTab = index;
         });
-        if (index == 0) {
+        if (index == 0 && _showReels) {
           _playVideo(_currentReelIndex);
         } else {
           _pauseAllVideos();
@@ -174,7 +189,7 @@ class _ReelsPageState extends State<ReelsPage> with WidgetsBindingObserver {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        automaticallyImplyLeading: false, // Disable default back arrow
+        automaticallyImplyLeading: false,
         backgroundColor: Colors.black,
         title: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -198,6 +213,14 @@ class _ReelsPageState extends State<ReelsPage> with WidgetsBindingObserver {
               debugPrint('Camera icon pressed');
             },
           ),
+          IconButton(
+            icon: Icon(
+              _showReels ? Icons.visibility_off : Icons.visibility,
+              color: Colors.white,
+            ),
+            tooltip: _showReels ? 'Hide Reels' : 'Show Reels',
+            onPressed: _toggleShowReels,
+          ),
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(60.0),
@@ -214,15 +237,14 @@ class _ReelsPageState extends State<ReelsPage> with WidgetsBindingObserver {
         ),
       ),
       body: _selectedTab == 0
+          ? (_showReels
           ? (isLoading
           ? const Center(child: CircularProgressIndicator())
           : PageView.builder(
         scrollDirection: Axis.vertical,
         controller: PageController(initialPage: _currentReelIndex),
         itemCount: _controllers.length,
-        onPageChanged: (index) {
-          _playVideo(index);
-        },
+        onPageChanged: (index) => _playVideo(index),
         itemBuilder: (context, index) {
           final controller = _controllers[index];
           return GestureDetector(
@@ -267,6 +289,13 @@ class _ReelsPageState extends State<ReelsPage> with WidgetsBindingObserver {
             ),
           );
         },
+      ))
+          : Center(
+        child: Text(
+          'Reels are hidden.\nTap the eye icon to show.',
+          textAlign: TextAlign.center,
+          style: TextStyle(color: Colors.white70, fontSize: 16),
+        ),
       ))
           : SharedDashboard(userId: widget.userId),
     );
