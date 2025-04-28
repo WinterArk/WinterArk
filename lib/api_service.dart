@@ -5,7 +5,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class ApiService {
-  static const String BASE_URL = 'http://18.234.214.233:3000';
+  // static const String BASE_URL = 'http://18.234.214.233:3000';
+  static const String BASE_URL = 'http://10.0.2.2:3000';
 
   // 1) SIGN UP a new user
   static Future<Map<String, dynamic>> signUp(
@@ -318,15 +319,21 @@ class ApiService {
   }
 
   // 18) CREATE a new post (for Shared Dashboard)
-  static Future<Map<String, dynamic>> createPost(String userId, String description) async {
+    static Future<Map<String, dynamic>> createPost (
+        String userId, {
+        String? description,
+        String? workoutId,
+    }) async {
   final url = Uri.parse('$BASE_URL/api/posts');
   final response = await http.post(
   url,
   headers: {"Content-Type": "application/json"},
-  body: json.encode({
-  "userId": userId,
-  "description": description,
-  }),
+            body: json.encode({
+          "userId": userId,
+          if (description != null && description.isNotEmpty)
+            "description": description,
+          if (workoutId != null) "workoutId": workoutId,
+        }),
   );
   if (response.statusCode == 201) {
   return json.decode(response.body);
@@ -496,6 +503,21 @@ class ApiService {
   } else {
   throw Exception('Failed to fetch streak leaderboard: ${response.body}');
   }
+  }
+
+  // 29) SHARE a workout to the dashboard
+  static Future<Map<String, dynamic>> shareWorkout(String workoutId) async {
+    final url = Uri.parse('$BASE_URL/api/workouts/share/$workoutId');
+    final response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      // no body needed—workoutId is in the path
+    );
+    if (response.statusCode == 201) {
+      return json.decode(response.body) as Map<String, dynamic>;
+    } else {
+      throw Exception('Failed to share workout: ${response.body}');
+    }
   }
 
   // 31) Update username endpoint
