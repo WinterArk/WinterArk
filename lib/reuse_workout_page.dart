@@ -28,8 +28,6 @@ class _WorkoutReusePageState extends State<WorkoutReusePage> {
 
   Future<void> _fetchPastWorkouts() async {
     try {
-      // Assume ApiService.getWorkouts(userId) returns a List of workouts.
-      // Replace "yourUserId" with the actual user id from shared_preferences.
       final String? userId = await getUserId();
       if (userId == null) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -63,7 +61,11 @@ class _WorkoutReusePageState extends State<WorkoutReusePage> {
     // Get a sorted list of dates.
     List<String> dates = workoutsByDate.keys.toList();
     return Scaffold(
-      appBar: AppBar(title: const Text("Reuse Past Workout")),
+      appBar: AppBar(
+        title: const Text("Reuse Past Workout"),
+        backgroundColor: Colors.green,
+        centerTitle: true,
+      ),
       body: dates.isEmpty
           ? const Center(child: CircularProgressIndicator())
           : ListView.builder(

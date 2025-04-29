@@ -287,7 +287,7 @@ Future<void> _submitWorkout() async {
                 color: Colors.grey[850],
                 borderRadius: const BorderRadius.all(Radius.circular(12)),
                 border: Border.all(
-                  color: Colors.white70,
+                  color: Colors.black,
                   width: 1,
                 ),
               ),
