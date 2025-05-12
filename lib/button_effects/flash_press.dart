@@ -4,8 +4,8 @@ class FlashOnPress extends StatefulWidget {
   final Widget child;
   final VoidCallback onTap;
   final Duration flashDuration;
-  final Color glowColor;   // NEW!
-  final Color flashColor;  // NEW!
+  final Color glowColor;   
+  final Color flashColor;  
 
   const FlashOnPress({
     Key? key,
@@ -24,10 +24,8 @@ class _FlashOnPressState extends State<FlashOnPress> {
   bool _flashing = false;
 
   void _handleTap() {
-    // show the flash
     setState(() => _flashing = true);
 
-    // do your real action _after_ hold time
     Future.delayed(widget.flashDuration, () {
       if (!mounted) return;
       widget.onTap();
@@ -54,7 +52,6 @@ class _FlashOnPressState extends State<FlashOnPress> {
 
   @override
   Widget build(BuildContext context) {
-    // build your glow shadows based on widget.glowColor
     final blueGlow = glowShadows(widget.glowColor, radii: [8,16,24])
         .map((s) => BoxShadow(
               color: s.color,
@@ -67,10 +64,8 @@ class _FlashOnPressState extends State<FlashOnPress> {
       duration: widget.flashDuration,
       curve: Curves.easeOut,
       decoration: BoxDecoration(
-        // permanent glow
         boxShadow: [
           ...blueGlow,
-          // only white( or flashColor ) flash when _flashing
           if (_flashing) ...[
             BoxShadow(
               color: widget.flashColor.withOpacity(0.6),
@@ -84,7 +79,7 @@ class _FlashOnPressState extends State<FlashOnPress> {
             ),
           ]
         ],
-        color: Colors.transparent, // your child paints its own fill
+        color: Colors.transparent, 
       ),
       child: GestureDetector(
         onTap: _handleTap,
