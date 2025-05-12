@@ -11,6 +11,7 @@ import 'verification_screen.dart';
 import 'winterark_home.dart';
 import 'dart:async'; // for unawaited
 import 'package:firebase_messaging/firebase_messaging.dart'; // for FCM
+import 'button_effects/ui_helpers.dart';
 
 class LoginScreen extends StatefulWidget {
   final bool isSignUp;
@@ -35,6 +36,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _persistUserId(String userId) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('currentUserId', userId);
+    await prefs.setString('userId', userId);
     print('🟢 saved currentUserId = $userId');
   }
 
@@ -66,9 +68,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _handleSignUp() async {
     if (!_tosAccepted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('You must accept the Terms of Service.')),
-      );
+      showShortFadeSnack(context, 'You must accept the Terms of Service.');
       return;
     }
 
@@ -88,14 +88,7 @@ class _LoginScreenState extends State<LoginScreen> {
         unawaited(sendTokenToBackend(token));
       }
 
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Account created! Check your email for the verification code.',
-          ),
-        ),
-      );
+      showShortFadeSnack(context, 'Account created! Check your email for the verification code.');
 
       Navigator.pushReplacement(
         context,
@@ -107,9 +100,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
-      );
+      showShortFadeSnack(context, e.toString());
     } finally {
       setState(() => _isLoading = false);
     }
@@ -132,9 +123,7 @@ class _LoginScreenState extends State<LoginScreen> {
         unawaited(sendTokenToBackend(token));
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Logged in successfully!')),
-      );
+      showShortFadeSnack(context, 'Logged in successfully!');
 
       Navigator.pushReplacement(
         context,
@@ -143,13 +132,7 @@ class _LoginScreenState extends State<LoginScreen> {
     } catch (e) {
       final msg = e.toString().toLowerCase();
       if (msg.contains('verify')) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Your account is not verified. Please check your email.',
-            ),
-          ),
-        );
+        showShortFadeSnack(context, 'Your account is not verified. Please check your email.');
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -160,9 +143,7 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         );
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString())),
-        );
+        showShortFadeSnack(context, e.toString());
       }
     } finally {
       setState(() => _isLoading = false);
@@ -177,6 +158,10 @@ class _LoginScreenState extends State<LoginScreen> {
     _userOrEmailCtrl.dispose();
     _emailCtrl.dispose();
     _passCtrl.dispose();
+    _isLoading = false;
+    _tosAccepted = false;
+    _isSignUp = false;
+    _isLoading = false;
     super.dispose();
   }
 

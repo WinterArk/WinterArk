@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:android_intent_plus/android_intent.dart';
-
+import 'button_effects/ui_helpers.dart';
 // ──────────────────────────────────────────────────────────────
 // Prefix‑import the helpers so the analyzer can find them.
 import 'package:winterark/notification_service.dart' as notify;
@@ -73,59 +73,36 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
     );
 
     await notify.scheduleWorkoutReminder(workoutDateTime, 'Chest');
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Workout reminder scheduled.')),
-    );
+    showShortFadeSnack(context, 'Workout reminder scheduled.');
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Notification Settings')),
+      appBar: AppBar(
+        title: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(width: 8),
+          Text(
+            "Notification Settings",
+            style: glowingTextStyle(
+              Colors.white,
+              size: 26,
+            ),
+          ),
+        ],
+      ),
+        backgroundColor: Colors.black,
+        centerTitle: true,
+        leading: IconButton(
+          icon: glowingIcon(Icons.arrow_back, Colors.white, 24),
+          onPressed: () => Navigator.of(context).maybePop(),
+          tooltip: 'Back',
+        ),  
+      ),
       body: ListView(
         children: [
-          SwitchListTile(
-            title: const Text('Workout Reminders'),
-            value: workoutReminders,
-            onChanged: (v) {
-              setState(() => workoutReminders = v);
-              _updateSettings();
-            },
-          ),
-          SwitchListTile(
-            title: const Text('Roast Notifications'),
-            value: roastNotifications,
-            onChanged: (v) {
-              setState(() => roastNotifications = v);
-              _updateSettings();
-            },
-          ),
-          ListTile(
-            title: const Text('Schedule Workout Reminder'),
-            onTap: _pickWorkoutReminderTime,
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: ElevatedButton(
-              onPressed: () {
-                notify.showImmediateReminder('Chest');
-              },
-              child: const Text('Test Workout Reminder Now'),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: ElevatedButton(
-              onPressed: () {
-                notify.showChatNotification(
-                  title: 'Test Chat Notification',
-                  body: 'This is a test chat notification.',
-                  payload: 'test_chat_payload',
-                );
-              },
-              child: const Text('Test Chat Notification'),
-            ),
-          ),
           ListTile(
             title: const Text('Exact Alarm Permission'),
             subtitle: const Text('Allow app to schedule exact alarms'),

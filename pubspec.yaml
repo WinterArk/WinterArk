@@ -39,7 +39,7 @@ dependencies:
   intl: ^0.20.2
   multi_select_flutter: ^4.1.3
   video_player: ^2.9.3
-  
+  another_flushbar: ^1.10.24
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -73,6 +73,7 @@ flutter:
     - assets/videos/demo1.mp4
     - assets/videos/demo2.mp4
     - assets/videos/demo3.mp4
+    - assets/roasts.json
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.

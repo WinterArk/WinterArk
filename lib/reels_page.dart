@@ -34,12 +34,17 @@ class _ReelsPageState extends State<ReelsPage> with WidgetsBindingObserver {
   }
 
   Future<void> _initDemoControllers() async {
-    for (String path in _demoVideoPaths) {
-      final controller = VideoPlayerController.asset(path);
-      await controller.initialize();
-      controller.setLooping(true);
-      _controllers.add(controller);
+    for (var path in _demoVideoPaths) {
+      final c = VideoPlayerController.asset(path);
+      await c.initialize();
+      if (!mounted) {
+        c.dispose();
+        return;
+      }
+      c.setLooping(true);
+      _controllers.add(c);
     }
+    if (!mounted) return;
     setState(() {
       isLoading = false;
     });
@@ -85,6 +90,7 @@ class _ReelsPageState extends State<ReelsPage> with WidgetsBindingObserver {
     for (var controller in _controllers) {
       controller.dispose();
     }
+    _controllers.clear();
     super.dispose();
   }
 

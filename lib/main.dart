@@ -13,6 +13,7 @@ import 'package:http/http.dart' as http;
 
 // Timezone package:
 import 'package:timezone/data/latest.dart' as tz;
+import 'dart:typed_data';
 
 // Notification packages:
 import 'package:awesome_notifications/awesome_notifications.dart';
@@ -93,9 +94,11 @@ Future<void> main() async {
         channelKey: 'workout_reminder',
         channelName: 'Workout Reminders',
         channelDescription: 'Reminders for scheduled workouts',
-        defaultColor: Colors.blue,
-        ledColor: Colors.white,
+        defaultColor: Color(0xFF00BFFF), 
+        ledColor: Color(0xFF00BFFF),
         importance: NotificationImportance.High,
+        enableLights: true,
+        channelShowBadge: true,
         playSound: true,
         enableVibration: true,
       ),
@@ -104,13 +107,22 @@ Future<void> main() async {
         channelName: 'Roast Notifications',
         channelDescription:
             'Channel for roast notifications when a planned workout is missed',
-        defaultColor: Colors.red,
-        ledColor: Colors.white,
+        defaultColor: Color(0xFF1E1E1E),
+        ledColor: Colors.deepOrange,
         importance: NotificationImportance.High,
+        enableLights: true,
+        channelShowBadge: true,
+        playSound: true,
+        enableVibration: true,
       ),
     ],
     debug: true,
   );
+
+  final allowed = await AwesomeNotifications().isNotificationAllowed();
+  if (!allowed) {
+    AwesomeNotifications().requestPermissionToSendNotifications();
+  }
   
   // Initialize Workmanager for background tasks (e.g., roast notifications).
   Workmanager().initialize(callbackDispatcher, isInDebugMode: false);
@@ -140,6 +152,10 @@ Future<void> main() async {
   
   runApp(const WinterArkApp());
 }
+
+final blueGrotto = const Color.fromARGB(255, 45, 178, 250); 
+final aquamarine = const Color.fromARGB(255, 167, 223, 248); 
+final babyBlue   = const Color.fromARGB(255, 212, 242, 255);
 
 class WinterArkApp extends StatelessWidget {
   const WinterArkApp({super.key});

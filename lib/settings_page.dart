@@ -4,6 +4,7 @@ import 'account_settings.dart';
 import 'notification_settings.dart';
 import 'api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'button_effects/ui_helpers.dart';
 
 class SettingsPage extends StatefulWidget {
   final String userId;
@@ -28,26 +29,48 @@ class _SettingsPageState extends State<SettingsPage> {
     _SettingsItem(icon: Icons.person, label: 'Account'),
     _SettingsItem(icon: Icons.help_outline, label: 'Help'),
     _SettingsItem(icon: Icons.info_outline, label: 'About'),
+    _SettingsItem(icon: Icons.logout, label: 'Log out', iconColor: Colors.redAccent,
+    textColor: Colors.redAccent),
   ];
-
-  final List<String> roastLevels = [
-    '🥶 Ice Cold',
-    '🧊 Chill But Honest',
-    '🔥 Spicy Motivation',
-    '💀 Ruthless Gym Goblin'
-  ];
-
-  String selectedRoast = '🥶 Ice Cold';
 
   Future<bool> _showSignOutConfirmation() async {
     final result = await showDialog<bool>(
       context: context,
+      barrierDismissible: false,                   
       builder: (_) => AlertDialog(
-        title: const Text("Confirm Sign Out"),
-        content: const Text("Are you sure you want to sign out?"),
+        backgroundColor: Colors.grey[900],         
+        shape: RoundedRectangleBorder(             
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: Text(
+          "Log out of Winter Ark?",
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+            color: Colors.white,
+            // optional glow:
+            shadows: glowShadows(aquamarine, radii: [8,16,24]),
+          ),
+        ),
+        actionsAlignment: MainAxisAlignment.center,
+        actionsPadding: const EdgeInsets.only(bottom: 12),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text("Cancel")),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text("Sign Out")),
+          TextButton(
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.white,        
+            ),
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text("Cancel"),
+          ),
+          const SizedBox(width: 16),
+          TextButton(
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.red,          
+            ),
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text("Sign Out"),
+          ),
         ],
       ),
     );
@@ -75,10 +98,43 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            glowingIcon(Icons.settings, textSnow, 28),
+            const SizedBox(width: 8),
+            Text(
+              "WinterArk’s Settings",
+              style: glowingTextStyle(
+                textSnow,
+                size: 26,
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: Colors.black,
+        centerTitle: true,
+        leading: IconButton(
+          icon: glowingIcon(Icons.arrow_back, textSnow, 24),
+          onPressed: () => Navigator.of(context).maybePop(),
+          tooltip: 'Back',
+        ),
+        bottom: PreferredSize(
+          preferredSize: Size.fromHeight(40),
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Text(
+              "Welcome back, winter warrior — let’s personalize your grind.",
+              style: TextStyle(fontSize: 14, color: Colors.grey[400]),
+            ),
+          ),
+        ), 
+      ),
       backgroundColor: Colors.black,
       body: Column(
         children: [
-          _buildCustomHeader(),
+          // _buildCustomHeader(),
           _buildStreakBadge(),
           Expanded(
             child: ListView(
@@ -86,23 +142,7 @@ class _SettingsPageState extends State<SettingsPage> {
               children: [
                 _buildSection('GENERAL', generalItems),
                 _buildSection('ACCOUNT', accountItems),
-                _buildRoastNotificationLevel(),
               ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: ElevatedButton.icon(
-              icon: const Icon(Icons.logout),
-              label: const Text('Log Out'),
-              onPressed: _confirmAndSignOut,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: frostBlue,
-                foregroundColor: Colors.white,
-                minimumSize: const Size(double.infinity, 52),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                textStyle: const TextStyle(fontWeight: FontWeight.w600),
-              ),
             ),
           ),
         ],
@@ -112,22 +152,39 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Widget _buildCustomHeader() => Padding(
     padding: const EdgeInsets.fromLTRB(20, 48, 20, 12),
-    child: Row(
+    child: Stack(
+      alignment: Alignment.center,
       children: [
-        IconButton(
-          icon: Icon(Icons.arrow_back, color: frostBlue, size: 32),
-          onPressed: () => Navigator.pop(context),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('WinterArk\'s Settings', style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: textSnow)),
-              const SizedBox(height: 6),
-              Text('Welcome back, winter warrior — let’s personalize your grind.', style: TextStyle(fontSize: 14, color: Colors.grey[400])),
-            ],
+        // 1) back arrow at left
+        Align(
+          alignment: Alignment.centerLeft,
+          child: IconButton(
+            icon: glowingIcon(Icons.arrow_back, babyBlue, 25),
+            onPressed: () => Navigator.pop(context),
           ),
+        ),
+
+        // 2) title + subtitle centered
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              "WinterArk’s Settings",
+              style: glowingTextStyle(textSnow, size: 26),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              "Welcome back, winter warrior — let’s personalize your grind.",
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 14, color: Colors.grey[400]),
+            ),
+          ],
+        ),
+
+        // 3) phantom widget on right to balance the arrow
+        Align(
+          alignment: Alignment.centerRight,
+          child: SizedBox(width: 48),
         ),
       ],
     ),
@@ -162,12 +219,23 @@ class _SettingsPageState extends State<SettingsPage> {
     },
   );
 
-  Widget _streakContainer({required Widget child}) => Container(
-    decoration: BoxDecoration(color: cardGray, borderRadius: BorderRadius.circular(16)),
-    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-    padding: const EdgeInsets.all(20),
-    child: child,
-  );
+  Widget _streakContainer({ required Widget child }) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 0, 16),
+      child: Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: Colors.black,               
+          borderRadius: BorderRadius.circular(16),
+        ),
+        padding: const EdgeInsets.symmetric(
+          vertical: 20,
+          horizontal: 0,                      
+        ),
+        child: child,
+      ),
+    );
+  }
 
   Widget _buildSection(String title, List<_SettingsItem> items) => Padding(
     padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -178,60 +246,66 @@ class _SettingsPageState extends State<SettingsPage> {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           child: Text(title, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.grey[500]!)),
         ),
-        ...items.map((item) => ListTile(
-          leading: Icon(item.icon, color: item.highlight ? frostBlue : Colors.white70),
-          title: Text(item.label, style: TextStyle(fontSize: 16, fontWeight: item.highlight ? FontWeight.bold : FontWeight.normal, color: item.highlight ? frostBlue : textSnow)),
-          onTap: () {
-            if (item.label.toLowerCase() == 'notifications') {
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationSettingsPage()));
-            } else if (item.label.toLowerCase() == 'account') {
-              Navigator.push(context, MaterialPageRoute(builder: (_) => AccountSettingsPage(userId: widget.userId)));
-            }
-          },
-        )),
+        ...items.map((item) {
+          final isLogout = item.label.toLowerCase() == 'log out';
+          final iconColor = item.iconColor ??
+              (item.highlight ? frostBlue : Colors.white70);
+          final textColor = item.textColor ??
+              (item.highlight ? frostBlue : textSnow);
+
+          return ListTile(
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            leading: Icon(item.icon, color: iconColor),
+            title: Text(
+              item.label,
+              style: TextStyle(
+                color: textColor,
+                fontWeight:
+                    item.highlight ? FontWeight.bold : FontWeight.normal,
+                fontSize: 16,
+              ),
+            ),
+            onTap: () {
+              if (isLogout) {
+                _confirmAndSignOut();
+              } else if (item.label.toLowerCase() == 'account') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        AccountSettingsPage(userId: widget.userId),
+                  ),
+                );
+              } else if (item.label.toLowerCase() == 'notifications') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const NotificationSettingsPage(),
+                  ),
+                );
+              }
+            },
+          );
+        }).toList(),
       ],
     ),
   );
 
-  Widget _buildRoastNotificationLevel() => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      const Padding(
-        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-        child: Text('ROAST NOTIFICATION LEVEL', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.grey)),
-      ),
-      SizedBox(
-        height: 42,
-        child: ListView.builder(
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          itemCount: roastLevels.length,
-          itemBuilder: (_, i) {
-            final roast = roastLevels[i];
-            return Padding(
-              padding: const EdgeInsets.only(right: 12),
-              child: OutlinedButton(
-                onPressed: () => setState(() => selectedRoast = roast),
-                style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: selectedRoast == roast ? frostBlue : Colors.white24),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                  foregroundColor: selectedRoast == roast ? frostBlue : Colors.white,
-                ),
-                child: Text(roast),
-              ),
-            );
-          },
-        ),
-      ),
-      const SizedBox(height: 20),
-    ],
-  );
 }
 
 class _SettingsItem {
   final IconData icon;
   final String label;
   final bool highlight;
+  final Color? iconColor;   
+  final Color? textColor;
 
-  const _SettingsItem({required this.icon, required this.label, this.highlight = false});
+  const _SettingsItem({
+    required this.icon,
+    required this.label,
+    this.highlight = false,
+    this.iconColor,
+    this.textColor,
+  });
 }

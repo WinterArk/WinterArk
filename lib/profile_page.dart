@@ -1,20 +1,7 @@
 import 'package:flutter/material.dart';
 import 'settings_page.dart';
-
+import 'button_effects/ui_helpers.dart';
 /// Entry point for the Profile Page
-void main() {
-  runApp(MaterialApp(
-    home: const ProfilePage(userId: 'demoUser'),
-    theme: ThemeData(
-      brightness: Brightness.dark,
-      scaffoldBackgroundColor: Colors.black,
-      primaryColor: Colors.blue,
-      cardColor: Colors.grey[850],
-      appBarTheme: const AppBarTheme(backgroundColor: Colors.blue),
-    ),
-    debugShowCheckedModeBanner: false,
-  ));
-}
 
 class ProfilePage extends StatelessWidget {
   final String userId;
@@ -37,12 +24,16 @@ class ProfilePage extends StatelessWidget {
         automaticallyImplyLeading: false,
         title: Text(
           profile?['username'] ?? 'Profile',
-          style: const TextStyle(color: Colors.white),
+          style: glowingTextStyle(
+              Colors.white,
+              size: 26,
+            ),
         ),
+        backgroundColor: Colors.black,
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.settings, color: Colors.white),
+            icon: glowingIcon(Icons.settings, Colors.white, 24),
             onPressed: () {
               Navigator.push(
                 context,
