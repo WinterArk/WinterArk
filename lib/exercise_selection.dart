@@ -23,6 +23,17 @@ class _ExerciseSelectionWidgetState extends State<ExerciseSelectionWidget> {
   final TextEditingController searchController = TextEditingController();
   final TextEditingController customExerciseController = TextEditingController();
 
+   @override
+    void initState() {
+      super.initState();
+    }
+
+    @override
+    void dispose() {
+      searchController.dispose();
+      customExerciseController.dispose();  
+      super.dispose();
+    }
   // Primary dropdown options
   final List<String> muscleGroups = [
     'Chest',

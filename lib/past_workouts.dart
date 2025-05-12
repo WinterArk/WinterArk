@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'api_service.dart';
 import 'package:intl/intl.dart';
 import 'streak_leaderboard.dart';
+import 'button_effects/ui_helpers.dart';
 
 // Helper function to convert month/day to YYYY-MM-DD format.
 String getDateString(String monthName, int day) {
@@ -72,11 +73,25 @@ class _PastWorkoutsCalendarState extends State<PastWorkoutsCalendar> {
   ];
   Map<String, List<dynamic>> workoutsByDate = {};
 
+  TextEditingController? exerciseNameController;
+  TextEditingController? setsController;
+  TextEditingController? repsController;
+  TextEditingController? weightController;
   @override
   void initState() {
     super.initState();
     _fetchWorkoutsForCalendar();
   }
+
+  @override
+  void dispose() {
+    exerciseNameController?.dispose();
+    setsController?.dispose();
+    repsController?.dispose();
+    weightController?.dispose();
+    super.dispose();
+  }
+    
 
   Future<void> _fetchWorkoutsForCalendar() async {
     final String? userId = widget.buddyId ?? await getUserId();
@@ -97,9 +112,7 @@ class _PastWorkoutsCalendarState extends State<PastWorkoutsCalendar> {
         workoutsByDate = grouped;
       });
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error fetching workouts: $e")),
-      );
+      showShortFadeSnack(context, "Error fetching workouts: $e");
     }
   }
 
@@ -107,9 +120,7 @@ class _PastWorkoutsCalendarState extends State<PastWorkoutsCalendar> {
     final dateStr = getDateString(monthName, day);
     final String? userId = widget.buddyId ?? await getUserId();
     if (userId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("User not logged in.")),
-      );
+      showShortFadeSnack(context, "User not logged in.");
       return;
     }
     try {
@@ -160,17 +171,15 @@ class _PastWorkoutsCalendarState extends State<PastWorkoutsCalendar> {
         },
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error fetching workouts: $e")),
-      );
+      showShortFadeSnack(context, "Error fetching workouts: $e");
     }
   }
 
   void _showWorkoutOptions(BuildContext context, Map<String, dynamic> workout) {
-    final TextEditingController exerciseNameController = TextEditingController(text: workout['exercise_name']);
-    final TextEditingController setsController = TextEditingController(text: workout['sets'].toString());
-    final TextEditingController repsController = TextEditingController(text: workout['reps'].toString());
-    final TextEditingController weightController = TextEditingController(text: workout['weight'].toString());
+    exerciseNameController = TextEditingController(text: workout['exercise_name']);
+    setsController = TextEditingController(text: workout['sets'].toString());
+    repsController = TextEditingController(text: workout['reps'].toString());
+    weightController = TextEditingController(text: workout['weight'].toString());
     String localWeightUnit = workout['weightUnit'] ?? 'lbs';
     showDialog(
       context: context,
@@ -238,13 +247,9 @@ class _PastWorkoutsCalendarState extends State<PastWorkoutsCalendar> {
                 try {
                   await ApiService.deleteWorkout(workout['_id']);
                   Navigator.of(context).pop();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Workout deleted successfully.")),
-                  );
+                  showShortFadeSnack(context, "Workout deleted successfully.");
                 } catch (e) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Failed to delete workout: $e")),
-                  );
+                  showShortFadeSnack(context, "Failed to delete workout: $e");
                 }
               },
               child: const Text("Delete", style: TextStyle(color: Colors.red)),
@@ -253,23 +258,19 @@ class _PastWorkoutsCalendarState extends State<PastWorkoutsCalendar> {
               key: const Key('update-workout'),
               onPressed: () async {
                 final updateData = {
-                  "exercise_name": exerciseNameController.text.trim(),
-                  "sets": int.tryParse(setsController.text.trim()),
-                  "reps": int.tryParse(repsController.text.trim()),
-                  "weight": double.tryParse(weightController.text.trim()),
+                  "exercise_name": exerciseNameController!.text.trim(),
+                  "sets": int.tryParse(setsController!.text.trim()),
+                  "reps": int.tryParse(repsController!.text.trim()),
+                  "weight": double.tryParse(weightController!.text.trim()),
                   "weightUnit": localWeightUnit,
                 };
 
                 try {
                   await ApiService.updateWorkout(workout['_id'], updateData);
                   Navigator.of(context).pop();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Workout updated successfully.")),
-                  );
+                  showShortFadeSnack(context, "Workout updated successfully.");
                 } catch (e) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Failed to update workout: $e")),
-                  );
+                  showShortFadeSnack(context, "Failed to update workout: $e");
                 }
               },
               child: const Text("Update"),
@@ -297,7 +298,7 @@ class _PastWorkoutsCalendarState extends State<PastWorkoutsCalendar> {
           widget.buddyName != null
               ? '${widget.buddyName}\'s Past Workouts'
               : 'Past Workouts',
-          style: const TextStyle(color: Colors.lightBlue),
+          style: glowingTextStyle(Colors.lightBlue, size: 26),
         ),
         centerTitle: true,
         actions: [

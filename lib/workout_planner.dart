@@ -3,7 +3,9 @@
 import 'package:flutter/material.dart';
 import 'api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
+import 'button_effects/ui_helpers.dart';
 
 class ExerciseEntry {
   final TextEditingController exerciseNameController = TextEditingController();
@@ -16,7 +18,7 @@ class ExerciseEntry {
   String weightUnit;
 
   ExerciseEntry({
-    this.weightUnit = "lbs",
+    this.weightUnit = "Lbs",
   });
   void dispose() {
     exerciseNameController.dispose();
@@ -46,29 +48,44 @@ class _WorkoutTrackerScreenState extends State<WorkoutTrackerScreen> {
   DateTime? selectedDate;
   TimeOfDay? selectedTime;
   
-  // New state variables for workout details
   final List<String> trainingStyles = ['strength', 'size', 'endurance', 'flexibility'];
   List<ExerciseEntry> exerciseEntries = [];
   String? selectedExerciseType;
   String? selectedTrainingStyle;
+  final blueGrotto = const Color.fromARGB(255, 45, 178, 250); 
+  final aquamarine = const Color.fromARGB(255, 167, 223, 248); 
+  final babyBlue   = const Color.fromARGB(255, 212, 242, 255);
+  
+  bool _addFlashing = false;
 
+  static const _flashDuration = Duration(milliseconds: 300);
+  Set<String> _flashingSplits = {};
+
+  void _flashAddButton() {
+    setState(() => _addFlashing = true);
+    Future.delayed(_flashDuration, () {
+      if (mounted) setState(() => _addFlashing = false);
+    });
+  }
+  
+  void _flashChip(String split) {
+    setState(() => _flashingSplits.add(split));
+    Future.delayed(_flashDuration, () {
+      if (!mounted) return;
+      setState(() => _flashingSplits.remove(split));
+    });
+  }
   List<String> workoutSplitOptions = [
-  'Push',
-  'Pull',
   'Legs',
-  'Full Upper',
-  'Full Lower',
-  'Full Body',
   'Back',
-  'Chest',
-  'Shoulders',
-  'Arms',
   'Core',
-  'Custom'
+  'Delts',
+  'Arms',
+  'Chest',
   ];
   List<String> selectedWorkoutSplits = [];
   TextEditingController customWorkoutSplitController = TextEditingController();
-
+ 
   Future<String?> getUserId() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('userId');
@@ -79,29 +96,23 @@ class _WorkoutTrackerScreenState extends State<WorkoutTrackerScreen> {
     super.initState();
     if (widget.prefillWorkouts != null && widget.prefillWorkouts!.isNotEmpty) {
       String rawSplit = widget.prefillWorkouts!.first['exercise_type'] ?? "";
-      // Split into parts 
       List<String> splits = rawSplit
           .split(',')
           .map((s) => s.trim())
           .where((s) => s.isNotEmpty)
           .toList();
-      // Predefined splits in your options 
       final List<String> predefined = workoutSplitOptions
           .map((s) => s.toLowerCase())
           .toList();
-      // Custom split
       bool hasCustom = splits.any((s) => !predefined.contains(s.toLowerCase()));
       if (hasCustom) {
         selectedWorkoutSplits = ["Custom"];
-        // If multiple custom values exist, join them
         customWorkoutSplitController.text = splits.join(', ');
       } else {
-        // Otherwise, capitalize each predefined value.
         selectedWorkoutSplits =
             splits.map((s) => s[0].toUpperCase() + s.substring(1).toLowerCase()).toList();
       }
       
-      // Prefill exercise entries as before...
       for (var workout in widget.prefillWorkouts!) {
         ExerciseEntry entry = ExerciseEntry();
         entry.exerciseNameController.text = workout['exercise_name'] ?? "";
@@ -109,18 +120,17 @@ class _WorkoutTrackerScreenState extends State<WorkoutTrackerScreen> {
         entry.repsController.text = workout['reps']?.toString() ?? "";
         entry.weightController.text = workout['weight']?.toString() ?? "";
         entry.notesController.text = workout['notes'] ?? "";
-        entry.weightUnit = workout['weightUnit'] ?? "lbs";
+        entry.weightUnit = workout['weightUnit'] ?? "Lbs";
         exerciseEntries.add(entry);
       }
     } else {
-      // No prefill data.
       exerciseEntries.add(ExerciseEntry());
     }
   }
 
   @override
   void dispose() {
-    // Dispose all controllers for each entry.
+    customWorkoutSplitController.dispose();
     for (var entry in exerciseEntries) {
       entry.dispose();
     }
@@ -129,7 +139,6 @@ class _WorkoutTrackerScreenState extends State<WorkoutTrackerScreen> {
 
 
 Future<void> _submitWorkout() async {
-  // Validate that at least one exercise entry is filled out.
   bool valid = false;
   for (var entry in exerciseEntries) {
     if (entry.exerciseNameController.text.trim().isNotEmpty &&
@@ -141,25 +150,14 @@ Future<void> _submitWorkout() async {
     }
   }
   if (!valid) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Please fill in at least one exercise completely.")),
-    );
+    showShortFadeSnack(context, "Please fill in at least one exercise completely.");
     return;
   }
   if (selectedWorkoutSplits.isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Please select a workout split.")),
-    );
-    return;
-  }
-  if (selectedDate == null || selectedTime == null) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Please pick a date and time for your workout.")),
-    );
+    showShortFadeSnack(context, "Please select a workout split.");
     return;
   }
 
-  // If Custom split is selected, Combine the selected workout splits into one string
   String workoutSplitValue;
   if (selectedWorkoutSplits.contains("Custom")) {
     List<String> splits = List.from(selectedWorkoutSplits);
@@ -174,26 +172,16 @@ Future<void> _submitWorkout() async {
     workoutSplitValue = selectedWorkoutSplits.join(', ');
   }
 
-  // Combine selected date and time into a DateTime object.
-  final DateTime workoutDate = DateTime(
-    selectedDate!.year,
-    selectedDate!.month,
-    selectedDate!.day,
-    selectedTime!.hour,
-    selectedTime!.minute,
-  );
+  final DateTime workoutDate = DateTime.now();
 
   final String? userId = await getUserId();
   if (userId == null) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("User not logged in.")),
-    );
+    showShortFadeSnack(context, "User not logged in.");
     return;
   }
   
   bool allSuccess = true;
   for (var entry in exerciseEntries) {
-    // Skip incomplete entries.
     if (entry.exerciseNameController.text.trim().isEmpty ||
         entry.setsController.text.trim().isEmpty ||
         entry.repsController.text.trim().isEmpty ||
@@ -208,31 +196,25 @@ Future<void> _submitWorkout() async {
         sets: int.parse(entry.setsController.text.trim()),
         reps: int.parse(entry.repsController.text.trim()),
         weight: double.parse(entry.weightController.text.trim()),
-        weightUnit: entry.weightUnit,
+        weightUnit: entry.weightUnit.trim().toLowerCase(),
         date: workoutDate,
         notes: entry.notesController.text.trim(),
-        // trainingStyle: selectedTrainingStyle,
       );
     } catch (e) {
       allSuccess = false;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error adding an exercise: $e")),
-      );
+      showShortFadeSnack(context, "Error adding an exercise: $e");
     }
   }
 
   if (allSuccess) {
     try {
       await ApiService.updateStreak(userId, workoutDate.toIso8601String());
-      // Optionally, you could show a message that the streak is updated.
       print("Streak updated successfully.");
     } 
     catch (e) {
       print("Error updating streak: $e");
     }
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Workout added successfully!")),
-    );
+    showShortFadeSnack(context, "Workout added successfully!");
     setState(() {
       for (var entry in exerciseEntries) {
         entry.dispose();
@@ -244,423 +226,382 @@ Future<void> _submitWorkout() async {
   }
 }
 
+  Widget _splitChip(String split) {
+    final isSelected = selectedWorkoutSplits.contains(split);
+    final isFlashing = _flashingSplits.contains(split);
+
+    List<BoxShadow>? shadows;
+    if (isSelected || isFlashing) {
+      shadows = [
+        ...glowShadows(blueGrotto, radii: [4, 8, 16]),
+        if (isFlashing) ...[
+          BoxShadow(
+            color: Colors.white.withOpacity(0.8),
+            blurRadius: 8,
+            spreadRadius: 2,
+          ),
+          BoxShadow(
+            color: Colors.white.withOpacity(0.4),
+            blurRadius: 16,
+            spreadRadius: 4,
+          ),
+        ]
+      ];
+    }
+
+    return AnimatedContainer(
+      duration: _flashDuration,
+      curve: Curves.easeOut,
+      margin: const EdgeInsets.symmetric(horizontal: 4),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: shadows,
+      ),
+      child: ChoiceChip(
+        label: Text(
+          split,
+          style: TextStyle(
+            fontSize: 16,
+            color: isSelected ? Colors.black : Colors.white70,
+          ),
+        ),
+        selected: isSelected,
+        onSelected: (on) {
+          _flashChip(split); 
+          setState(() {
+            if (on) selectedWorkoutSplits.add(split);
+            else selectedWorkoutSplits.remove(split);
+          });
+        },
+        selectedColor: blueGrotto,
+        backgroundColor: Colors.grey[900],
+        labelPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: const BorderSide(color: Colors.transparent, width: 1),
+        ),
+      ),
+    );
+  }
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Workout Tracker"),
-        backgroundColor: Colors.blueAccent,
-        centerTitle: true,
-      ),
-      // Removed the bottomNavigationBar here so that HomePage’s nav bar is the only one.
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: ListView(
-          children: [
-            const Center(
-              child: Text(
-                "Plan Your Workout",
-                style: TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.blueAccent,
-                ),
-              ),
+        title: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          glowingIcon(Icons.fitness_center, blueGrotto, 28),
+          const SizedBox(width: 8),
+          Text(
+            "Track Your Workout!",
+            style: glowingTextStyle(
+              blueGrotto,
+              size: 26,
             ),
-            const SizedBox(height: 20),
-            // Body Parts Buttons
-            MultiSelectDialogField<String>(
-              key: WorkoutTrackerScreen.workoutSplitKey,
-              initialValue: selectedWorkoutSplits, 
-              items: workoutSplitOptions
-                  .map((option) => MultiSelectItem<String>(option, option))
-                  .toList(),
-              title: Center(
-                child: const Text(
-                  "Workout Split",
-                  textAlign: TextAlign.center,
-                ),
+          ),
+        ],
+      ),
+        backgroundColor: Colors.black,
+        centerTitle: true,
+        leading: IconButton(
+          icon: glowingIcon(Icons.arrow_back, babyBlue, 24),
+          onPressed: () => Navigator.of(context).maybePop(),
+          tooltip: 'Back',
+        ),  
+        actions: [
+          IconButton(
+            icon: glowingIcon(Icons.check, babyBlue, 25),
+            onPressed: _submitWorkout,
+            tooltip: "Submit Workout",
+          ),
+        ],
+      ),
+      body: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 20),
+      child: ListView(
+        children: [
+          Center(
+            child: Text(
+              "Select Your Split!",
+              style: Theme.of(context)
+                .textTheme
+                .titleMedium!
+                .copyWith(color: babyBlue),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _splitChip(workoutSplitOptions[0]),
+                ],
               ),
-              itemsTextStyle: const TextStyle(color: Colors.white, fontSize: 16),
-              selectedColor: Colors.blueAccent,
-              decoration: BoxDecoration(
-                color: Colors.grey[850],
-                borderRadius: const BorderRadius.all(Radius.circular(12)),
-                border: Border.all(
-                  color: Colors.black,
-                  width: 1,
-                ),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _splitChip(workoutSplitOptions[1]),
+                  const SizedBox(width: 8),
+                  _splitChip(workoutSplitOptions[2]),
+                ],
               ),
-              buttonIcon: const Icon(
-                Icons.arrow_drop_down,
-                color: Colors.white,
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _splitChip(workoutSplitOptions[3]),
+                  const SizedBox(width: 8),
+                  _splitChip(workoutSplitOptions[4]),
+                  const SizedBox(width: 8),
+                  _splitChip(workoutSplitOptions[5]),
+                ],
               ),
-              buttonText: Text.rich(
-                TextSpan(
+            ],
+          ),
+
+            const SizedBox(height: 30),
+            ...exerciseEntries.asMap().entries.map((entryData) {
+            final idx = entryData.key;
+            final entry = entryData.value;
+            return Card(
+              color: Colors.black,
+              elevation: 2,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              margin: const EdgeInsets.symmetric(vertical: 8),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(12, 0, 16, 0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    WidgetSpan(
-                      child: SizedBox(width: MediaQuery.of(context).size.width * 0.27) 
+                    Padding(
+                      padding: const EdgeInsets.only(top: 0, bottom: 0),
+                      child: SizedBox(
+                        height: 19,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            Text(
+                                'Exercise Details',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium!
+                                    .copyWith(color: babyBlue),
+                              ),
+                            Positioned(
+                              right: 0,
+                              child: PopupMenuButton<String>(
+                                icon: Icon(Icons.more_vert, color: babyBlue),
+                                color: Colors.grey[900],
+                                onSelected: (choice) {
+                                  switch (choice) {
+                                    case 'unit_lbs':
+                                      setState(() => entry.weightUnit = 'Lbs');
+                                      break;
+                                    case 'unit_kg':
+                                      setState(() => entry.weightUnit = 'Kg');
+                                      break;
+                                    case 'duplicate':
+                                      final copy = ExerciseEntry()
+                                        ..exerciseNameController.text = entry.exerciseNameController.text
+                                        ..setsController.text = entry.setsController.text
+                                        ..repsController.text = entry.repsController.text
+                                        ..weightController.text = entry.weightController.text
+                                        ..weightUnit = entry.weightUnit
+                                        ..showNotes = entry.showNotes
+                                        ..notesController.text = entry.notesController.text;
+                                      setState(() {
+                                        exerciseEntries.insert(idx + 1, copy);
+                                      });
+                                      break;
+                                    case 'remove':
+                                      if (exerciseEntries.length > 1) {
+                                        showDialog(
+                                          context: context,
+                                          barrierDismissible: false,
+                                          builder: (ctx) => AlertDialog(
+                                            backgroundColor: Colors.grey[900],                          
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(16),                  
+                                            ),
+                                            title: Text(
+                                              "Delete Exercise?",
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 18,
+                                                color: Colors.white,
+                                                shadows: glowShadows(aquamarine, radii: [8,16,24]),      
+                                              ),
+                                            ),
+                                            actionsAlignment: MainAxisAlignment.center,                  
+                                            actionsPadding: const EdgeInsets.only(bottom: 12),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () => Navigator.of(ctx).pop(false),
+                                                style: TextButton.styleFrom(foregroundColor: Colors.white),
+                                                child: const Text("Cancel"),
+                                              ),
+                                              const SizedBox(width: 16),
+                                              TextButton(
+                                                onPressed: () {
+                                                  setState(() => exerciseEntries.removeAt(idx));
+                                                  Navigator.of(ctx).pop(true);
+                                                },
+                                                style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
+                                                child: const Text("Delete"),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      } else {
+                                        showShortFadeSnack(context, "At least one exercise is required.");
+                                      }
+                                      break;
+                                    case 'notes':
+                                      setState(() => entry.showNotes = !entry.showNotes);
+                                      break;
+                                  }
+                                },
+                                itemBuilder: (_) => [
+                                  PopupMenuItem(
+                                    value: 'duplicate',
+                                    child: ConstrainedBox(
+                                    constraints: const BoxConstraints(minWidth: 70, maxWidth: 70),
+                                    child: Text('Duplicate Exercise', 
+                                    style: TextStyle(color: Colors.white70)))),
+                                  PopupMenuItem(
+                                    value: 'remove',
+                                    child: ConstrainedBox(
+                                    constraints: const BoxConstraints(minWidth: 70, maxWidth: 70),
+                                    child: Text('Remove Exercise',
+                                    style: TextStyle(color: Colors.white70)))),
+                                  PopupMenuItem(
+                                    value: 'notes',
+                                    child: ConstrainedBox(
+                                      constraints: const BoxConstraints(minWidth: 70, maxWidth: 70),
+                                      child: Text(
+                                        entry.showNotes ? 'Hide Notes' : 'Add Notes',
+                                        style: const TextStyle(color: Colors.white70),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                    const TextSpan(
-                      text: "Select Workout Split",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        children: [
+                          iconTextField(entry.exerciseNameController, 'Exercise Name', Icons.edit),
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              Expanded(child: iconTextField(entry.setsController, 'Sets', Icons.format_list_numbered)),
+                              const SizedBox(width: 8),
+                              Expanded(child: iconTextField(entry.repsController, 'Reps', Icons.repeat)),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                flex: 1,
+                                child: TextField(
+                                  controller: entry.weightController,
+                                  keyboardType: TextInputType.number,
+                                  style: const TextStyle(color: Colors.white70),
+                                  decoration: InputDecoration(
+                                    hintText: entry.weightUnit,         
+                                    hintStyle: const TextStyle(color: Colors.white70),
+                                    filled: true,
+                                    isDense: true,
+                                    fillColor: Colors.grey[900],
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                      borderSide: BorderSide.none,
+                                    ),
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      vertical: 16,
+                                      horizontal: 14,
+                                    ),
+                                    prefixIcon: SizedBox(
+                                      width: 40,
+                                      height: 40,
+                                      child: Center(
+                                        child: PopupMenuButton<String>(
+                                          padding: EdgeInsets.zero,          
+                                          iconSize: 24,                      
+                                          icon: glowingIcon(Icons.fitness_center, babyBlue, 24),
+                                          color: Colors.grey[900],
+                                          onSelected: (unit) => setState(() => entry.weightUnit = unit),
+                                          itemBuilder: (_) => [
+                                            PopupMenuItem(value: 'Lbs', child: Text('Lbs', style: TextStyle(color: Colors.white70))),
+                                            PopupMenuItem(value: 'Kg',  child: Text('Kg',  style: TextStyle(color: Colors.white70))),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          if (entry.showNotes) ...[
+                            const SizedBox(height: 12),
+                            iconTextField(entry.notesController, 'Notes', Icons.note, maxLines: 3),
+                          ],
+                        ],
                       ),
                     ),
                   ],
                 ),
-                textAlign: TextAlign.center,
               ),
-              onConfirm: (results) {
-                setState(() {
-                  selectedWorkoutSplits = List<String>.from(results);
-                });
-              },
-            ),
-            if (selectedWorkoutSplits.contains("Custom"))
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: TextField(
-                  controller: customWorkoutSplitController,
-                  style: const TextStyle(color: Colors.white),
-                  decoration: const InputDecoration(
-                    labelText: "Custom Split",
-                    labelStyle: TextStyle(color: Colors.white70),
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-              ),
-            const SizedBox(height: 20),
-            // Detailed Workout Input
-            Column(
-              children: [
-                // Display each exercise entry form:
-                Column(
-                  children: exerciseEntries.map((entry) {
-                    return Card(
-                      color: Colors.grey[850],
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+            );
+          }).toList(),
+           const SizedBox(height: 25),
+            Center(
+              child: AnimatedContainer(
+                duration: _flashDuration,
+                curve: Curves.easeOut,
+                width: MediaQuery.of(context).size.width * 0.4,
+                height: 50.0,
+                decoration: BoxDecoration(
+                  color: Colors.black,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    ...glowShadows(blueGrotto, radii: [8, 12, 16]),
+                    if (_addFlashing) ...[
+                      BoxShadow(
+                        color: Colors.white.withOpacity(0.6),
+                        blurRadius: 12,
+                        spreadRadius: 2,
                       ),
-                      margin: const EdgeInsets.only(bottom: 12),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          children: [
-                            TextField(
-                              key: const Key('exercise-name'),
-                              controller: entry.exerciseNameController,
-                              style: const TextStyle(color: Colors.white),
-                              decoration: const InputDecoration(
-                                label: Center(
-                                  child: Text(
-                                    "Exercise Name",
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(color: Colors.white70),
-                                  ),
-                                ),
-                                border: OutlineInputBorder(),
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-                            Row(
-                              children: [
-                                Expanded(
-                                  flex: 2,
-                                  child: TextField(
-                                    key: const Key('exercise-sets'),
-                                    controller: entry.setsController,
-                                    keyboardType: TextInputType.number,
-                                    style: const TextStyle(color: Colors.white),
-                                    decoration: const InputDecoration(
-                                      labelText: "Sets",
-                                      labelStyle: TextStyle(color: Colors.white70),
-                                      border: OutlineInputBorder(),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  flex: 2,
-                                  child: TextField(
-                                    key: const Key('exercise-reps'),
-                                    controller: entry.repsController,
-                                    keyboardType: TextInputType.number,
-                                    style: const TextStyle(color: Colors.white),
-                                    decoration: const InputDecoration(
-                                      labelText: "Reps",
-                                      labelStyle: TextStyle(color: Colors.white70),
-                                      border: OutlineInputBorder(),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 10),
-                                Row(
-                                  children: [
-                                    // Weight TextField with fixed width
-                                    SizedBox(
-                                      width: 90,
-                                      child: TextField(
-                                        key: const Key('exercise-weight'),
-                                        controller: entry.weightController,
-                                        keyboardType: TextInputType.number,
-                                        style: const TextStyle(color: Colors.white),
-                                        decoration: const InputDecoration(
-                                          labelText: "Weight",
-                                          labelStyle: TextStyle(color: Colors.white70),
-                                          border: OutlineInputBorder(),
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    // Weight unit dropdown with fixed width
-                                    SizedBox(
-                                      width: 50,
-                                      child: DropdownButton<String>(
-                                        key: const Key('weight-unit'),
-                                        isExpanded: true,
-                                        value: entry.weightUnit,
-                                        dropdownColor: Colors.grey[800],
-                                        style: const TextStyle(color: Colors.white, fontSize: 16),
-                                        items: <String>["lbs", "kg"].map((String unit) {
-                                          return DropdownMenuItem<String>(
-                                            value: unit,
-                                            child: Center(
-                                              child: Text(
-                                                unit,
-                                                textAlign: TextAlign.center,
-                                                style: const TextStyle(color: Colors.white),
-                                              ),
-                                            ),
-                                          );
-                                        }).toList(),
-                                        onChanged: (String? newValue) {
-                                          if (newValue != null) {
-                                            setState(() {
-                                              entry.weightUnit = newValue;
-                                            });
-                                          }
-                                        },
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(
-                                  width: 30,
-                                  child: IconButton(
-                                    key: const Key('notes-toggle'),
-                                    icon: Icon(
-                                      entry.showNotes ? Icons.note : Icons.note_add,
-                                      color: Colors.yellowAccent,
-                                    ),
-                                    onPressed: () {
-                                      setState(() {
-                                        entry.showNotes = !entry.showNotes;
-                                      });
-                                    },
-                                  ),
-                                ), 
-                              ],
-                            ),
-                            if (entry.showNotes) 
-                              Padding(
-                                padding: const EdgeInsets.only(top: 8),
-                                child: TextField(
-                                  key: const Key('exercise-notes'),
-                                  controller: entry.notesController,
-                                  style: const TextStyle(color: Colors.white),
-                                  decoration: const InputDecoration(
-                                    label: Center(
-                                      child: Text(
-                                        "Notes",
-                                        style: TextStyle(color: Colors.white70),
-                                      ),
-                                    ),
-                                    border: OutlineInputBorder(),
-                                  ),
-                                  maxLines: 2,
-                                ),
-                              ),
-                          ],
-                        ),
+                      BoxShadow(
+                        color: Colors.white.withOpacity(0.3),
+                        blurRadius: 24,
+                        spreadRadius: 4,
                       ),
-                    );
-                  }).toList(),
+                    ],
+                  ],
                 ),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                // Plus button: add a new exercise entry
-                IconButton(
-                  icon: const Icon(Icons.add_circle, color: Colors.blueAccent, size: 32),
+                child: TextButton.icon(
                   onPressed: () {
-                    setState(() {
-                      exerciseEntries.add(ExerciseEntry());
-                    });
+                    _flashAddButton();               
+                    setState(() => exerciseEntries.add(ExerciseEntry()));
                   },
-                ),
-                // Minus button: remove the last entry if there is more than one
-                IconButton(
-                  icon: const Icon(Icons.remove_circle, color: Colors.red, size: 32),
-                  onPressed: () {
-                    setState(() {
-                      if (exerciseEntries.length > 1) {
-                        exerciseEntries.removeLast();
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text("At least one exercise is required.")),
-                        );
-                      }
-                    });
-                  },
-                ),
-              ],
-            ),
-            // const SizedBox(height: 20),
-            // // Dropdown for Training Style
-            // DropdownButtonFormField<String>(
-            //   value: selectedTrainingStyle,
-            //   decoration: InputDecoration(
-            //     labelText: 'Training Style',
-            //     labelStyle: const TextStyle(color: Colors.white70),
-            //     filled: true,
-            //     fillColor: Colors.grey[850],
-            //     border: OutlineInputBorder(
-            //       borderRadius: BorderRadius.circular(12),
-            //     ),
-            //   ),
-            //   dropdownColor: Colors.grey[850],
-            //   style: const TextStyle(color: Colors.white),
-            //   items: trainingStyles.map((style) {
-            //     return DropdownMenuItem(
-            //       value: style,
-            //       child: Text(style),
-            //     );
-            //   }).toList(),
-            //   onChanged: (value) {
-            //     setState(() {
-            //       selectedTrainingStyle = value;
-            //     });
-            //   },
-            // ),
-            // const SizedBox(height: 20),
-            // // Date and Time Picker
-            // const Text(
-            //   "Schedule Workout",
-            //   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
-            // ),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                // Date Picker Button
-                Expanded(
-                  child: ElevatedButton(
-                    key: const Key('pick-date'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey[800],
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    onPressed: () async {
-                      DateTime? pickedDate = await showDatePicker(
-                        context: context,
-                        initialDate: DateTime.now(),
-                        firstDate: DateTime(2020),
-                        lastDate: DateTime(2100),
-                      );
-                      if (pickedDate != null) {
-                        setState(() {
-                          selectedDate = pickedDate;
-                        });
-                      }
-                    },
-                    child: Text(
-                      selectedDate == null
-                          ? "Pick Date"
-                          : "${selectedDate!.month}/${selectedDate!.day}/${selectedDate!.year}",
-                    ),
+                  style: TextButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
+                  icon: glowingIcon(Icons.add, blueGrotto, 24),
+                  label: Text('Add Exercise', style: glowingTextStyle(blueGrotto, size: 16)),
                 ),
-                const SizedBox(width: 10),
-                // Time Picker Button
-                Expanded(
-                  child: ElevatedButton(
-                    key: const Key('pick-time'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey[800],
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    onPressed: () async {
-                      TimeOfDay? pickedTime = await showTimePicker(
-                        context: context,
-                        initialTime: TimeOfDay.now(),
-                      );
-                      if (pickedTime != null) {
-                        setState(() {
-                          selectedTime = pickedTime;
-                        });
-                      }
-                    },
-                    child: Text(
-                      selectedTime == null ? "Pick Time" : selectedTime!.format(context),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            // const SizedBox(height: 20),
-            // // Reminder and Roasts Switches
-            // Card(
-            //   color: Colors.grey[850],
-            //   shape: RoundedRectangleBorder(
-            //     borderRadius: BorderRadius.circular(12),
-            //   ),
-            //   child: Column(
-            //     children: [
-            //       SwitchListTile(
-            //         activeColor: Colors.blueAccent,
-            //         title: const Text("Send Reminder?", style: TextStyle(color: Colors.white)),
-            //         value: sendReminder,
-            //         onChanged: (value) {
-            //           setState(() {
-            //             sendReminder = value;
-            //           });
-            //         },
-            //       ),
-            //       SwitchListTile(
-            //         activeColor: Colors.blueAccent,
-            //         title: const Text("Send Roasts?", style: TextStyle(color: Colors.white)),
-            //         value: sendRoasts,
-            //         onChanged: (value) {
-            //           setState(() {
-            //             sendRoasts = value;
-            //           });
-            //         },
-            //       ),
-            //     ],
-            //   ),
-            // ),
-            const SizedBox(height: 20),
-            // Submit Workout Button
-            ElevatedButton(
-              key: const Key('submit-workout'),
-              onPressed: _submitWorkout,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blueAccent,
-                padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 40),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-              ),
-              child: const Text(
-                "Submit Workout",
-                style: TextStyle(color: Colors.black, fontSize: 16),
               ),
             ),
           ],

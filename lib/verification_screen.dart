@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import 'api_service.dart';
 import 'home_page.dart';
+import 'button_effects/ui_helpers.dart';
 
 class VerificationScreen extends StatefulWidget {
   final String email;
@@ -36,9 +37,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
       );
 
       // 2) If successful, show a success message
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Account verified successfully!')),
-      );
+      showShortFadeSnack(context, 'Account verified successfully!');
 
       // 3) Navigate directly to HomePage, passing userId
       Navigator.pushReplacement(
@@ -48,9 +47,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
         ),
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Verification failed: $e')),
-      );
+      showShortFadeSnack(context, 'Verification failed: $e');
     } finally {
       setState(() {
         _isLoading = false;
@@ -65,13 +62,9 @@ class _VerificationScreenState extends State<VerificationScreen> {
     });
     try {
       await ApiService.resendVerification(widget.email);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Verification code resent successfully!')),
-      );
+      showShortFadeSnack(context, 'Verification code resent successfully!');
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to resend verification email: $e')),
-      );
+      showShortFadeSnack(context, 'Failed to resend verification email: $e');
     } finally {
       setState(() {
         _isResending = false;
@@ -82,6 +75,8 @@ class _VerificationScreenState extends State<VerificationScreen> {
   @override
   void dispose() {
     _codeController.dispose();
+    _isLoading = false;
+    _isResending = false;
     super.dispose();
   }
 

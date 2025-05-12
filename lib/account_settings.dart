@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'api_service.dart';
+import 'button_effects/ui_helpers.dart';
 
 class AccountSettingsPage extends StatefulWidget {
   final String userId;
@@ -99,6 +100,8 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
     _oldPasswordController.dispose();
     _newPasswordController.dispose();
     _confirmPasswordController.dispose();
+    _isLoading = false;
+    _message = '';
     super.dispose();
   }
 
@@ -106,8 +109,26 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Account Settings'),
+        title: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(width: 8),
+          Text(
+            "Account Settings",
+            style: glowingTextStyle(
+              Colors.white,
+              size: 26,
+            ),
+          ),
+        ],
+      ),
         backgroundColor: Colors.black,
+        centerTitle: true,
+        leading: IconButton(
+          icon: glowingIcon(Icons.arrow_back, Colors.white, 24),
+          onPressed: () => Navigator.of(context).maybePop(),
+          tooltip: 'Back',
+        ),  
       ),
       backgroundColor: Colors.black,
       body: SingleChildScrollView(

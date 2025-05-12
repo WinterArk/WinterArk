@@ -6,60 +6,76 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:intl/intl.dart';
 import 'api_service.dart';
 import 'package:timezone/data/latest.dart' as tz;
+import 'package:flutter/material.dart';
+import 'dart:typed_data';
+import 'dart:convert';
+import 'package:flutter/services.dart';
 
-// Returns a random roast message based on a randomly chosen muscle group
-String getRandomRoastMessage(List<String>? muscleGroups) {
-  Map<String, List<String>> roastMessages = {
-    'legs': [
-      "Of course you skipped legs, Mr. Chicken Legger!",
-      "Leg day? More like nap day—no leg gains here!",
-      "Skipping leg day again? Those chicken legs won't cut it!",
-      "Legs are the foundation, but you just couldn't build one!"
-    ],
-    'chest': [
-      "Didn't hit chest? Looks like a pancake to me!",
-      "Your chest is so flat, I mistook it for a board!",
-      "Skipping chest day means no push-ups—except if you're pushing your luck!",
-      "Chest day? More like rest day—where's the pump?"
-    ],
-    'arms': [
-      "Arm day? More like no arms day!",
-      "Your arms are so soft, they might as well be made of jelly!",
-      "Skipping arms won't make you strong—try lifting some dumbbells!",
-      "No curls? Your biceps are crying out for help!"
-    ],
-    'back': [
-      "Back day is important—oops, you missed it again!",
-      "An empty back equals no pull-ups—time to pull your weight!",
-      "Your back is as empty as your promise to work out!",
-      "Skipping back day? You'll be leaning on excuses all day!"
-    ],
-    'shoulders': [
-      "Shoulders are for power—guess you're all weak today!",
-      "No shoulder workout? That's like trying to carry the world with no support!",
-      "Skipping shoulders? Your arms are doomed to carry all the load!",
-      "Your shoulder strength is as missing as your motivation!"
-    ],
-    'core': [
-      "Your core is so weak, it might as well be cardboard!",
-      "No core workout means no abs—you might as well be flat!",
-      "Skipping core day? That’s a recipe for a wobbly midsection!",
-      "Your abs are taking a vacation if you skip core workouts!"
-    ],
-  };
-
-  // If muscle groups are provided and not empty, pick one randomly
-  if (muscleGroups != null && muscleGroups.isNotEmpty) {
-    final random = Random();
-    String chosenGroup = muscleGroups[random.nextInt(muscleGroups.length)].toLowerCase();
-    final messages = roastMessages[chosenGroup] ?? ['You skipped your workout, pathetic!'];
-    return messages[random.nextInt(messages.length)];
-  } else {
-    return 'You skipped your workout, pathetic!';
+class _RoastLoader {
+  static Map<String, dynamic>? _cache;
+  static Future<Map<String, dynamic>> load() async {
+    if (_cache != null) return _cache!;
+    final raw = await rootBundle.loadString('assets/roasts.json');
+    _cache = json.decode(raw) as Map<String, dynamic>;
+    return _cache!;
   }
 }
+// Returns a random roast message based on a randomly chosen muscle group
+Future<String> getRandomRoastMessage(
+  List<String>? muscleGroups,
+  String selectedDifficulty,
+) async {
+  
+  final roastByLevel = await _RoastLoader.load();
+  final levelMap = (roastByLevel[selectedDifficulty]
+      ?? roastByLevel['Soft Serve Roasts 🍦😋']) as Map<String, dynamic>;
+  final rnd = Random();
+  if (muscleGroups == null || muscleGroups.isEmpty) {
+    return 'You skipped your workout, pathetic!';
+  }
 
+  List<dynamic> messages;
+  if (muscleGroups != null && muscleGroups.isNotEmpty) {
+    final chosenMuscle = muscleGroups[rnd.nextInt(muscleGroups.length)].toLowerCase();
+    messages = (levelMap[chosenMuscle] as List<dynamic>?)
+        ?? levelMap.values.expand((l) => (l as List).cast<dynamic>()).toList();
+  } else {
+    messages = levelMap.values.expand((l) => (l as List).cast<dynamic>()).toList();
+  }
+  return messages[rnd.nextInt(messages.length)] as String;
+}
 void callbackDispatcher() {
+   AwesomeNotifications().initialize(
+    null,
+    [
+      NotificationChannel(
+        channelKey: 'workout_reminder',
+        channelName: 'Workout Reminders',
+        channelDescription: 'Reminders for scheduled workouts',
+        defaultColor: Color(0xFF00BFFF),   
+        ledColor: Color(0xFF00BFFF),
+        importance: NotificationImportance.High,
+        enableLights: true,
+        channelShowBadge: true,
+        playSound: true,
+        enableVibration: true,
+      ),
+      NotificationChannel(
+        channelKey: 'roast_notifications',
+        channelName: 'Roast Notifications',
+        channelDescription:
+            'Channel for roast notifications when a planned workout is missed',
+        defaultColor: Color(0xFF1E1E1E),
+        ledColor: Colors.deepOrange,
+        importance: NotificationImportance.High,
+        enableLights: true,
+        channelShowBadge: true,
+        playSound: true,
+        enableVibration: true,
+      ),
+    ],
+  );
+
   Workmanager().executeTask((task, inputData) async {
     tz.initializeTimeZones();
     print("Local timezone: ${tz.local.name}");
@@ -76,6 +92,7 @@ void callbackDispatcher() {
     }
 
     List<String>? plannedMuscleGroups = prefs.getStringList('plannedMuscleGroups');
+    String? roastLevel = prefs.getString('roastLevel') ?? 'Soft Serve Roasts 🍦😋';
     String? plannedWorkoutDateStr = prefs.getString('plannedWorkoutDate');
     String? plannedWorkoutName = prefs.getString('plannedWorkoutName');
 
@@ -114,18 +131,20 @@ void callbackDispatcher() {
     );
 
     try {
-      // Query the API to fetch workouts logged for the day of the planned workout
       List<dynamic> workouts = await ApiService.getWorkoutsForDay(userId, dateKey);
-      // If no workout was logged for that day, schedule a roast notification
       if (workouts.isEmpty) {
-        String roastMessage = getRandomRoastMessage(plannedMuscleGroups);
+        final roastMessage = await getRandomRoastMessage(plannedMuscleGroups, roastLevel);
         await AwesomeNotifications().createNotification(
           content: NotificationContent(
             id: 200,
             channelKey: 'roast_notifications',
-            title: 'You Missed Your $plannedWorkoutName Workout!',
+            title: '🔥 You Missed Your $plannedWorkoutName Workout!',
             body: roastMessage,
-            notificationLayout: NotificationLayout.Default,
+            notificationLayout: NotificationLayout.BigText, 
+            color: Colors.deepOrangeAccent,  
+            autoDismissible: true,
+            displayOnBackground: true,
+            displayOnForeground: true, 
           ),
           schedule: notificationSchedule
         );

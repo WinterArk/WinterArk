@@ -4,6 +4,7 @@ import 'api_service.dart';
 import 'past_workouts.dart';
 import 'chat_screen.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'button_effects/ui_helpers.dart';
 
 class GymBuddyScreen extends StatefulWidget {
   final String currentUserId;
@@ -69,9 +70,7 @@ class _GymBuddyScreenState extends State<GymBuddyScreen> {
         connectedBuddies = newConnected;
       });
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error loading buddies: $e')),
-      );
+      showShortFadeSnack(context, 'Error loading buddies: $e');
     } finally {
       setState(() => isLoadingBuddies = false);
     }
@@ -105,9 +104,7 @@ class _GymBuddyScreenState extends State<GymBuddyScreen> {
       results.removeWhere((u) => u['_id'] == widget.currentUserId);
       setState(() => searchResults = results);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Search error: $e')),
-      );
+      showShortFadeSnack(context, 'Search error: $e');
     } finally {
       setState(() => isLoadingSearch = false);
     }
@@ -116,15 +113,11 @@ class _GymBuddyScreenState extends State<GymBuddyScreen> {
   Future<void> _addGymBuddy(String buddyId) async {
     try {
       await ApiService.addGymBuddy(widget.currentUserId, buddyId);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Request sent')),
-      );
+      showShortFadeSnack(context, 'Request sent');
       setState(() => searchResults.removeWhere((u) => u['_id'] == buddyId));
       _loadUserBuddies();
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
+      showShortFadeSnack(context, 'Error: $e');
     }
   }
 
@@ -209,9 +202,22 @@ class _GymBuddyScreenState extends State<GymBuddyScreen> {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        automaticallyImplyLeading: false, // hide the back-arrow here
-        title: const Text('Gym Buddies'),
-        backgroundColor: Colors.black,
+        title: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(width: 8),
+          Text(
+            "Gym Buddies",
+            style: glowingTextStyle(
+              Colors.white,
+              size: 26,
+            ),
+          ),
+        ],
+      ),
+      automaticallyImplyLeading: false, // hide the back-arrow here
+      backgroundColor: Colors.black,
+      centerTitle: true,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

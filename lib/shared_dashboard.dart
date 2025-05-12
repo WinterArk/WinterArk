@@ -1,6 +1,7 @@
 // shared_dashboard.dart
 import 'package:flutter/material.dart';
 import 'api_service.dart';
+import 'button_effects/ui_helpers.dart';
 
 class SharedDashboard extends StatefulWidget {
   final String userId;
@@ -11,6 +12,7 @@ class SharedDashboard extends StatefulWidget {
 }
 
 class _SharedDashboardState extends State<SharedDashboard> {
+  TextEditingController? postController;
   List<dynamic> posts = [];
   bool isLoading = true;
 
@@ -18,6 +20,12 @@ class _SharedDashboardState extends State<SharedDashboard> {
   void initState() {
     super.initState();
     fetchPosts();
+  }
+
+  @override
+  void dispose() {
+    postController?.dispose();
+    super.dispose();
   }
 
   Future<void> fetchPosts() async {
@@ -31,13 +39,13 @@ class _SharedDashboardState extends State<SharedDashboard> {
       setState(() {
         isLoading = false;
       });
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Error fetching posts: $e')));
+      showShortFadeSnack(context, 'Error fetching posts: $e');
+          
     }
   }
 
   void _showNewPostDialog() {
-    final TextEditingController postController = TextEditingController();
+    postController = TextEditingController();
     showDialog(
       context: context,
       builder: (context) {
@@ -56,7 +64,7 @@ class _SharedDashboardState extends State<SharedDashboard> {
             ),
             ElevatedButton(
               onPressed: () async {
-                final description = postController.text.trim();
+                final description = postController!.text.trim();
                 if (description.isNotEmpty) {
                   try {
                     final newPost =
@@ -66,8 +74,7 @@ class _SharedDashboardState extends State<SharedDashboard> {
                     });
                     Navigator.pop(context);
                   } catch (e) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Error creating post: $e')));
+                      showShortFadeSnack(context, 'Error creating post: $e');
                   }
                 }
               },
@@ -84,6 +91,7 @@ class _SharedDashboardState extends State<SharedDashboard> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false, // Prevent duplicate back/sign-out arrow
+        centerTitle: true,
         title: const Text('Shared Dashboard'),
         backgroundColor: Colors.black,
         actions: [
@@ -132,11 +140,18 @@ class WorkoutPostCard extends StatefulWidget {
 class _WorkoutPostCardState extends State<WorkoutPostCard> {
   // Use a mutable copy of the post so we can update it
   late dynamic currentPost;
+  TextEditingController? editController;
 
   @override
   void initState() {
     super.initState();
     currentPost = widget.post;
+  }
+
+   @override
+  void dispose() {
+    editController?.dispose();
+    super.dispose();
   }
 
   // Compute liked/disliked state dynamically from currentPost.
@@ -170,7 +185,7 @@ class _WorkoutPostCardState extends State<WorkoutPostCard> {
   }
 
   void _showEditDialog() {
-    final TextEditingController editController =
+    editController =
     TextEditingController(text: currentPost['description']);
     showDialog(
       context: context,
@@ -190,7 +205,7 @@ class _WorkoutPostCardState extends State<WorkoutPostCard> {
             ),
             ElevatedButton(
               onPressed: () async {
-                final newDesc = editController.text.trim();
+                final newDesc = editController!.text.trim();
                 if (newDesc.isNotEmpty) {
                   try {
                     final updatedPost =
@@ -200,8 +215,7 @@ class _WorkoutPostCardState extends State<WorkoutPostCard> {
                     });
                     Navigator.pop(context);
                   } catch (e) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Error updating post: $e')));
+                      showShortFadeSnack(context, 'Error updating post: $e');
                   }
                 }
               },
@@ -216,12 +230,10 @@ class _WorkoutPostCardState extends State<WorkoutPostCard> {
   Future<void> _deletePost() async {
     try {
       await ApiService.deletePost(currentPost['_id']);
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Post deleted successfully')));
+      showShortFadeSnack(context, 'Post deleted successfully');
       // Optionally, signal the parent widget to refresh the posts list.
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error deleting post: $e')));
+      showShortFadeSnack(context, 'Error deleting post: $e');
     }
   }
 
@@ -291,9 +303,7 @@ class _WorkoutPostCardState extends State<WorkoutPostCard> {
                         currentPost = updatedPost;
                       });
                     } catch (e) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Error liking post: $e')),
-                      );
+                      showShortFadeSnack(context, 'Error liking post: $e');
                     }
                   },
                 ),
@@ -315,9 +325,7 @@ class _WorkoutPostCardState extends State<WorkoutPostCard> {
                         currentPost = updatedPost;
                       });
                     } catch (e) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Error disliking post: $e')),
-                      );
+                      showShortFadeSnack(context, 'Error disliking post: $e');
                     }
                   },
                 ),
@@ -354,8 +362,7 @@ class _WorkoutPostCardState extends State<WorkoutPostCard> {
                     currentPost['comments'] = updatedPost['comments'];
                   });
                 } catch (e) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Error adding comment: $e')));
+                    showShortFadeSnack(context, 'Error adding comment: $e');
                 }
               },
             ),
