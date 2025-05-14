@@ -25,7 +25,7 @@ class _HomePageState extends State<HomePage> {
       const WorkoutTrackerLandingPage(),
       const PastWorkoutsCalendar(),
       GymBuddyScreen(currentUserId: widget.userId),
-      ProfilePage(userId: widget.userId),
+      ProfilePage(userId: widget.userId)
     ];
 
     return Scaffold(

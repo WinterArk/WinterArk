@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'api_service.dart';
 import 'button_effects/ui_helpers.dart';
+import 'button_effects/neon_button_onpressed.dart';
 
 class AccountSettingsPage extends StatefulWidget {
   final String userId;
@@ -154,10 +155,12 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                 border: OutlineInputBorder(),
               ),
             ),
-            const SizedBox(height: 8),
-            ElevatedButton(
+            const SizedBox(height: 16),
+            NeonButton(
               onPressed: _isLoading ? null : _updateUsername,
-              child: const Text('Update Username'),
+              glowColor: Colors.white,
+              backgroundColor: Colors.black,
+              label: 'Update Username',
             ),
             const SizedBox(height: 16),
             const Text(
@@ -201,10 +204,12 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                 border: OutlineInputBorder(),
               ),
             ),
-            const SizedBox(height: 8),
-            ElevatedButton(
+            const SizedBox(height: 16),
+            NeonButton(
               onPressed: _isLoading ? null : _updatePassword,
-              child: const Text('Update Password'),
+              glowColor: Colors.white,
+              backgroundColor: Colors.black,
+              label: 'Update Passoword',
             ),
             const SizedBox(height: 16),
             const Text(
@@ -215,10 +220,12 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 8),
-            ElevatedButton(
+            const SizedBox(height: 16),
+            NeonButton(
               onPressed: _isLoading ? null : _updateProfilePicture,
-              child: const Text('Update Profile Picture'),
+              glowColor: Colors.white,
+              backgroundColor: Colors.black,
+              label: 'Update Profile Picture',
             ),
             const SizedBox(height: 16),
             if (_message.isNotEmpty)
