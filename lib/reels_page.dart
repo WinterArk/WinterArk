@@ -17,6 +17,18 @@ class _ReelsPageState extends State<ReelsPage> with WidgetsBindingObserver {
     'assets/videos/demo1.mp4',
     'assets/videos/demo2.mp4',
     'assets/videos/demo3.mp4'
+    'assets/videos/demo4.mov'
+    'assets/videos/demo5.mov'
+    'assets/videos/demo6.mov'
+    'assets/videos/demo7.mov'
+    'assets/videos/demo8.mov'
+    'assets/videos/demo9.mov'
+    'assets/videos/demo10.mov'
+    'assets/videos/demo11.mov'
+    'assets/videos/demo12.mov'
+    'assets/videos/demo13.mov'
+    'assets/videos/demo14.mov'
+    'assets/videos/demo15.mov'
   ];
 
   final List<VideoPlayerController> _controllers = [];
