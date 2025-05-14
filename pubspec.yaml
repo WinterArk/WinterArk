@@ -74,6 +74,11 @@ flutter:
     - assets/videos/demo2.mp4
     - assets/videos/demo3.mp4
     - assets/roasts.json
+    - assets/images/frozen-fall-leaves-in-winter-free-image.webp
+    - assets/images/heavy-snow-in-the-forest-free-image.webp
+    - assets/images/tiny-and-lonely-snowman-in-the-city-free-photo.png
+    - assets/images/cute-bambi-in-snowy-forest-free-photo.png
+    - assets/images/small-village-in-a-snow-globe-free-image.webp
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.

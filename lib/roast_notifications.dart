@@ -21,6 +21,8 @@ class _RoastNotificationsSettingsPageState extends State<RoastNotificationsSetti
   final aquamarine = const Color.fromARGB(255, 167, 223, 248);  // #91C1D8
   final blueGrotto = const Color.fromARGB(255, 45, 178, 250);  // #0070AC
 
+  bool showExplicitRoasts = false;
+  String explicitRoast = 'Lift or Get Lit the F*** Up 💪🔥';
   String selectedRoast = 'Soft Serve Roasts 🍦😋';
   final List<String> roastLevels = [
     'Soft Serve Roasts 🍦😋',
@@ -45,6 +47,7 @@ class _RoastNotificationsSettingsPageState extends State<RoastNotificationsSetti
   void initState() {
     super.initState();
     _loadSettings();
+    _loadPrefs();
   }
 
   Future<void> _loadSettings() async {
@@ -61,6 +64,13 @@ class _RoastNotificationsSettingsPageState extends State<RoastNotificationsSetti
     await prefs.setBool('roastNotifications', roastEnabled);
     await prefs.setDouble('roastIntensity', roastIntensity);
     await prefs.setString('roastLevel', selectedRoast);
+  }
+
+  Future<void> _loadPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      showExplicitRoasts = prefs.getBool('showExplicitRoasts') ?? false;
+    });
   }
 
   void _enableRoastNotifications() {
@@ -179,9 +189,9 @@ class _RoastNotificationsSettingsPageState extends State<RoastNotificationsSetti
           ),
           child: Switch(
             value: value,
+            inactiveTrackColor: Colors.black,
             activeColor: aquamarine,
             activeTrackColor: aquamarine.withOpacity(0.3),
-
             onChanged: (v) {
               onChanged(v);
               setState(() => _isSwitchFlashing = true);
@@ -364,7 +374,11 @@ class _RoastNotificationsSettingsPageState extends State<RoastNotificationsSetti
                 spacing: 200,
                 runSpacing: 12,
                 alignment: WrapAlignment.center,
-                children: roastLevels.map((r) => _neonRoastChip(r)).toList(),
+                children: [
+                  for (final level in roastLevels)
+                    if (level != explicitRoast || showExplicitRoasts)
+                      _neonRoastChip(level),
+                ],
               ),
               const SizedBox(height: 40),
               if (debugMode)
