@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:intl/intl.dart';
-import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'api_service.dart';
 import 'workout_reminders.dart'; 
 import 'roast_notifications.dart'; 
 import 'package:workmanager/workmanager.dart';
 import 'button_effects/flash_press.dart';
-import 'package:another_flushbar/flushbar.dart';
 import 'button_effects/ui_helpers.dart';
 
 class PlanWorkoutPage extends StatefulWidget {
@@ -43,7 +40,7 @@ class _PlanWorkoutPageState extends State<PlanWorkoutPage> {
   static const _flashDuration = Duration(milliseconds: 300);
   static const _flashHold = Duration(milliseconds: 400);
   static const _flashFade = Duration(milliseconds: 400);
-  Set<String> _flashingSplits = {};
+  final Set<String> _flashingSplits = {};
 
   void _flashAddButton() {
     setState(() => _addFlashing = true);
@@ -220,8 +217,11 @@ class _PlanWorkoutPageState extends State<PlanWorkoutPage> {
           _flashChip(split);  
           _saveSelectedSplits();
           setState(() {
-            if (on) selectedWorkoutSplits.add(split);
-            else selectedWorkoutSplits.remove(split);
+            if (on) {
+              selectedWorkoutSplits.add(split);
+            } else {
+              selectedWorkoutSplits.remove(split);
+            }
           });
         },
         selectedColor: aquamarine,
@@ -246,7 +246,7 @@ class _PlanWorkoutPageState extends State<PlanWorkoutPage> {
           colorScheme: ColorScheme.dark(
             primary: aquamarine,
             onPrimary: Colors.black,
-            surface: Colors.black!,
+            surface: Colors.black,
             onSurface: Colors.white70,
           ),
         ),

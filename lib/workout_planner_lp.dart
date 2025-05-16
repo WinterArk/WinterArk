@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'workout_planner.dart';
 import 'reuse_workout_page.dart';
 import 'plan_future_workout.dart';
-import 'button_effects/lb_animated.dart';
-import 'button_effects/pulsing_icon.dart';
 import 'button_effects/flash_press.dart';
 
 class WorkoutTrackerLandingPage extends StatelessWidget {

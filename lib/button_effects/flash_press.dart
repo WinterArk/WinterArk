@@ -8,13 +8,13 @@ class FlashOnPress extends StatefulWidget {
   final Color flashColor;  
 
   const FlashOnPress({
-    Key? key,
+    super.key,
     required this.child,
     required this.onTap,
     this.flashDuration = const Duration(milliseconds: 200),
     this.glowColor   = Colors.blueAccent,
     this.flashColor  = Colors.white,
-  }) : super(key: key);
+  });
 
   @override
   _FlashOnPressState createState() => _FlashOnPressState();

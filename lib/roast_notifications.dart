@@ -1,7 +1,6 @@
 // lib/roast_notifications_settings_page.dart
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'button_effects/ui_helpers.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'background_tasks.dart';
 import 'button_effects/flash_press.dart';
@@ -31,8 +30,8 @@ class _RoastNotificationsSettingsPageState extends State<RoastNotificationsSetti
     'Lift or Get Lit the F*** Up 💪🔥',
   ];
 
-  bool _switchFlashing = false;
-  Duration _switchFlashDuration = const Duration(milliseconds: 100);
+  final bool _switchFlashing = false;
+  final Duration _switchFlashDuration = const Duration(milliseconds: 100);
 
   final Set<String> _flashingRoasts = {};
   final Duration _flashDuration = const Duration(milliseconds: 300);

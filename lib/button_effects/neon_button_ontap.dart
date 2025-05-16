@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:winterark/button_effects/ui_helpers.dart';
 
 class NeonButton extends StatelessWidget {
   final String label;
@@ -8,12 +7,12 @@ class NeonButton extends StatelessWidget {
   final Color backgroundColor;
 
   const NeonButton({
-    Key? key,
+    super.key,
     required this.label,
     required this.onTap,
     this.glowColor        = Colors.blueAccent,
     this.backgroundColor  = Colors.black,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

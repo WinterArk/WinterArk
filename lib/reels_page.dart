@@ -13,191 +13,72 @@ class ReelsPage extends StatefulWidget {
 class _ReelsPageState extends State<ReelsPage> with WidgetsBindingObserver {
   int _selectedTab = 0;
   int _currentReelIndex = 0;
+  bool _showReels = false;
+
   final List<String> _demoVideoPaths = [
     'assets/videos/demo1.mp4',
     'assets/videos/demo2.mp4',
-    'assets/videos/demo3.mp4'
-    'assets/videos/demo4.mov'
-    'assets/videos/demo5.mov'
-    'assets/videos/demo6.mov'
-    'assets/videos/demo7.mov'
-    'assets/videos/demo8.mov'
-    'assets/videos/demo9.mov'
-    'assets/videos/demo10.mov'
-    'assets/videos/demo11.mov'
-    'assets/videos/demo12.mov'
-    'assets/videos/demo13.mov'
-    'assets/videos/demo14.mov'
-    'assets/videos/demo15.mov'
+    'assets/videos/demo3.mp4',
+    'assets/videos/demo4.mp4',
+    'assets/videos/demo5.mp4',
+    'assets/videos/demo6.mp4',
+    'assets/videos/demo7.mp4',
+    'assets/videos/demo8.mp4',
+    'assets/videos/demo9.mp4',
+    'assets/videos/demo10.mp4',
+    'assets/videos/demo11.mp4',
+    'assets/videos/demo12.mp4',
+    'assets/videos/demo13.mp4',
+    'assets/videos/demo14.mp4',
   ];
 
-  final List<VideoPlayerController> _controllers = [];
-  bool isLoading = true;
-  bool _isPlaying = true;
-
-  /// when false, videos never initialize/play
-  bool _showReels = false;
+  late final PageController _pageController;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    // _initDemoControllers();  // initialization deferred until toggle
-  }
-
-  Future<void> _initDemoControllers() async {
-    for (var path in _demoVideoPaths) {
-      final c = VideoPlayerController.asset(path);
-      await c.initialize();
-      if (!mounted) {
-        c.dispose();
-        return;
-      }
-      c.setLooping(true);
-      _controllers.add(c);
-    }
-    if (!mounted) return;
-    setState(() {
-      isLoading = false;
-    });
-    _playVideo(_currentReelIndex);
-  }
-
-  void _playVideo(int index) {
-    for (int i = 0; i < _controllers.length; i++) {
-      if (i == index) {
-        _controllers[i].play();
-      } else {
-        _controllers[i].pause();
-      }
-    }
-    setState(() {
-      _currentReelIndex = index;
-      _isPlaying = true;
-    });
-  }
-
-  void _pauseAllVideos() {
-    for (var controller in _controllers) {
-      controller.pause();
-    }
-  }
-
-  /// Toggle showing/hiding reels
-  void _toggleShowReels() {
-    setState(() {
-      _showReels = !_showReels;
-      if (_showReels) {
-        isLoading = true;
-        _initDemoControllers();
-      } else {
-        _pauseAllVideos();
-      }
-    });
+    _pageController = PageController(initialPage: _currentReelIndex);
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    for (var controller in _controllers) {
-      controller.dispose();
-    }
-    _controllers.clear();
+    _pageController.dispose();
     super.dispose();
   }
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.inactive ||
-        state == AppLifecycleState.paused ||
-        state == AppLifecycleState.detached) {
-      for (var controller in _controllers) {
-        if (controller.value.isPlaying) {
-          controller.pause();
-        }
-      }
-    }
-  }
-
-  @override
-  void deactivate() {
-    for (var controller in _controllers) {
-      controller.pause();
-    }
-    super.deactivate();
+  void _toggleShowReels() {
+    setState(() {
+      _showReels = !_showReels;
+    });
   }
 
   Widget _tabButton(String label, int index) {
     return GestureDetector(
       onTap: () {
-        setState(() {
-          _selectedTab = index;
-        });
+        setState(() => _selectedTab = index);
         if (index == 0 && _showReels) {
-          _playVideo(_currentReelIndex);
-        } else {
-          _pauseAllVideos();
+          _pageController.jumpToPage(_currentReelIndex);
         }
       },
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
         decoration: BoxDecoration(
           color: _selectedTab == index
               ? Colors.blueAccent.withOpacity(0.3)
               : Colors.transparent,
-          borderRadius: BorderRadius.circular(30),
+          borderRadius: BorderRadius.circular(24),
         ),
         child: Text(
           label,
           style: TextStyle(
             color: _selectedTab == index ? Colors.blueAccent : Colors.white,
-            fontSize: 16,
+            fontSize: 14,
             fontWeight: FontWeight.bold,
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _videoOverlay(int index) {
-    return Positioned(
-      right: 16,
-      bottom: 32,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          IconButton(
-            icon: const Icon(Icons.favorite_border,
-                size: 32, color: Colors.redAccent),
-            onPressed: () {},
-          ),
-          const SizedBox(height: 12),
-          IconButton(
-            icon: const Icon(Icons.comment, size: 32, color: Colors.lightBlueAccent),
-            onPressed: () {},
-          ),
-          const SizedBox(height: 12),
-          IconButton(
-            icon: const Icon(Icons.bookmark_border, size: 32, color: Colors.amber),
-            onPressed: () {},
-          ),
-          const SizedBox(height: 12),
-          IconButton(
-            icon: const Icon(Icons.share, size: 32, color: Colors.greenAccent),
-            onPressed: () {},
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _playPauseIconOverlay() {
-    return Center(
-      child: AnimatedOpacity(
-        opacity: _isPlaying ? 0.0 : 1.0,
-        duration: const Duration(milliseconds: 300),
-        child: const Icon(Icons.play_arrow, size: 80, color: Colors.white70),
       ),
     );
   }
@@ -227,9 +108,7 @@ class _ReelsPageState extends State<ReelsPage> with WidgetsBindingObserver {
         actions: [
           IconButton(
             icon: const Icon(Icons.camera_alt, color: Colors.white),
-            onPressed: () {
-              debugPrint('Camera icon pressed');
-            },
+            onPressed: () => debugPrint('Camera pressed'),
           ),
           IconButton(
             icon: Icon(
@@ -241,9 +120,9 @@ class _ReelsPageState extends State<ReelsPage> with WidgetsBindingObserver {
           ),
         ],
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(60.0),
+          preferredSize: const Size.fromHeight(48.0),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 8),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -256,58 +135,22 @@ class _ReelsPageState extends State<ReelsPage> with WidgetsBindingObserver {
       ),
       body: _selectedTab == 0
           ? (_showReels
-          ? (isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : PageView.builder(
+          ? PageView.builder(
         scrollDirection: Axis.vertical,
-        controller: PageController(initialPage: _currentReelIndex),
-        itemCount: _controllers.length,
-        onPageChanged: (index) => _playVideo(index),
+        controller: _pageController,
+        itemCount: _demoVideoPaths.length,
+        onPageChanged: (index) {
+          setState(() => _currentReelIndex = index);
+        },
         itemBuilder: (context, index) {
-          final controller = _controllers[index];
-          return GestureDetector(
-            onTap: () {
-              setState(() {
-                if (controller.value.isPlaying) {
-                  controller.pause();
-                  _isPlaying = false;
-                } else {
-                  controller.play();
-                  _isPlaying = true;
-                }
-              });
-            },
-            child: Stack(
-              children: [
-                SizedBox.expand(
-                  child: FittedBox(
-                    fit: BoxFit.cover,
-                    child: SizedBox(
-                      width: controller.value.size.width,
-                      height: controller.value.size.height,
-                      child: VideoPlayer(controller),
-                    ),
-                  ),
-                ),
-                _playPauseIconOverlay(),
-                _videoOverlay(index),
-                Positioned(
-                  left: 16,
-                  bottom: 32,
-                  child: Text(
-                    'Demo Reel ${index + 1}',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
-            ),
+          return _VideoTile(
+            key: ValueKey(index),
+            assetPath: _demoVideoPaths[index],
+            index: index,
+            playOnLoad: index == _currentReelIndex,
           );
         },
-      ))
+      )
           : Center(
         child: Text(
           'Reels are hidden.\nTap the eye icon to show.',
@@ -316,6 +159,141 @@ class _ReelsPageState extends State<ReelsPage> with WidgetsBindingObserver {
         ),
       ))
           : SharedDashboard(userId: widget.userId),
+    );
+  }
+}
+
+class _VideoTile extends StatefulWidget {
+  final String assetPath;
+  final int index;
+  final bool playOnLoad;
+
+  const _VideoTile({
+    super.key,
+    required this.assetPath,
+    required this.index,
+    this.playOnLoad = false,
+  });
+
+  @override
+  __VideoTileState createState() => __VideoTileState();
+}
+
+class __VideoTileState extends State<_VideoTile> {
+  late final VideoPlayerController _controller;
+  bool _initialized = false;
+  bool _isPlaying = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = VideoPlayerController.asset(widget.assetPath)
+      ..setLooping(true)
+      ..initialize().then((_) {
+        if (!mounted) return;
+        setState(() {
+          _initialized = true;
+          if (widget.playOnLoad) {
+            _controller.play();
+            _isPlaying = true;
+          }
+        });
+      });
+  }
+
+  @override
+  void didUpdateWidget(covariant _VideoTile oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!_initialized) return;
+    if (!oldWidget.playOnLoad && widget.playOnLoad) {
+      _controller.play();
+      setState(() => _isPlaying = true);
+    } else if (oldWidget.playOnLoad && !widget.playOnLoad) {
+      _controller.pause();
+      setState(() => _isPlaying = false);
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_initialized) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          if (_controller.value.isPlaying) {
+            _controller.pause();
+            _isPlaying = false;
+          } else {
+            _controller.play();
+            _isPlaying = true;
+          }
+        });
+      },
+      child: Stack(
+        children: [
+          Center(
+            child: AspectRatio(
+              aspectRatio: _controller.value.aspectRatio,
+              child: VideoPlayer(_controller),
+            ),
+          ),
+          Center(
+            child: AnimatedOpacity(
+              opacity: _isPlaying ? 0.0 : 1.0,
+              duration: const Duration(milliseconds: 300),
+              child: const Icon(Icons.play_arrow, size: 80, color: Colors.white70),
+            ),
+          ),
+          Positioned(
+            right: 16,
+            bottom: 32,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.favorite_border, size: 32, color: Colors.redAccent),
+                  onPressed: () {},
+                ),
+                const SizedBox(height: 12),
+                IconButton(
+                  icon: const Icon(Icons.comment, size: 32, color: Colors.lightBlueAccent),
+                  onPressed: () {},
+                ),
+                const SizedBox(height: 12),
+                IconButton(
+                  icon: const Icon(Icons.bookmark_border, size: 32, color: Colors.amber),
+                  onPressed: () {},
+                ),
+                const SizedBox(height: 12),
+                IconButton(
+                  icon: const Icon(Icons.share, size: 32, color: Colors.greenAccent),
+                  onPressed: () {},
+                ),
+              ],
+            ),
+          ),
+          Positioned(
+            left: 16,
+            bottom: 32,
+            child: Text(
+              'Demo Reel ${widget.index + 1}',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

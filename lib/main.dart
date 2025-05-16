@@ -13,7 +13,6 @@ import 'package:http/http.dart' as http;
 
 // Timezone package:
 import 'package:timezone/data/latest.dart' as tz;
-import 'dart:typed_data';
 
 // Notification packages:
 import 'package:awesome_notifications/awesome_notifications.dart';

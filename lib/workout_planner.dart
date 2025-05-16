@@ -3,8 +3,6 @@
 import 'package:flutter/material.dart';
 import 'api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:intl/intl.dart';
-import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'button_effects/ui_helpers.dart';
 
 class ExerciseEntry {
@@ -59,7 +57,7 @@ class _WorkoutTrackerScreenState extends State<WorkoutTrackerScreen> {
   bool _addFlashing = false;
 
   static const _flashDuration = Duration(milliseconds: 300);
-  Set<String> _flashingSplits = {};
+  final Set<String> _flashingSplits = {};
 
   void _flashAddButton() {
     setState(() => _addFlashing = true);
@@ -269,8 +267,11 @@ Future<void> _submitWorkout() async {
         onSelected: (on) {
           _flashChip(split); 
           setState(() {
-            if (on) selectedWorkoutSplits.add(split);
-            else selectedWorkoutSplits.remove(split);
+            if (on) {
+              selectedWorkoutSplits.add(split);
+            } else {
+              selectedWorkoutSplits.remove(split);
+            }
           });
         },
         selectedColor: blueGrotto,
@@ -562,7 +563,7 @@ Future<void> _submitWorkout() async {
                 ),
               ),
             );
-          }).toList(),
+          }),
            const SizedBox(height: 25),
             Center(
               child: AnimatedContainer(

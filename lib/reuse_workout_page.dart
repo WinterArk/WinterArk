@@ -23,8 +23,8 @@ class _WorkoutReusePageState extends State<WorkoutReusePage> {
   final blueGrotto = const Color.fromARGB(255, 45, 178, 250);  // #0070AC
   final navyBlue   = const Color(0xFF003371);  // #003371
 
-  Set<String> _flashingRows = {};
-  Duration _flashDuration = const Duration(milliseconds: 300);
+  final Set<String> _flashingRows = {};
+  final Duration _flashDuration = const Duration(milliseconds: 300);
 
   Future<String?> getUserId() async {
     final prefs = await SharedPreferences.getInstance();
@@ -172,7 +172,7 @@ class _WorkoutReusePageState extends State<WorkoutReusePage> {
                       ),
                     ),
                   );
-                }).toList(),
+                }),
                 const SizedBox(height: 12),
               ],
             ),

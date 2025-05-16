@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
-import 'package:another_flushbar/flushbar.dart';
 import 'button_effects/ui_helpers.dart';
 import 'package:intl/intl.dart';
 
@@ -103,7 +102,7 @@ class _WorkoutReminderSettingsPageState extends State<WorkoutReminderSettingsPag
           colorScheme: ColorScheme.dark(
             primary: aquamarine,
             onPrimary: Colors.black,
-            surface: Colors.black!,
+            surface: Colors.black,
             onSurface: Colors.white70,
           ),
         ),

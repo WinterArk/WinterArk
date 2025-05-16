@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class LandingButton extends StatefulWidget {
   final VoidCallback onTap;
   final Widget child;
-  const LandingButton({ required this.onTap, required this.child });
+  const LandingButton({super.key,  required this.onTap, required this.child });
 
   @override
   _LandingButtonState createState() => _LandingButtonState();

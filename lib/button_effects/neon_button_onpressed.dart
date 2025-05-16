@@ -10,14 +10,14 @@ class NeonButton extends StatefulWidget {
   final Duration flashDuration;
 
   const NeonButton({
-    Key? key,
+    super.key,
     required this.label,
     this.onPressed,
     this.glowColor = Colors.blueAccent,
     this.backgroundColor = Colors.black,
     this.textColor = Colors.white,
     this.flashDuration = const Duration(milliseconds: 500), 
-  }) : super(key: key);
+  });
 
   @override
   _NeonButtonState createState() => _NeonButtonState();

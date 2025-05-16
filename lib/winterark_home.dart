@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'login_screen.dart';
 
 class WinterArkHome extends StatefulWidget {
-  const WinterArkHome({Key? key}) : super(key: key);
+  const WinterArkHome({super.key});
 
   @override
   State<WinterArkHome> createState() => _WinterArkHomeState();
