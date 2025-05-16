@@ -70,9 +70,6 @@ dev_dependencies:
 # The following section is specific to Flutter packages.
 flutter:
   assets: # add more demos here if needed
-    - assets/videos/demo1.mp4
-    - assets/videos/demo2.mp4
-    - assets/videos/demo3.mp4
     - assets/videos/demo4.mp4
     - assets/videos/demo5.mp4
     - assets/videos/demo6.mp4
@@ -85,11 +82,11 @@ flutter:
     - assets/videos/demo13.mp4
     - assets/videos/demo14.mp4
     - assets/roasts.json
-    - assets/images/frozen-fall-leaves-in-winter-free-image.webp
-    - assets/images/heavy-snow-in-the-forest-free-image.webp
-    - assets/images/tiny-and-lonely-snowman-in-the-city-free-photo.png
-    - assets/images/cute-bambi-in-snowy-forest-free-photo.png
-    - assets/images/small-village-in-a-snow-globe-free-image.webp
+    - assets/images/raw.png
+    - assets/images/raw1.png
+    - assets/images/raw3.png
+    - assets/images/raw4.png
+    - assets/images/raw5.png
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
