@@ -7,7 +7,6 @@ import 'package:intl/intl.dart';
 import 'api_service.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:flutter/material.dart';
-import 'dart:typed_data';
 import 'dart:convert';
 import 'package:flutter/services.dart';
 
@@ -35,7 +34,7 @@ Future<String> getRandomRoastMessage(
   }
 
   List<dynamic> messages;
-  if (muscleGroups != null && muscleGroups.isNotEmpty) {
+  if (muscleGroups.isNotEmpty) {
     final chosenMuscle = muscleGroups[rnd.nextInt(muscleGroups.length)].toLowerCase();
     messages = (levelMap[chosenMuscle] as List<dynamic>?)
         ?? levelMap.values.expand((l) => (l as List).cast<dynamic>()).toList();

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:video_player/video_player.dart';
 import 'button_effects/ui_helpers.dart';
 import 'settings_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -8,7 +7,7 @@ import 'api_service.dart';
 class ProfilePage extends StatefulWidget {
   final String userId;
  
-  const ProfilePage({Key? key, required this.userId}) : super(key: key);
+  const ProfilePage({super.key, required this.userId});
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();
@@ -244,7 +243,7 @@ class _ProfilePageState extends State<ProfilePage> {
 class GymBuddiesPage extends StatelessWidget {
   final List<String> buddies;
 
-  const GymBuddiesPage({Key? key, required this.buddies}) : super(key: key);
+  const GymBuddiesPage({super.key, required this.buddies});
 
   @override
   Widget build(BuildContext context) {
@@ -286,7 +285,7 @@ class GymBuddiesPage extends StatelessWidget {
 
 class UserProfilePage extends StatelessWidget {
   final String username;
-  const UserProfilePage({Key? key, required this.username}) : super(key: key);
+  const UserProfilePage({super.key, required this.username});
 
   @override
   Widget build(BuildContext context) {

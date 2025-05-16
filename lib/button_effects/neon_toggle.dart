@@ -10,7 +10,7 @@ class NeonToggle extends StatefulWidget {
   final Duration flashDuration;
 
   const NeonToggle({
-    Key? key,
+    super.key,
     required this.label,
     required this.value,
     required this.onChanged,
@@ -18,7 +18,7 @@ class NeonToggle extends StatefulWidget {
     this.activeColor = Colors.lightBlueAccent,
     this.inactiveTrackColor = Colors.grey,
     this.flashDuration = const Duration(milliseconds: 300),
-  }) : super(key: key);
+  });
 
   @override
   _NeonToggleState createState() => _NeonToggleState();
