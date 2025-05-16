@@ -16,11 +16,11 @@ class _WinterArkHomeState extends State<WinterArkHome> {
 
   int _currentPage = 0;
   final List<String> _backgroundImages = [
-    'assets/images/frozen-fall-leaves-in-winter-free-image.webp',
-    'assets/images/tiny-and-lonely-snowman-in-the-city-free-photo.png',
-    'assets/images/heavy-snow-in-the-forest-free-image.webp',
-    'assets/images/cute-bambi-in-snowy-forest-free-photo.png',
-    'assets/images/small-village-in-a-snow-globe-free-image.webp',
+    'assets/images/raw.png',
+    'assets/images/raw1.png',
+    'assets/images/raw3.png',
+    'assets/images/raw4.png',
+    'assets/images/raw5.png',
   ];
 
   @override
