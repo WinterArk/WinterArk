@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'api_service.dart';
 import 'button_effects/ui_helpers.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 
-// Helper to format ISO timestamps into "April 22nd 2025, 10:32 PM" in local time.
 String _formatDateTime(String iso) {
   final dt = DateTime.parse(iso).toLocal();
   final month = DateFormat.MMMM().format(dt);
@@ -40,35 +40,75 @@ class SharedDashboard extends StatefulWidget {
 }
 
 class _SharedDashboardState extends State<SharedDashboard> {
-  TextEditingController? postController;
+  late IO.Socket socket;
   List<dynamic> posts = [];
   bool isLoading = true;
+  TextEditingController? postController;
 
   @override
   void initState() {
     super.initState();
+    _initSocket();
     fetchPosts();
   }
 
   @override
   void dispose() {
+    socket.dispose();
     postController?.dispose();
     super.dispose();
   }
 
+  void _initSocket() {
+    socket = IO.io(
+      ApiService.BASE_URL,
+      IO.OptionBuilder()
+          .setTransports(['websocket'])
+          .setQuery({'userId': widget.userId})
+          .build(),
+    );
+
+    // Explicitly connect
+    socket.connect();
+
+    socket.onConnect((_) {
+      debugPrint('⚡ Socket connected as ${socket.id}');
+      // join your personal room
+      socket.emit('join', widget.userId);
+      debugPrint('📥 Emitted join for room ${widget.userId}');
+    });
+
+    socket.onConnectError((err) {
+      debugPrint('❌ Socket connect error: $err');
+    });
+
+    socket.onError((err) {
+      debugPrint('⚠️ Socket error: $err');
+    });
+
+    socket.onDisconnect((_) {
+      debugPrint('🔌 Socket disconnected');
+    });
+
+    socket.on('new_post', (data) {
+      debugPrint('📨 new_post received: ${data['description']}');
+      setState(() {
+        posts.insert(0, data);
+      });
+    });
+  }
+
   Future<void> fetchPosts() async {
+    setState(() => isLoading = true);
     try {
-      final data = await ApiService.fetchPosts();
+      final data = await ApiService.fetchSharedPosts(widget.userId);
       setState(() {
         posts = data;
-        isLoading = false;
       });
     } catch (e) {
-      setState(() {
-        isLoading = false;
-      });
       showShortFadeSnack(context, 'Error fetching posts: $e');
-          
+    } finally {
+      setState(() => isLoading = false);
     }
   }
 
@@ -76,126 +116,95 @@ class _SharedDashboardState extends State<SharedDashboard> {
     postController = TextEditingController();
     showDialog(
       context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Create New Post'),
-          content: TextField(
-            controller: postController,
-            decoration: const InputDecoration(
-              hintText: 'Enter post description',
-            ),
+      builder: (ctx) => AlertDialog(
+        title: const Text('Create New Post'),
+        content: TextField(
+          controller: postController,
+          decoration: const InputDecoration(hintText: 'Enter post description'),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          ElevatedButton(
+            onPressed: () async {
+              final desc = postController!.text.trim();
+              if (desc.isEmpty) return;
+              try {
+                final newPost = await ApiService.createPost(widget.userId, description: desc);
+                // we’ll also get it via socket—but insert locally immediately:
+                setState(() => posts.insert(0, newPost));
+                Navigator.pop(ctx);
+              } catch (e) {
+                showShortFadeSnack(context, 'Error creating post: $e');
+              }
+            },
+            child: const Text('Post'),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                final description = postController!.text.trim();
-                if (description.isNotEmpty) {
-                  try {
-                    final newPost = await ApiService.createPost(
-                      widget.userId,
-                      description: description,
-                    );
-                    setState(() {
-                      posts.insert(0, newPost);
-                    });
-                    Navigator.pop(context);
-                  } catch (e) {
-                      showShortFadeSnack(context, 'Error creating post: $e');
-                  }
-                }
-              },
-              child: const Text('Post'),
-            ),
-          ],
-        );
-      },
+        ],
+      ),
     );
   }
 
   void _showShareWorkoutDialog() async {
-    List<dynamic> workouts = [];
+    List<dynamic> workouts;
     try {
       workouts = await ApiService.getPastWorkouts(widget.userId);
     } catch (e) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Error fetching workouts: $e')));
+      showShortFadeSnack(context, 'Error fetching workouts: $e');
       return;
     }
     String? selectedId;
-    final TextEditingController descController = TextEditingController();
+    final descCtrl = TextEditingController();
     showDialog(
       context: context,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setStateDlg) {
-            return AlertDialog(
-              title: const Text('Share a Workout'),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  DropdownButton<String>(
-                    isExpanded: true,
-                    value: selectedId,
-                    hint: const Text('Select a workout'),
-                    items: workouts.map<DropdownMenuItem<String>>((item) {
-                      final w = item as Map<String, dynamic>;
-                      final id = w['_id'] as String;
-                      final name = w['exercise_name'] ?? 'Workout';
-                      final date = w['date'] as String;
-                      final dateStr = _formatDateTime(date);
-                      return DropdownMenuItem(
-                        value: id,
-                        child: Text('$name on $dateStr'),
-                      );
-                    }).toList(),
-                    onChanged: (val) => setStateDlg(() => selectedId = val),
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: descController,
-                    decoration: const InputDecoration(
-                      hintText: 'Optional description',
-                    ),
-                  ),
-                ],
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx2, setDlg) => AlertDialog(
+          title: const Text('Share a Workout'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              DropdownButton<String>(
+                isExpanded: true,
+                value: selectedId,
+                hint: const Text('Select a workout'),
+                items: workouts.map((item) {
+                  final w = item as Map<String, dynamic>;
+                  final id = w['_id'] as String;
+                  final name = w['exercise_name'] ?? 'Workout';
+                  final dateStr = _formatDateTime(w['date'] as String);
+                  return DropdownMenuItem(value: id, child: Text('$name on $dateStr'));
+                }).toList(),
+                onChanged: (v) => setDlg(() => selectedId = v),
               ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('Cancel'),
-                ),
-                ElevatedButton(
-                  onPressed: selectedId == null
-                      ? null
-                      : () async {
-                    try {
-                      final newPost = await ApiService.createPost(
-                        widget.userId,
-                        workoutId: selectedId,
-                        description: descController.text.trim().isEmpty
-                            ? null
-                            : descController.text.trim(),
-                      );
-                      setState(() {
-                        posts.insert(0, newPost);
-                      });
-                      Navigator.pop(context);
-                    } catch (e) {
-                      ScaffoldMessenger.of(context)
-                          .showSnackBar(SnackBar(content: Text('Error sharing workout: $e')));
-                    }
-                  },
-                  child: const Text('Share'),
-                ),
-              ],
-            );
-          },
-        );
-      },
+              const SizedBox(height: 12),
+              TextField(
+                controller: descCtrl,
+                decoration: const InputDecoration(hintText: 'Optional description'),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx2), child: const Text('Cancel')),
+            ElevatedButton(
+              onPressed: selectedId == null
+                  ? null
+                  : () async {
+                try {
+                  final newPost = await ApiService.createPost(
+                    widget.userId,
+                    workoutId: selectedId,
+                    description: descCtrl.text.trim().isEmpty ? null : descCtrl.text.trim(),
+                  );
+                  setState(() => posts.insert(0, newPost));
+                  Navigator.pop(ctx2);
+                } catch (e) {
+                  showShortFadeSnack(ctx, 'Error sharing workout: $e');
+                }
+              },
+              child: const Text('Share'),
+            )
+          ],
+        ),
+      ),
     );
   }
 
@@ -203,27 +212,19 @@ class _SharedDashboardState extends State<SharedDashboard> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false, // Prevent duplicate back/sign-out arrow
-        centerTitle: true,
         title: const Text('Shared Dashboard'),
         backgroundColor: Colors.black,
+        centerTitle: true,
         actions: [
           DropdownButtonHideUnderline(
             child: DropdownButton<String>(
               icon: const Icon(Icons.more_vert, color: Colors.white),
-              items: <String>['New Post', 'Share Workout']
-                  .map<DropdownMenuItem<String>>((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
-              onChanged: (value) {
-                if (value == 'New Post') {
-                  _showNewPostDialog();
-                } else if (value == 'Share Workout') {
-                  _showShareWorkoutDialog();
-                }
+              items: const ['New Post', 'Share Workout']
+                  .map((v) => DropdownMenuItem(value: v, child: Text(v)))
+                  .toList(),
+              onChanged: (v) {
+                if (v == 'New Post') _showNewPostDialog();
+                if (v == 'Share Workout') _showShareWorkoutDialog();
               },
             ),
           ),
@@ -233,10 +234,7 @@ class _SharedDashboardState extends State<SharedDashboard> {
           ? const Center(child: CircularProgressIndicator())
           : ListView.builder(
         itemCount: posts.length,
-        itemBuilder: (context, index) {
-          final post = posts[index];
-          return WorkoutPostCard(post: post, userId: widget.userId);
-        },
+        itemBuilder: (_, i) => WorkoutPostCard(post: posts[i], userId: widget.userId),
       ),
     );
   }

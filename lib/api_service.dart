@@ -5,7 +5,6 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class ApiService {
-  // static const String BASE_URL = 'http://18.234.214.233:3000';
   static const String BASE_URL = 'http://18.234.214.233:3000';
 
   // 1) SIGN UP a new user
@@ -342,15 +341,18 @@ class ApiService {
   }
   }
 
-  // 19) FETCH posts for Shared Dashboard
-  static Future<List<dynamic>> fetchPosts() async {
-  final url = Uri.parse('$BASE_URL/api/posts');
-  final response = await http.get(url, headers: {"Content-Type": "application/json"});
-  if (response.statusCode == 200) {
-  return json.decode(response.body);
-  } else {
-  throw Exception('Failed to fetch posts: ${response.body}');
-  }
+// 19) FETCH shared posts for dashboard
+  static Future<List<dynamic>> fetchSharedPosts(String userId) async {
+    final url = Uri.parse('$BASE_URL/api/posts/shared/$userId');
+    final response = await http.get(
+      url,
+      headers: {"Content-Type": "application/json"},
+    );
+    if (response.statusCode == 200) {
+      return json.decode(response.body) as List<dynamic>;
+    } else {
+      throw Exception('Failed to fetch shared posts: ${response.body}');
+    }
   }
 
   // 20) Like a post
