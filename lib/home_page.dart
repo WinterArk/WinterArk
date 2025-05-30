@@ -6,6 +6,7 @@ import 'gymbuddy.dart';
 import 'reels_page.dart';
 import 'profile_page.dart';
 import 'button_effects/ui_helpers.dart';
+import 'upload_page.dart';
 
 class HomePage extends StatefulWidget {
   final String userId;
@@ -23,9 +24,9 @@ class _HomePageState extends State<HomePage> {
     final List<Widget> pages = [
       ReelsPage(userId: widget.userId),
       const WorkoutTrackerLandingPage(),
-      const PastWorkoutsCalendar(),
+      UploadPage(userId: widget.userId),  
       GymBuddyScreen(currentUserId: widget.userId),
-      ProfilePage(userId: widget.userId)
+      ProfilePage(userId: widget.userId),
     ];
 
     return Scaffold(
@@ -59,9 +60,9 @@ class _HomePageState extends State<HomePage> {
               label: "Workout",
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.calendar_today),
-              activeIcon: glowingIcon(Icons.calendar_today, blueGrotto, 32),
-              label: "History",
+              icon: Icon(Icons.camera_alt),
+              activeIcon: glowingIcon(Icons.camera_alt, blueGrotto, 32),
+              label: "Upload",
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.people),

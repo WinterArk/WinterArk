@@ -106,7 +106,7 @@ void showShortFadeSnack(BuildContext context, String message) {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: Colors.grey[850],
+          color: Colors.black,
           borderRadius: BorderRadius.circular(12),
           boxShadow: glowShadows(glowColor, radii: [6,12,18]),
         ),

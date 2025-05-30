@@ -83,6 +83,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
       final userId = res['user']['_id'] as String;
       await _persistUserId(userId);
+
+      final jwt = res['token'] as String;
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('authToken', jwt);
+
       final token = await FirebaseMessaging.instance.getToken();
       if (token != null) {
         unawaited(sendTokenToBackend(token));
@@ -116,8 +121,17 @@ class _LoginScreenState extends State<LoginScreen> {
         _passCtrl.text.trim(),
       );
 
+      final jwt = res['token'] as String;
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('authToken', jwt);
+
       final userId = res['user']['_id'] as String;
       await _persistUserId(userId);
+      
+      // final jwt = res['token'] as String;
+      // final prefs = await SharedPreferences.getInstance();
+      // await prefs.setString('authToken', jwt);
+
       final token = await FirebaseMessaging.instance.getToken();
       if (token != null) {
         unawaited(sendTokenToBackend(token));
