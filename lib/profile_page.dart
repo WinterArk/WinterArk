@@ -324,20 +324,15 @@ class _ProfilePageState extends State<ProfilePage> {
                   child: Column(
                     children: [
                       TabBar(
-                        // active tab label color
                         labelColor: blueGrotto,
-                        // inactive tab label color
                         unselectedLabelColor: Colors.white70,
-                        // the little line under the active tab
                         indicatorColor: blueGrotto,
-                        // how thick that line should be
                         indicatorWeight: 3,
                         tabs: const [
                           Tab(text: "Images"),
                           Tab(text: "Reels"),
                         ],
                       ),
-                      // this Expanded gives TabBarView a bounded height
                       Expanded(
                         child: TabBarView(
                           children: [

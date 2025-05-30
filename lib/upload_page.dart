@@ -8,7 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'api_service.dart';
 import 'profile_post.dart';
-import 'button_effects/ui_helpers.dart';    // ← your neon helpers
+import 'button_effects/ui_helpers.dart';   
 
 class UploadPage extends StatefulWidget {
   final String userId;
@@ -94,7 +94,6 @@ class _UploadPageState extends State<UploadPage> {
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                // --- Caption reserved for later ---
                   // TextField(
                   //   controller: _captionCtrl,
                   //   style: const TextStyle(color: Colors.white70),
@@ -162,8 +161,6 @@ class _UploadPageState extends State<UploadPage> {
                     ),
                   ],
                 ),
-
-                // push everything else (eventual caption, etc.) downward
                 const SizedBox(height: 24),
               ],
             ),
