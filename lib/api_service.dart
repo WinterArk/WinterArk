@@ -14,7 +14,7 @@ class ApiService {
   // static const String BASE_URL = 'http://10.0.2.2:3000';
   // for production, use the following line:
   // static const String BASE_URL = 'https://18.234.214.233:3000';
-  static const String BASE_URL = 'http://10.0.2.2:3000';
+  static const String BASE_URL = 'https://18.234.214.233:3000';
 
   // 1) SIGN UP a new user
   static Future<Map<String, dynamic>> signUp(
