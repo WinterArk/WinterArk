@@ -300,6 +300,11 @@ class _PastWorkoutsCalendarState extends State<PastWorkoutsCalendar> {
               : 'Past Workouts',
           style: glowingTextStyle(Colors.lightBlue, size: 26),
         ),
+        leading: IconButton(
+          icon: glowingIcon(Icons.arrow_back, babyBlue, 24),
+          onPressed: () => Navigator.of(context).maybePop(),
+          tooltip: 'Back',
+        ),
         centerTitle: true,
         actions: [
           FutureBuilder<int>(
@@ -310,12 +315,12 @@ class _PastWorkoutsCalendarState extends State<PastWorkoutsCalendar> {
                 icon: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.whatshot, color: Colors.orange),
+                    glowingIcon(Icons.whatshot, babyBlue, 24),
                     Text(
                       '$streak',
-                      style: const TextStyle(
-                        color: Colors.orange,
-                        fontWeight: FontWeight.bold,
+                      style: glowingTextStyle(
+                        babyBlue,
+                        size: 20,
                       ),
                     ),
                   ],

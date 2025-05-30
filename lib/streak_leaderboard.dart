@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'api_service.dart';
+import 'button_effects/ui_helpers.dart';
 
 class StreakLeaderboardPage extends StatelessWidget {
   const StreakLeaderboardPage({super.key});
@@ -31,8 +32,27 @@ class StreakLeaderboardPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        title: const Text('Streak Leaderboard'),
-        backgroundColor: Colors.black,
+        title: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // glowingIcon(Icons.fitness_center, blueGrotto, 28),
+          const SizedBox(width: 8),
+          Text(
+            "Streak Leaderboard",
+            style: glowingTextStyle(
+              Colors.white,
+              size: 26,
+            ),
+          ),
+        ],
+      ),
+      leading: IconButton(
+          icon: glowingIcon(Icons.arrow_back, Colors.white, 24),
+          onPressed: () => Navigator.of(context).maybePop(),
+          tooltip: 'Back',
+      ),
+      centerTitle: true,
+      backgroundColor: Colors.black,
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: _fetchLeaderboardWithUsernames(),
@@ -48,14 +68,14 @@ class StreakLeaderboardPage extends StatelessWidget {
           final leaderboard = snapshot.data ?? [];
           return Column(
             children: [
-              const SizedBox(height: 20),
-              const Icon(Icons.emoji_events, color: Colors.amber, size: 80),
+              const SizedBox(height: 10),
+              glowingIcon(Icons.emoji_events, Colors.amber, 80),
               const SizedBox(height: 10),
               const Text(
                 'Top Streaks',
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 24,
+                  fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -68,6 +88,7 @@ class StreakLeaderboardPage extends StatelessWidget {
                     final username = entry['username'] as String;
                     final streak = entry['streakCount'] as int;
 
+                    // pick a color for the rank
                     Color iconColor;
                     if (index == 0) {
                       iconColor = Colors.amber;
@@ -79,9 +100,19 @@ class StreakLeaderboardPage extends StatelessWidget {
                       iconColor = Colors.orange;
                     }
 
+                    // leading icon: glowing for top-3
+                    final leadingIcon = (index < 3)
+                        ? glowingIcon(Icons.whatshot, iconColor, 30)
+                        : Icon(Icons.whatshot, color: iconColor, size: 30);
+
+                    // title text: glowing for top-3
+                    final titleText = (index < 3)
+                        ? Text(username, style: glowingTextStyle(iconColor, size: 18))
+                        : Text(username, style: const TextStyle(color: Colors.white, fontSize: 18));
+
                     return ListTile(
-                      leading: Icon(Icons.whatshot, color: iconColor, size: 30),
-                      title: Text(username, style: const TextStyle(color: Colors.white, fontSize: 18)),
+                      leading: leadingIcon,
+                      title: titleText,
                       trailing: Text(
                         streak.toString(),
                         style: const TextStyle(color: Colors.white, fontSize: 18),

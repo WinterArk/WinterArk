@@ -2,10 +2,19 @@
 // ignore_for_file: constant_identifier_names
 
 import 'package:http/http.dart' as http;
+import 'package:mime/mime.dart';
+import 'package:http_parser/http_parser.dart';
 import 'dart:convert';
+import 'dart:io';
+import 'profile_post.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
-  static const String BASE_URL = 'http://18.234.214.233:3000';
+  // for local testing, use the following line:
+  // static const String BASE_URL = 'http://10.0.2.2:3000';
+  // for production, use the following line:
+  // static const String BASE_URL = 'https://18.234.214.233:3000';
+  static const String BASE_URL = 'http://10.0.2.2:3000';
 
   // 1) SIGN UP a new user
   static Future<Map<String, dynamic>> signUp(
@@ -609,5 +618,105 @@ class ApiService {
       return json.decode(response.body) as Map<String, dynamic>;
     }
     throw Exception('Failed to fetch user profile: ${response.body}');
+  }
+
+  static Future<String?> _getJwt() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('authToken');
+  }
+
+  static Future<Map<String,String>> _authHeaders() async {
+    final jwt = await _getJwt();
+    return {
+      'Content-Type': 'application/json',
+      if (jwt != null) 'Authorization': 'Bearer $jwt',
+    };
+  }
+
+   static Future<String?> _readToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('authToken');
+  }
+
+  
+   // 1. paginated feed of *all* users’ posts
+  static Future<List<ProfilePost>> getProfileFeed({
+    int page = 1,
+    int limit = 20,
+  }) async {
+    final uri = Uri.parse('$BASE_URL/api/profilePosts?page=$page&limit=$limit');
+    final token = await _readToken();
+    final res = await http.get(uri, headers: {
+      'Authorization': 'Bearer $token',
+    });
+    if (res.statusCode != 200) {
+      throw Exception('Feed load error ${res.statusCode}');
+    }
+    final List data = json.decode(res.body);
+    return data.map((e) => ProfilePost.fromJson(e)).toList();
+  }
+
+  // ——————————————————————————————————————
+  // 2. all posts for *one* user
+  static Future<List<ProfilePost>> getUserPosts(String userId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('authToken');
+    if (token == null) throw Exception('Not authenticated');
+
+    final uri = Uri.parse('$BASE_URL/api/profilePosts/user/$userId');
+    final res = await http.get(
+      uri,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type':  'application/json',
+      },
+    );
+
+    if (res.statusCode != 200) {
+      throw Exception(
+        'Failed to load user posts (${res.statusCode}): ${res.body}'
+      );
+    }
+
+    final List data = json.decode(res.body);
+    return data.map((e) => ProfilePost.fromJson(e)).toList();
+  }
+
+  // ——————————————————————————————————————
+  // 3. upload a new image/video post
+  /// Create a new profile post (image or video).
+  static Future<ProfilePost> createProfilePost(
+    File file, {
+    String? caption,
+    required String mediaType,
+    required String token,
+  }) async {
+    final uri = Uri.parse('$BASE_URL/api/profilePosts');
+    final mimeType = lookupMimeType(file.path) ?? 'application/octet-stream';
+
+    final req = http.MultipartRequest('POST', uri)
+      ..headers['Authorization'] = 'Bearer $token'
+      ..fields['mediaType'] = mediaType
+      ..files.add(
+        await http.MultipartFile.fromPath(
+          'file',
+          file.path,
+          contentType: MediaType.parse(mimeType),
+        ),
+      );
+
+    if (caption != null) {
+      req.fields['caption'] = caption;
+    }
+
+    final streamed = await req.send();
+    final body = await streamed.stream.bytesToString();
+
+    if (streamed.statusCode != 201) {
+      throw Exception('Failed to create post (${streamed.statusCode}): $body');
+    }
+
+    final jsonMap = json.decode(body);
+    return ProfilePost.fromJson(jsonMap);
   }
 }
