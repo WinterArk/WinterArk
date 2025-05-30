@@ -638,8 +638,7 @@ class ApiService {
     return prefs.getString('authToken');
   }
 
-  
-   // 1. paginated feed of *all* users’ posts
+  // paginated feed of all users posts
   static Future<List<ProfilePost>> getProfileFeed({
     int page = 1,
     int limit = 20,
@@ -656,8 +655,7 @@ class ApiService {
     return data.map((e) => ProfilePost.fromJson(e)).toList();
   }
 
-  // ——————————————————————————————————————
-  // 2. all posts for *one* user
+  // all posts for one user
   static Future<List<ProfilePost>> getUserPosts(String userId) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('authToken');
@@ -682,9 +680,7 @@ class ApiService {
     return data.map((e) => ProfilePost.fromJson(e)).toList();
   }
 
-  // ——————————————————————————————————————
-  // 3. upload a new image/video post
-  /// Create a new profile post (image or video).
+  // Create a new profile post (image or video).
   static Future<ProfilePost> createProfilePost(
     File file, {
     String? caption,

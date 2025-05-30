@@ -16,9 +16,6 @@ class _ReelsPageState extends State<ReelsPage> with WidgetsBindingObserver {
   bool _showReels = false;
 
   final List<String> _demoVideoPaths = [
-    'assets/videos/demo1.mp4',
-    'assets/videos/demo2.mp4',
-    'assets/videos/demo3.mp4',
     'assets/videos/demo4.mp4',
     'assets/videos/demo5.mp4',
     'assets/videos/demo6.mp4',
