@@ -106,8 +106,6 @@ void callbackDispatcher() {
       plannedWorkoutDate = DateTime.now();
     }
 
-    // For testing, we want the roast notification to fire 1 minute after the planned workout date
-    // For production, use 24 hours
     final Duration delayDuration = const Duration(hours: 24);
     DateTime scheduledDate = plannedWorkoutDate.add(delayDuration);
 

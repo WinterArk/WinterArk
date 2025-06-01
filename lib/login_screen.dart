@@ -9,7 +9,7 @@ import 'api_service.dart';
 import 'home_page.dart';
 import 'verification_screen.dart';
 import 'winterark_home.dart';
-import 'dart:async'; // for unawaited
+import 'dart:async';
 import 'package:firebase_messaging/firebase_messaging.dart'; // for FCM
 import 'button_effects/ui_helpers.dart';
 
@@ -32,7 +32,6 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _tosAccepted = false;
   bool _isLoading   = false;
 
-  /// Store the id for `main.dart`
   Future<void> _persistUserId(String userId) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('currentUserId', userId);
@@ -163,8 +162,6 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() => _isLoading = false);
     }
   }
-
-  /* ─────────────────────────  UI  ───────────────────────── */
 
   @override
   void dispose() {

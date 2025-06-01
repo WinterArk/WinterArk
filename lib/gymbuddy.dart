@@ -252,7 +252,7 @@ class _GymBuddyScreenState extends State<GymBuddyScreen> {
           ),
         ],
       ),
-      automaticallyImplyLeading: false, // hide the back-arrow here
+      automaticallyImplyLeading: false,
       backgroundColor: Colors.black,
       centerTitle: true,
       elevation: 0,

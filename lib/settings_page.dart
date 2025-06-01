@@ -155,7 +155,6 @@ class _SettingsPageState extends State<SettingsPage> {
     child: Stack(
       alignment: Alignment.center,
       children: [
-        // 1) back arrow at left
         Align(
           alignment: Alignment.centerLeft,
           child: IconButton(
@@ -164,7 +163,6 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
         ),
 
-        // 2) title + subtitle centered
         Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -181,7 +179,6 @@ class _SettingsPageState extends State<SettingsPage> {
           ],
         ),
 
-        // 3) phantom widget on right to balance the arrow
         Align(
           alignment: Alignment.centerRight,
           child: SizedBox(width: 48),

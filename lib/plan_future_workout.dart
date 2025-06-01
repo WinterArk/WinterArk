@@ -134,8 +134,7 @@ class _PlanWorkoutPageState extends State<PlanWorkoutPage> {
       // Schedule the background task for roast notifications.
       await Workmanager().registerOneOffTask(
         "roast_notification_task", 
-        "roastNotificationTask",   
-        // set to 1 minutes for immediate testing; change to 24 hours for production
+        "roastNotificationTask",
         initialDelay: const Duration(hours: 24),  
         inputData: {},
       );

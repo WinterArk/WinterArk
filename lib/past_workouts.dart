@@ -8,7 +8,6 @@ import 'package:intl/intl.dart';
 import 'streak_leaderboard.dart';
 import 'button_effects/ui_helpers.dart';
 
-// Helper function to convert month/day to YYYY-MM-DD format.
 String getDateString(String monthName, int day) {
   final currentYear = DateTime.now().year;
   final monthsMap = {
@@ -97,7 +96,6 @@ class _PastWorkoutsCalendarState extends State<PastWorkoutsCalendar> {
     final String? userId = widget.buddyId ?? await getUserId();
     if (userId == null) return;
     try {
-      // Assume ApiService.getPastWorkouts(userId) returns all workouts for the user.
       final List<dynamic> allWorkouts = await ApiService.getPastWorkouts(userId);
       Map<String, List<dynamic>> grouped = {};
       for (var workout in allWorkouts) {
