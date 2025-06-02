@@ -41,7 +41,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
     _loadPrefs();
   }
 
-   Future<void> _loadPrefs() async {
+  Future<void> _loadPrefs() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       showExplicitRoasts = prefs.getBool('showExplicitRoasts') ?? false;
@@ -78,7 +78,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
     if (pickedDate == null) return;
 
     final pickedTime =
-    await showTimePicker(context: context, initialTime: TimeOfDay.now());
+        await showTimePicker(context: context, initialTime: TimeOfDay.now());
     if (pickedTime == null) return;
 
     final workoutDateTime = DateTime(
@@ -98,25 +98,25 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
     return Scaffold(
       appBar: AppBar(
         title: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const SizedBox(width: 8),
-          Text(
-            "Notification Settings",
-            style: glowingTextStyle(
-              Colors.white,
-              size: 26,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(width: 8),
+            Text(
+              "Notification Settings",
+              style: glowingTextStyle(
+                Colors.white,
+                size: 26,
+              ),
             ),
-          ),
-        ],
-      ),
+          ],
+        ),
         backgroundColor: Colors.black,
         centerTitle: true,
         leading: IconButton(
           icon: glowingIcon(Icons.arrow_back, Colors.white, 24),
           onPressed: () => Navigator.of(context).maybePop(),
           tooltip: 'Back',
-        ),  
+        ),
       ),
       body: ListView(
         children: [

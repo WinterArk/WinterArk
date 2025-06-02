@@ -16,7 +16,7 @@ import 'package:http/http.dart' as http;
 
 class ProfilePage extends StatefulWidget {
   final String userId;
- 
+
   const ProfilePage({super.key, required this.userId});
 
   @override
@@ -24,9 +24,12 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  late Future<Map<String, dynamic>> _profileFuture;  
+  late Future<Map<String, dynamic>> _profileFuture;
   late Future<List<ProfilePost>> _postsFuture;
   int _buddyCount = 0;
+  bool _isUsersProfile = false;
+  String? _displayName;
+  String? _fetchedUsername;
 
   @override
   void initState() {
@@ -34,6 +37,27 @@ class _ProfilePageState extends State<ProfilePage> {
     _profileFuture = ApiService.getUserProfile(widget.userId);
     _postsFuture = ApiService.getUserPosts(widget.userId);
     _loadBuddyCount();
+    _checkIfUsersProfile();
+    _profileFuture.then((profile) {
+      final fetchedName = profile['name'] as String? ?? 'Unknown';
+      final fetchedUsername = profile['username'] as String? ?? 'Unknown';
+
+      if (mounted) {
+        setState(() {
+          _displayName = fetchedName;
+          _fetchedUsername = fetchedUsername;
+        });
+      }
+    }).catchError((_) {});
+  }
+
+  Future<void> _checkIfUsersProfile() async {
+    final prefs = await SharedPreferences.getInstance();
+    final storedId = prefs.getString('userId') ?? '';
+    final bool isSelf = (widget.userId == storedId);
+    setState(() {
+      _isUsersProfile = isSelf;
+    });
   }
 
   // Future<void> _loadProfile() async {
@@ -72,12 +96,15 @@ class _ProfilePageState extends State<ProfilePage> {
     final isVideo = p.mediaType == 'video';
     return GestureDetector(
       onTap: isVideo
-          ? () => Navigator.push(context, MaterialPageRoute(
-        builder: (_) => VideoPlayerPage(
-          url: p.mediaUrl,
-          fitStyle: BoxFit.cover,   // or BoxFit.contain
-        ),
-      )): null, 
+          ? () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => VideoPlayerPage(
+                  url: p.mediaUrl,
+                  fitStyle: BoxFit.cover, // or BoxFit.contain
+                ),
+              ))
+          : null,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(8),
         child: Stack(fit: StackFit.expand, children: [
@@ -135,8 +162,18 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Profile", style: glowingTextStyle(Colors.white, size: 24)),
+        title: Text(
+          _fetchedUsername == null ? '' : _fetchedUsername!,
+          style: glowingTextStyle(Colors.white, size: 24),
+        ),
         centerTitle: true,
+        leading: !_isUsersProfile
+            ? IconButton(
+                icon: glowingIcon(Icons.arrow_back, Colors.white, 24),
+                onPressed: () => Navigator.of(context).maybePop(),
+                tooltip: 'Back',
+              )
+            : null,
         automaticallyImplyLeading: false,
         backgroundColor: Colors.black,
         elevation: 0,
@@ -145,29 +182,41 @@ class _ProfilePageState extends State<ProfilePage> {
             icon: glowingIcon(Icons.calendar_today, Colors.white, 24),
             tooltip: 'Workout History',
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => PastWorkoutsCalendar(),
-                ),
-              );
+              if (!_isUsersProfile) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => PastWorkoutsCalendar(
+                      buddyId: widget.userId,
+                    ),
+                  ),
+                );
+              } else {
+                // Viewing your own profile → no args
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => PastWorkoutsCalendar(),
+                  ),
+                );
+              }
             },
           ),
           const SizedBox(width: 5),
-          IconButton(
-            icon: glowingIcon(Icons.settings, Colors.white, 24),
-            tooltip: 'Settings',
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => SettingsPage(userId: widget.userId),
-                ),
-              );
-            },
-          ),
+          if (_isUsersProfile)
+            IconButton(
+              icon: glowingIcon(Icons.settings, Colors.white, 24),
+              tooltip: 'Settings',
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => SettingsPage(userId: widget.userId),
+                  ),
+                );
+              },
+            ),
         ],
-        
       ),
       body: Column(
         children: [
@@ -194,13 +243,13 @@ class _ProfilePageState extends State<ProfilePage> {
                 );
               }
 
-              final profile  = snapshot.data!;
+              final profile = snapshot.data!;
               final username = profile['username'] as String? ?? 'Unknown';
               final name = profile['name'] as String? ?? 'Unknown';
-              final bio      = profile['bio']      as String? ?? '';
+              final bio = profile['bio'] as String? ?? '';
               final initial = name.isNotEmpty ? name[0].toUpperCase() : '?';
-              final hash    = name.hashCode;
-              final swatch  = Colors.primaries[hash % Colors.primaries.length];
+              final hash = name.hashCode;
+              final swatch = Colors.primaries[hash % Colors.primaries.length];
               final avatarColor = swatch.shade700;
 
               return Container(
@@ -222,7 +271,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   children: [
                     // profile avatar + picker
                     GestureDetector(
-                      onTap: () { /* … */ },
+                      onTap: () {/* … */},
                       child: CircleAvatar(
                         radius: 40,
                         backgroundColor: avatarColor,
@@ -250,10 +299,10 @@ class _ProfilePageState extends State<ProfilePage> {
                               color: Colors.white,
                             ),
                           ),
-                          Text(
-                            username,
-                            style: const TextStyle(color: Colors.white70),
-                          ),
+                          // Text(
+                          //   username,
+                          //   style: const TextStyle(color: Colors.white70),
+                          // ),
                           //  ``const SizedBox(height: 5),
                           // Bio here
                           if (bio.isNotEmpty)
@@ -270,7 +319,9 @@ class _ProfilePageState extends State<ProfilePage> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (ctx) => GymBuddyScreen(currentUserId: widget.userId, showBackArrow: true),
+                                  builder: (ctx) => GymBuddyScreen(
+                                      currentUserId: widget.userId,
+                                      showBackArrow: true),
                                 ),
                               );
                             },
@@ -287,11 +338,13 @@ class _ProfilePageState extends State<ProfilePage> {
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    const Icon(Icons.fitness_center, color: Colors.white),
+                                    const Icon(Icons.fitness_center,
+                                        color: Colors.white),
                                     const SizedBox(width: 8),
                                     Text(
                                       "Gym Buddies: $_buddyCount",
-                                      style: const TextStyle(color: Colors.white),
+                                      style:
+                                          const TextStyle(color: Colors.white),
                                     ),
                                   ],
                                 ),
@@ -315,9 +368,10 @@ class _ProfilePageState extends State<ProfilePage> {
                 if (snap.hasError)
                   return Center(child: Text("Error loading posts"));
 
-                final all   = snap.data!;
-                final images = all.where((p) => p.mediaType == 'image').toList();
-                final reels  = all.where((p) => p.mediaType == 'video').toList();
+                final all = snap.data!;
+                final images =
+                    all.where((p) => p.mediaType == 'image').toList();
+                final reels = all.where((p) => p.mediaType == 'video').toList();
 
                 return DefaultTabController(
                   length: 2,
@@ -336,8 +390,8 @@ class _ProfilePageState extends State<ProfilePage> {
                       Expanded(
                         child: TabBarView(
                           children: [
-                            _buildGrid(images),       
-                            _buildGrid(reels),        
+                            _buildGrid(images),
+                            _buildGrid(reels),
                           ],
                         ),
                       ),
@@ -383,8 +437,8 @@ class GymBuddiesPage extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder:
-                        (context) => UserProfilePage(username: buddies[index]),
+                    builder: (context) =>
+                        UserProfilePage(username: buddies[index]),
                   ),
                 );
               },

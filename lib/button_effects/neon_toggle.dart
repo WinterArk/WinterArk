@@ -42,7 +42,8 @@ class _NeonToggleState extends State<NeonToggle> {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(widget.label, style: TextStyle(color: Colors.white70, fontSize: 16)),
+        Text(widget.label,
+            style: TextStyle(color: Colors.white70, fontSize: 16)),
         const SizedBox(width: 12),
         AnimatedContainer(
           duration: widget.flashDuration,
@@ -56,8 +57,14 @@ class _NeonToggleState extends State<NeonToggle> {
                   spreadRadius: 2,
                 ),
               if (_isFlashing) ...[
-                BoxShadow(color: Colors.white.withOpacity(0.9), blurRadius: 16, spreadRadius: 4),
-                BoxShadow(color: Colors.white.withOpacity(0.5), blurRadius: 32, spreadRadius: 8),
+                BoxShadow(
+                    color: Colors.white.withOpacity(0.9),
+                    blurRadius: 16,
+                    spreadRadius: 4),
+                BoxShadow(
+                    color: Colors.white.withOpacity(0.5),
+                    blurRadius: 32,
+                    spreadRadius: 8),
               ],
             ],
           ),

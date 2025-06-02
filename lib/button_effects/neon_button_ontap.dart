@@ -10,8 +10,8 @@ class NeonButton extends StatelessWidget {
     super.key,
     required this.label,
     required this.onTap,
-    this.glowColor        = Colors.blueAccent,
-    this.backgroundColor  = Colors.black,
+    this.glowColor = Colors.blueAccent,
+    this.backgroundColor = Colors.black,
   });
 
   @override
@@ -36,7 +36,7 @@ class NeonButton extends StatelessWidget {
         child: Text(
           label,
           style: TextStyle(
-            fontSize: 12,   
+            fontSize: 12,
             color: glowColor,
             fontWeight: FontWeight.bold,
             shadows: [

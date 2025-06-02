@@ -24,13 +24,13 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   late bool _isSignUp = widget.isSignUp;
 
-  final _nameCtrl        = TextEditingController();
+  final _nameCtrl = TextEditingController();
   final _userOrEmailCtrl = TextEditingController();
-  final _emailCtrl       = TextEditingController();
-  final _passCtrl        = TextEditingController();
+  final _emailCtrl = TextEditingController();
+  final _passCtrl = TextEditingController();
 
   bool _tosAccepted = false;
-  bool _isLoading   = false;
+  bool _isLoading = false;
 
   Future<void> _persistUserId(String userId) async {
     final prefs = await SharedPreferences.getInstance();
@@ -92,7 +92,8 @@ class _LoginScreenState extends State<LoginScreen> {
         unawaited(sendTokenToBackend(token));
       }
 
-      showShortFadeSnack(context, 'Account created! Check your email for the verification code.');
+      showShortFadeSnack(context,
+          'Account created! Check your email for the verification code.');
 
       Navigator.pushReplacement(
         context,
@@ -126,7 +127,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
       final userId = res['user']['_id'] as String;
       await _persistUserId(userId);
-      
+
       // final jwt = res['token'] as String;
       // final prefs = await SharedPreferences.getInstance();
       // await prefs.setString('authToken', jwt);
@@ -145,7 +146,8 @@ class _LoginScreenState extends State<LoginScreen> {
     } catch (e) {
       final msg = e.toString().toLowerCase();
       if (msg.contains('verify')) {
-        showShortFadeSnack(context, 'Your account is not verified. Please check your email.');
+        showShortFadeSnack(
+            context, 'Your account is not verified. Please check your email.');
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -216,7 +218,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 _textField(_emailCtrl, 'Your email'),
                 const SizedBox(height: 20),
               ],
-
               _label(_isSignUp ? 'Enter Username' : 'Username or Email'),
               _textField(
                 _userOrEmailCtrl,
@@ -232,7 +233,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 key: const Key('login-password'),
               ),
               const SizedBox(height: 10),
-
               if (_isSignUp)
                 GestureDetector(
                   onTap: _showTosDialog,
@@ -245,7 +245,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
               const SizedBox(height: 20),
-
               ElevatedButton(
                 key: const Key('login-button'),
                 onPressed: _isLoading
@@ -254,19 +253,19 @@ class _LoginScreenState extends State<LoginScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFADD8E6),
                   padding:
-                  const EdgeInsets.symmetric(vertical: 15, horizontal: 40),
+                      const EdgeInsets.symmetric(vertical: 15, horizontal: 40),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
                 child: _isLoading
                     ? const CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.black))
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.black))
                     : Text(
-                  _isSignUp ? 'Create Account' : 'Log In',
-                  style:
-                  const TextStyle(color: Colors.black, fontSize: 16),
-                ),
+                        _isSignUp ? 'Create Account' : 'Log In',
+                        style:
+                            const TextStyle(color: Colors.black, fontSize: 16),
+                      ),
               ),
               const SizedBox(height: 20),
               GestureDetector(
@@ -291,23 +290,23 @@ class _LoginScreenState extends State<LoginScreen> {
 
   /* helpers */
   Widget _label(String text) => Align(
-    alignment: Alignment.centerLeft,
-    child: Text(
-      text,
-      style: const TextStyle(
-        fontSize: 16,
-        fontWeight: FontWeight.bold,
-        color: Colors.white,
-      ),
-    ),
-  );
+        alignment: Alignment.centerLeft,
+        child: Text(
+          text,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+      );
 
   Widget _textField(
-      TextEditingController ctrl,
-      String hint, {
-        bool obscure = false,
-        Key? key,
-      }) =>
+    TextEditingController ctrl,
+    String hint, {
+    bool obscure = false,
+    Key? key,
+  }) =>
       TextField(
         key: key,
         controller: ctrl,

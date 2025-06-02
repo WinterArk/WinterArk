@@ -9,16 +9,18 @@ class RoastNotificationsSettingsPage extends StatefulWidget {
   const RoastNotificationsSettingsPage({super.key});
 
   @override
-  _RoastNotificationsSettingsPageState createState() => _RoastNotificationsSettingsPageState();
+  _RoastNotificationsSettingsPageState createState() =>
+      _RoastNotificationsSettingsPageState();
 }
 
-class _RoastNotificationsSettingsPageState extends State<RoastNotificationsSettingsPage> {
+class _RoastNotificationsSettingsPageState
+    extends State<RoastNotificationsSettingsPage> {
   bool debugMode = true;
   bool roastEnabled = false;
-  double roastIntensity = 0.5; 
-  final babyBlue   = const Color.fromARGB(255, 212, 242, 255);  // #D6E2E8
-  final aquamarine = const Color.fromARGB(255, 167, 223, 248);  // #91C1D8
-  final blueGrotto = const Color.fromARGB(255, 45, 178, 250);  // #0070AC
+  double roastIntensity = 0.5;
+  final babyBlue = const Color.fromARGB(255, 212, 242, 255); // #D6E2E8
+  final aquamarine = const Color.fromARGB(255, 167, 223, 248); // #91C1D8
+  final blueGrotto = const Color.fromARGB(255, 45, 178, 250); // #0070AC
 
   bool showExplicitRoasts = false;
   String explicitRoast = 'Lift or Get Lit the F*** Up 💪🔥';
@@ -54,7 +56,7 @@ class _RoastNotificationsSettingsPageState extends State<RoastNotificationsSetti
     setState(() {
       roastEnabled = prefs.getBool('roastNotifications') ?? false;
       roastIntensity = prefs.getDouble('roastIntensity') ?? 0.5;
-      selectedRoast  = prefs.getString('roastLevel') ?? roastLevels.first;
+      selectedRoast = prefs.getString('roastLevel') ?? roastLevels.first;
     });
   }
 
@@ -96,16 +98,16 @@ class _RoastNotificationsSettingsPageState extends State<RoastNotificationsSetti
     );
   }
 
-  TextStyle glowingTextStyle(Color color, {double size=16}) => TextStyle(
-    fontSize: size,
-    fontWeight: FontWeight.bold,
-    color: color,
-    shadows: [
-      ...glowShadows(color, radii: [8,16,24]),
-      BoxShadow(color: color.withOpacity(0.3), blurRadius: 36),
-    ],
-  );
-  
+  TextStyle glowingTextStyle(Color color, {double size = 16}) => TextStyle(
+        fontSize: size,
+        fontWeight: FontWeight.bold,
+        color: color,
+        shadows: [
+          ...glowShadows(color, radii: [8, 16, 24]),
+          BoxShadow(color: color.withOpacity(0.3), blurRadius: 36),
+        ],
+      );
+
   List<BoxShadow> glowShadows(
     Color baseColor, {
     List<double> radii = const [12, 24, 36],
@@ -159,7 +161,6 @@ class _RoastNotificationsSettingsPageState extends State<RoastNotificationsSetti
       children: [
         Text(label, style: glowingTextStyle(aquamarine, size: 18)),
         const SizedBox(width: 12),
-
         AnimatedContainer(
           duration: _flashDuration,
           decoration: BoxDecoration(
@@ -171,7 +172,6 @@ class _RoastNotificationsSettingsPageState extends State<RoastNotificationsSetti
                   blurRadius: 8,
                   spreadRadius: 2,
                 ),
-
               if (_isSwitchFlashing) ...[
                 BoxShadow(
                   color: Colors.white.withOpacity(0.9),
@@ -209,16 +209,22 @@ class _RoastNotificationsSettingsPageState extends State<RoastNotificationsSetti
     final isFlashing = _flashingRoasts.contains(roast);
 
     final List<BoxShadow> shadows = [
-      if (isSelected) ...glowShadows(blueGrotto, radii: [4,8,16]),
+      if (isSelected) ...glowShadows(blueGrotto, radii: [4, 8, 16]),
       if (isFlashing) ...[
-        BoxShadow(color: Colors.white.withOpacity(0.8), blurRadius: 4, spreadRadius: 1),
-        BoxShadow(color: Colors.white.withOpacity(0.4), blurRadius: 8, spreadRadius: 2),
+        BoxShadow(
+            color: Colors.white.withOpacity(0.8),
+            blurRadius: 4,
+            spreadRadius: 1),
+        BoxShadow(
+            color: Colors.white.withOpacity(0.4),
+            blurRadius: 8,
+            spreadRadius: 2),
       ],
     ];
 
     return GestureDetector(
-      onTapDown:   (_) => setState(() => _flashingRoasts.add(roast)),
-      onTapUp:     (_) {
+      onTapDown: (_) => setState(() => _flashingRoasts.add(roast)),
+      onTapUp: (_) {
         Future.delayed(_flashDuration, () {
           if (mounted) setState(() => _flashingRoasts.remove(roast));
         });
@@ -228,9 +234,9 @@ class _RoastNotificationsSettingsPageState extends State<RoastNotificationsSetti
       onTapCancel: () => setState(() => _flashingRoasts.remove(roast)),
       child: AnimatedContainer(
         decoration: BoxDecoration(
-        color: (isSelected || isFlashing)
-          ? blueGrotto.withOpacity(isSelected ? 1.0 : 0.2)
-          : Colors.grey[900],
+          color: (isSelected || isFlashing)
+              ? blueGrotto.withOpacity(isSelected ? 1.0 : 0.2)
+              : Colors.grey[900],
           borderRadius: BorderRadius.circular(20),
           boxShadow: shadows,
         ),
@@ -251,9 +257,9 @@ class _RoastNotificationsSettingsPageState extends State<RoastNotificationsSetti
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: FlashOnPress(
-        glowColor: Colors.red,     
-        flashColor: Colors.yellow,   
-        onTap: _sendImmediateRoast, 
+        glowColor: Colors.red,
+        flashColor: Colors.yellow,
+        onTap: _sendImmediateRoast,
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 24),
           decoration: BoxDecoration(
@@ -271,8 +277,8 @@ class _RoastNotificationsSettingsPageState extends State<RoastNotificationsSetti
               Text(
                 "😡 Roast Me Now",
                 style: glowingTextStyle(
-                Colors.red,
-                size:16,
+                  Colors.red,
+                  size: 16,
                 ),
               ),
             ],
@@ -293,11 +299,11 @@ class _RoastNotificationsSettingsPageState extends State<RoastNotificationsSetti
         channelKey: 'roast_notifications',
         title: '🔥 Roast Incoming!',
         body: roastMessage,
-        notificationLayout: NotificationLayout.BigText, 
-        color: Colors.deepOrangeAccent,  
+        notificationLayout: NotificationLayout.BigText,
+        color: Colors.deepOrangeAccent,
         autoDismissible: true,
         displayOnBackground: true,
-        displayOnForeground: true, 
+        displayOnForeground: true,
       ),
     );
   }
@@ -307,19 +313,19 @@ class _RoastNotificationsSettingsPageState extends State<RoastNotificationsSetti
     return Scaffold(
       appBar: AppBar(
         title: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          glowingIcon(Icons.whatshot, blueGrotto, 28),
-          const SizedBox(width: 8),
-          Text(
-            "Roast Notifications",
-            style: glowingTextStyle(
-              blueGrotto,
-              size: 26,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            glowingIcon(Icons.whatshot, blueGrotto, 28),
+            const SizedBox(width: 8),
+            Text(
+              "Roast Notifications",
+              style: glowingTextStyle(
+                blueGrotto,
+                size: 26,
+              ),
             ),
-          ),
-        ],
-      ),
+          ],
+        ),
         backgroundColor: Colors.black,
         centerTitle: true,
         leading: IconButton(
@@ -337,22 +343,22 @@ class _RoastNotificationsSettingsPageState extends State<RoastNotificationsSetti
             color: Colors.black,
             borderRadius: BorderRadius.circular(12),
             boxShadow: roastEnabled
-              ? glowShadows(blueGrotto, radii: [8,16,24])
-              : [BoxShadow(color: Colors.white10, blurRadius:4)],
+                ? glowShadows(blueGrotto, radii: [8, 16, 24])
+                : [BoxShadow(color: Colors.white10, blurRadius: 4)],
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center, 
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Center(
                 child: Row(
-                  mainAxisSize: MainAxisSize.min,      
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
                       "Enable Roasts",
                       style: glowingTextStyle(
-                      aquamarine,
-                      size:18,
+                        aquamarine,
+                        size: 18,
                       ),
                     ),
                     _neonToggle(
@@ -367,7 +373,9 @@ class _RoastNotificationsSettingsPageState extends State<RoastNotificationsSetti
                 ),
               ),
               const SizedBox(height: 40),
-              Center(child: Text("Intensity Level", style: glowingTextStyle(aquamarine, size:18))),
+              Center(
+                  child: Text("Intensity Level",
+                      style: glowingTextStyle(aquamarine, size: 18))),
               const SizedBox(height: 12),
               Wrap(
                 spacing: 200,
@@ -380,8 +388,7 @@ class _RoastNotificationsSettingsPageState extends State<RoastNotificationsSetti
                 ],
               ),
               const SizedBox(height: 40),
-              if (debugMode)
-                _buildInstantRoastButton(),
+              if (debugMode) _buildInstantRoastButton(),
               const SizedBox(height: 12),
             ],
           ),

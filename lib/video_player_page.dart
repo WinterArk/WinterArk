@@ -4,8 +4,6 @@ import 'package:video_player/video_player.dart';
 
 class VideoPlayerPage extends StatefulWidget {
   final String url;
-  /// Change this to BoxFit.cover if you want the video to crop
-  /// rather than letterbox.
   final BoxFit fitStyle;
 
   const VideoPlayerPage({
@@ -26,8 +24,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     super.initState();
     _ctrl = VideoPlayerController.network(widget.url)
       ..initialize().then((_) {
-        setState(() {});       // redraw once we know the video size
-        _ctrl.play();          // auto-start
+        setState(() {}); 
+        _ctrl.setVolume(1.0);
+        _ctrl.play();          
       })
       ..setLooping(true);
   }

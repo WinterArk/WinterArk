@@ -35,7 +35,8 @@ const String backendBaseUrl = 'http://18.234.214.233:3000';
 
 Future<String?> getCurrentUserId() async {
   final prefs = await SharedPreferences.getInstance();
-  return prefs.getString('currentUserId');
+  return prefs
+      .getString('currentUserId'); // Must match what login_screen.dart saves
 }
 
 Future<void> sendTokenToBackend(String token) async {
@@ -66,15 +67,20 @@ Future<void> sendTokenToBackend(String token) async {
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Initialize Firebase.
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
+  // Request FCM permissions.
   final settings = await FirebaseMessaging.instance.requestPermission();
-  print('Permission status: ${settings.authorizationStatus}');
+  print('🔔 Permission status: ${settings.authorizationStatus}');
 
+  // Initialize timezone data.
   tz.initializeTimeZones();
 
+  // Initialize your local notifications service (if needed).
   await initializeNotifications();
 
+  // Initialize Awesome Notifications with the desired channels.
   AwesomeNotifications().initialize(
     null,
     [
@@ -82,7 +88,7 @@ Future<void> main() async {
         channelKey: 'workout_reminder',
         channelName: 'Workout Reminders',
         channelDescription: 'Reminders for scheduled workouts',
-        defaultColor: Color(0xFF00BFFF), 
+        defaultColor: Color(0xFF00BFFF),
         ledColor: Color(0xFF00BFFF),
         importance: NotificationImportance.High,
         enableLights: true,
@@ -112,10 +118,14 @@ Future<void> main() async {
     AwesomeNotifications().requestPermissionToSendNotifications();
   }
 
+
+  // Initialize Workmanager for background tasks (e.g., roast notifications).
   Workmanager().initialize(callbackDispatcher, isInDebugMode: false);
 
+  // Set up Firebase Messaging background handler.
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
+  // Get initial FCM token and send it to backend.
   final token = await FirebaseMessaging.instance.getToken();
   if (token != null) {
     print('Initial FCM Token: $token');
@@ -123,26 +133,28 @@ Future<void> main() async {
   }
   FirebaseMessaging.instance.onTokenRefresh.listen(sendTokenToBackend);
 
+  // Listen for foreground FCM messages.
   FirebaseMessaging.onMessage.listen((RemoteMessage m) {
     final chatId = m.data['chatId'] ?? '';
     final title = m.notification?.title ?? 'New message';
     final body = m.notification?.body ?? 'You have a new message';
 
+    // Only show chat notification if not already in that chat.
     if (globals.activeChatId == null || globals.activeChatId != chatId) {
       showChatNotification(title: title, body: body, payload: chatId);
     }
   });
-  
+
   runApp(const WinterArkApp());
 }
 
-final blueGrotto = const Color.fromARGB(255, 45, 178, 250); 
-final aquamarine = const Color.fromARGB(255, 167, 223, 248); 
-final babyBlue   = const Color.fromARGB(255, 212, 242, 255);
+final blueGrotto = const Color.fromARGB(255, 45, 178, 250);
+final aquamarine = const Color.fromARGB(255, 167, 223, 248);
+final babyBlue = const Color.fromARGB(255, 212, 242, 255);
 
 class WinterArkApp extends StatelessWidget {
   const WinterArkApp({super.key});
-  
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

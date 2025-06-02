@@ -100,12 +100,10 @@ class StreakLeaderboardPage extends StatelessWidget {
                       iconColor = Colors.orange;
                     }
 
-                    // leading icon: glowing for top-3
                     final leadingIcon = (index < 3)
                         ? glowingIcon(Icons.whatshot, iconColor, 30)
                         : Icon(Icons.whatshot, color: iconColor, size: 30);
 
-                    // title text: glowing for top-3
                     final titleText = (index < 3)
                         ? Text(username, style: glowingTextStyle(iconColor, size: 18))
                         : Text(username, style: const TextStyle(color: Colors.white, fontSize: 18));

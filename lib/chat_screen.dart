@@ -57,7 +57,7 @@ class _ChatScreenState extends State<ChatScreen> {
       if (data['senderId'] == widget.currentUserId) return;
 
       final raw = data['timestamp'] as String;
-      final dt  = DateTime.parse(raw).toUtc().toLocal();
+      final dt = DateTime.parse(raw).toUtc().toLocal();
       data['pacificTimestamp'] = DateFormat.jm().format(dt);
 
       setState(() => messages.add(data));
@@ -65,12 +65,11 @@ class _ChatScreenState extends State<ChatScreen> {
 
       await ApiService.markMessageAsRead(chatId!, data['_id']);
       socket!.emit('message_read', {
-        'chatId':     chatId,
-        'messageId':  data['_id'],
-        'readerId':   widget.currentUserId,
+        'chatId': chatId,
+        'messageId': data['_id'],
+        'readerId': widget.currentUserId,
       });
     });
-
 
     socket!.on('message_read', (data) {
       final msgId = data['messageId'] as String;
@@ -103,7 +102,8 @@ class _ChatScreenState extends State<ChatScreen> {
   Future<void> _initializeChat() async {
     setState(() => isLoading = true);
     try {
-      final chat = await ApiService.createChat(widget.currentUserId, widget.buddyId);
+      final chat =
+          await ApiService.createChat(widget.currentUserId, widget.buddyId);
       chatId = chat['_id'] as String;
       globals.activeChatId = chatId;
       socket?.emit('join', chatId);
@@ -121,14 +121,13 @@ class _ChatScreenState extends State<ChatScreen> {
       final rawList = await ApiService.getMessages(chatId!);
       final formatted = rawList.map((m) {
         final raw = m['timestamp'] as String;
-        final dt  = DateTime.parse(raw).toUtc().toLocal();
+        final dt = DateTime.parse(raw).toUtc().toLocal();
         m['pacificTimestamp'] = DateFormat.jm().format(dt);
         return m;
       }).toList();
 
       setState(() => messages = formatted);
       _scrollToBottom();
-
 
       for (var m in messages) {
         if (m['senderId'] != widget.currentUserId && m['read'] == false) {
@@ -153,7 +152,7 @@ class _ChatScreenState extends State<ChatScreen> {
     final now = DateTime.now();
     final pacific = now.toLocal();
     final newMsg = {
-      '_id': now.microsecondsSinceEpoch.toString(),  // temporary unique id
+      '_id': now.microsecondsSinceEpoch.toString(), // temporary unique id
       'chatId': chatId,
       'senderId': widget.currentUserId,
       'content': text,
@@ -199,9 +198,11 @@ class _ChatScreenState extends State<ChatScreen> {
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
-          crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+          crossAxisAlignment:
+              isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
           children: [
-            Text(msg['content'] as String, style: const TextStyle(color: Colors.white)),
+            Text(msg['content'] as String,
+                style: const TextStyle(color: Colors.white)),
             const SizedBox(height: 4),
             Text(
               'Sent: ${msg['pacificTimestamp']}',
@@ -212,7 +213,8 @@ class _ChatScreenState extends State<ChatScreen> {
                 padding: const EdgeInsets.only(top: 4),
                 child: Text(
                   'Seen: ${msg['pacificReadTime'] ?? ''}',
-                  style: const TextStyle(color: Colors.greenAccent, fontSize: 10),
+                  style:
+                      const TextStyle(color: Colors.greenAccent, fontSize: 10),
                 ),
               ),
           ],
@@ -225,51 +227,54 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      appBar: AppBar(title: Text(widget.buddyName), backgroundColor: Colors.black),
+      appBar:
+          AppBar(title: Text(widget.buddyName), backgroundColor: Colors.black),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : Column(
-        children: [
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: _loadMessages,
-              child: ListView(
-                controller: _scrollController,
-                children: messages.map(_buildMessageItem).toList(),
-              ),
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            color: Colors.grey[900],
-            child: Row(
               children: [
-                IconButton(
-                  icon: const Icon(Icons.attach_file, color: Colors.white),
-                  onPressed: () {},
-                ),
                 Expanded(
-                  child: TextField(
-                    key: const Key('chat-message-input'),
-                    controller: _messageController,
-                    style: const TextStyle(color: Colors.white),
-                    decoration: const InputDecoration(
-                      hintText: 'Type a message...',
-                      hintStyle: TextStyle(color: Colors.white54),
-                      border: InputBorder.none,
+                  child: RefreshIndicator(
+                    onRefresh: _loadMessages,
+                    child: ListView(
+                      controller: _scrollController,
+                      children: messages.map(_buildMessageItem).toList(),
                     ),
                   ),
                 ),
-                IconButton(
-                  key: const Key('chat-send-button'),
-                  icon: const Icon(Icons.send, color: Colors.blueAccent),
-                  onPressed: _sendMessage,
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  color: Colors.grey[900],
+                  child: Row(
+                    children: [
+                      IconButton(
+                        icon:
+                            const Icon(Icons.attach_file, color: Colors.white),
+                        onPressed: () {},
+                      ),
+                      Expanded(
+                        child: TextField(
+                          key: const Key('chat-message-input'),
+                          controller: _messageController,
+                          style: const TextStyle(color: Colors.white),
+                          decoration: const InputDecoration(
+                            hintText: 'Type a message...',
+                            hintStyle: TextStyle(color: Colors.white54),
+                            border: InputBorder.none,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        key: const Key('chat-send-button'),
+                        icon: const Icon(Icons.send, color: Colors.blueAccent),
+                        onPressed: _sendMessage,
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
-          ),
-        ],
-      ),
     );
   }
 }

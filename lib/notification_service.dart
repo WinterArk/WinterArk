@@ -18,7 +18,7 @@ const AndroidNotificationChannel workoutChannel = AndroidNotificationChannel(
 );
 
 final FlutterLocalNotificationsPlugin notificationsPlugin =
-FlutterLocalNotificationsPlugin();
+    FlutterLocalNotificationsPlugin();
 
 Future<void> initializeNotifications() async {
   const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -26,8 +26,8 @@ Future<void> initializeNotifications() async {
 
   await notificationsPlugin.initialize(initSettings);
 
-  final android = notificationsPlugin
-      .resolvePlatformSpecificImplementation<
+  // Explicitly create the two channels on Android
+  final android = notificationsPlugin.resolvePlatformSpecificImplementation<
       AndroidFlutterLocalNotificationsPlugin>();
 
   await android?.createNotificationChannel(chatChannel);
@@ -57,9 +57,9 @@ Future<void> showChatNotification({
 }
 
 Future<void> scheduleWorkoutReminder(
-    DateTime workoutDateTime,
-    String muscleGroup,
-    ) async {
+  DateTime workoutDateTime,
+  String muscleGroup,
+) async {
   final now = tz.TZDateTime.now(tz.local);
   final reminderTime = workoutDateTime.subtract(const Duration(seconds: 10));
   final scheduledDate = tz.TZDateTime.from(reminderTime, tz.local);

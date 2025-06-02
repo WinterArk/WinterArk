@@ -130,7 +130,8 @@ class _WinterArkHomeState extends State<WinterArkHome> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => const LoginScreen(isSignUp: false),
+                              builder: (_) =>
+                                  const LoginScreen(isSignUp: false),
                             ),
                           );
                         },

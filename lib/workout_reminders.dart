@@ -4,22 +4,23 @@ import 'package:timezone/timezone.dart' as tz;
 import 'button_effects/ui_helpers.dart';
 import 'package:intl/intl.dart';
 
-
 class WorkoutReminderSettingsPage extends StatefulWidget {
   const WorkoutReminderSettingsPage({super.key});
 
   @override
-  _WorkoutReminderSettingsPageState createState() => _WorkoutReminderSettingsPageState();
+  _WorkoutReminderSettingsPageState createState() =>
+      _WorkoutReminderSettingsPageState();
 }
 
-class _WorkoutReminderSettingsPageState extends State<WorkoutReminderSettingsPage> with WidgetsBindingObserver {
+class _WorkoutReminderSettingsPageState
+    extends State<WorkoutReminderSettingsPage> with WidgetsBindingObserver {
   DateTime? selectedDate;
   TimeOfDay? selectedTime;
   final TextEditingController reminderTextController = TextEditingController();
-  final babyBlue   = const Color.fromARGB(255, 212, 242, 255);  // #D6E2E8
-  final aquamarine = const Color.fromARGB(255, 167, 223, 248);  // #91C1D8
-  final blueGrotto = const Color.fromARGB(255, 45, 178, 250);  // #0070AC
-  final navyBlue   = const Color(0xFF003371);  // #003371
+  final babyBlue = const Color.fromARGB(255, 212, 242, 255); // #D6E2E8
+  final aquamarine = const Color.fromARGB(255, 167, 223, 248); // #91C1D8
+  final blueGrotto = const Color.fromARGB(255, 45, 178, 250); // #0070AC
+  final navyBlue = const Color(0xFF003371); // #003371
 
   late Future<List<NotificationModel>> _upcoming;
 
@@ -55,10 +56,10 @@ class _WorkoutReminderSettingsPageState extends State<WorkoutReminderSettingsPag
     if (schedule is NotificationCalendar) {
       final now = DateTime.now();
       final initial = DateTime(
-        schedule.year   ?? now.year,
-        schedule.month  ?? now.month,
-        schedule.day    ?? now.day,
-        schedule.hour   ?? now.hour,
+        schedule.year ?? now.year,
+        schedule.month ?? now.month,
+        schedule.day ?? now.day,
+        schedule.hour ?? now.hour,
         schedule.minute ?? now.minute,
         schedule.second ?? now.second,
       );
@@ -119,16 +120,16 @@ class _WorkoutReminderSettingsPageState extends State<WorkoutReminderSettingsPag
       builder: (ctx, child) => Theme(
         data: ThemeData.dark().copyWith(
           colorScheme: ColorScheme.dark(
-            primary:   Colors.grey[900]!,  
-            onPrimary: Colors.white,       
-            surface:   Colors.black,      
-            onSurface: Colors.white70,     
+            primary: Colors.grey[900]!,
+            onPrimary: Colors.white,
+            surface: Colors.black,
+            onSurface: Colors.white70,
           ),
           timePickerTheme: TimePickerThemeData(
-            dialBackgroundColor: Colors.black,  
-            dialTextColor:       aquamarine,
+            dialBackgroundColor: Colors.black,
+            dialTextColor: aquamarine,
             hourMinuteTextColor: aquamarine,
-            dayPeriodColor:     Colors.grey[900]!,
+            dayPeriodColor: Colors.grey[900]!,
             dayPeriodTextColor: aquamarine,
             dayPeriodBorderSide: BorderSide(color: Colors.black, width: 0),
             entryModeIconColor: aquamarine,
@@ -237,14 +238,14 @@ class _WorkoutReminderSettingsPageState extends State<WorkoutReminderSettingsPag
     FocusScope.of(context).unfocus();
   }
 
-  
-
   int _nextNotifId() {
     return DateTime.now().millisecondsSinceEpoch.remainder(100000);
   }
 
-  Future<void> scheduleWorkoutReminder(DateTime workoutDateTime, String muscleGroup) async {
-    final tz.TZDateTime scheduledDate = tz.TZDateTime.from(workoutDateTime, tz.local);
+  Future<void> scheduleWorkoutReminder(
+      DateTime workoutDateTime, String muscleGroup) async {
+    final tz.TZDateTime scheduledDate =
+        tz.TZDateTime.from(workoutDateTime, tz.local);
     final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
     print('Current local time: $now');
     print('Scheduled notification time: $scheduledDate');
@@ -263,7 +264,7 @@ class _WorkoutReminderSettingsPageState extends State<WorkoutReminderSettingsPag
         notificationLayout: NotificationLayout.BigText,
         color: Color(0xFF00BFFF),
         payload: {
-          'muscle':    muscleGroup,
+          'muscle': muscleGroup,
           'scheduled': scheduledDate.millisecondsSinceEpoch.toString(),
         },
       ),
@@ -271,23 +272,24 @@ class _WorkoutReminderSettingsPageState extends State<WorkoutReminderSettingsPag
     );
   }
 
-  TextStyle glowingTextStyle(Color color, double size, FontWeight font) => TextStyle(
-    fontSize: size,
-    fontWeight: FontWeight.bold,
-    color: color,
-    shadows: [
-      ...glowShadows(color, radii: [8,16,24]),
-      BoxShadow(color: color.withOpacity(0.3), blurRadius: 36),
-    ],
-  );
+  TextStyle glowingTextStyle(Color color, double size, FontWeight font) =>
+      TextStyle(
+        fontSize: size,
+        fontWeight: FontWeight.bold,
+        color: color,
+        shadows: [
+          ...glowShadows(color, radii: [8, 16, 24]),
+          BoxShadow(color: color.withOpacity(0.3), blurRadius: 36),
+        ],
+      );
 
   String _format(NotificationSchedule? schedule) {
     if (schedule is NotificationCalendar) {
       final dt = DateTime(
-        schedule.year   ?? 0,
-        schedule.month  ?? 1,
-        schedule.day    ?? 1,
-        schedule.hour   ?? 0,
+        schedule.year ?? 0,
+        schedule.month ?? 1,
+        schedule.day ?? 1,
+        schedule.hour ?? 0,
         schedule.minute ?? 0,
       );
       return DateFormat.yMMMd().add_jm().format(dt);
@@ -297,10 +299,10 @@ class _WorkoutReminderSettingsPageState extends State<WorkoutReminderSettingsPag
 
   DateTime calendarToDateTimeLocal(NotificationCalendar cal) {
     return DateTime(
-      cal.year   ?? DateTime.now().year,
-      cal.month  ?? DateTime.now().month,
-      cal.day    ?? DateTime.now().day,
-      cal.hour   ?? 0,
+      cal.year ?? DateTime.now().year,
+      cal.month ?? DateTime.now().month,
+      cal.day ?? DateTime.now().day,
+      cal.hour ?? 0,
       cal.minute ?? 0,
       cal.second ?? 0,
       cal.millisecond ?? 0,
@@ -311,7 +313,7 @@ class _WorkoutReminderSettingsPageState extends State<WorkoutReminderSettingsPag
     final diff = scheduled.difference(DateTime.now());
     if (diff.isNegative) return 'started already';
     if (diff.inDays > 0) {
-      return 'in ${diff.inDays} day${diff.inDays>1?'s':''}';
+      return 'in ${diff.inDays} day${diff.inDays > 1 ? 's' : ''}';
     }
     if (diff.inHours > 0) {
       return 'in ${diff.inHours}h ${diff.inMinutes % 60}m';
@@ -347,14 +349,12 @@ class _WorkoutReminderSettingsPageState extends State<WorkoutReminderSettingsPag
           ),
         ],
       ),
-
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-
               Text(
                 "Set a Reminder!",
                 style: Theme.of(context)
@@ -362,7 +362,6 @@ class _WorkoutReminderSettingsPageState extends State<WorkoutReminderSettingsPag
                     .titleMedium!
                     .copyWith(color: babyBlue),
               ),
-
               ConstrainedBox(
                 constraints: BoxConstraints(
                   maxWidth: MediaQuery.of(context).size.width * 0.9,
@@ -390,8 +389,10 @@ class _WorkoutReminderSettingsPageState extends State<WorkoutReminderSettingsPag
                             onTap: _pickDate,
                             customBorder: const CircleBorder(),
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 8),
-                              child: glowingIcon(Icons.calendar_today, babyBlue, 24),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 8),
+                              child: glowingIcon(
+                                  Icons.calendar_today, babyBlue, 24),
                             ),
                           ),
                           const SizedBox(width: 5),
@@ -399,8 +400,10 @@ class _WorkoutReminderSettingsPageState extends State<WorkoutReminderSettingsPag
                             onTap: _pickTime,
                             customBorder: const CircleBorder(),
                             child: Padding(
-                              padding: const EdgeInsets.only(right: 16, left: 8),
-                              child: glowingIcon(Icons.access_time, babyBlue, 24),
+                              padding:
+                                  const EdgeInsets.only(right: 16, left: 8),
+                              child:
+                                  glowingIcon(Icons.access_time, babyBlue, 24),
                             ),
                           ),
                         ],
@@ -416,7 +419,6 @@ class _WorkoutReminderSettingsPageState extends State<WorkoutReminderSettingsPag
                   ),
                 ),
               ),
-
               const SizedBox(height: 16),
               Text(
                 "Upcoming Reminders",
@@ -444,9 +446,9 @@ class _WorkoutReminderSettingsPageState extends State<WorkoutReminderSettingsPag
                       itemCount: list.length,
                       separatorBuilder: (_, __) => const SizedBox(height: 25),
                       itemBuilder: (ctx, i) {
-                        final n       = list[i];
-                        final pl      = n.content?.payload ?? {};
-                        final msStr   = pl['scheduled'] ?? '';
+                        final n = list[i];
+                        final pl = n.content?.payload ?? {};
+                        final msStr = pl['scheduled'] ?? '';
                         final msEpoch = int.tryParse(msStr);
                         final scheduled = msEpoch != null
                             ? DateTime.fromMillisecondsSinceEpoch(msEpoch)
@@ -467,9 +469,12 @@ class _WorkoutReminderSettingsPageState extends State<WorkoutReminderSettingsPag
                           decoration: BoxDecoration(
                             color: Colors.black,
                             borderRadius: BorderRadius.circular(12),
-                            boxShadow: glowShadows(babyBlue, radii: [4,8,12]).map((s) =>
-                            BoxShadow(color: s.color.withOpacity(1), blurRadius: s.blurRadius, spreadRadius: s.spreadRadius)
-                          ).toList(),
+                            boxShadow: glowShadows(babyBlue, radii: [4, 8, 12])
+                                .map((s) => BoxShadow(
+                                    color: s.color.withOpacity(1),
+                                    blurRadius: s.blurRadius,
+                                    spreadRadius: s.spreadRadius))
+                                .toList(),
                           ),
                           child: Row(
                             children: [
@@ -481,25 +486,32 @@ class _WorkoutReminderSettingsPageState extends State<WorkoutReminderSettingsPag
                                   children: [
                                     Text(
                                       '$muscle\'s reminder $rel',
-                                      style: glowingTextStyle(babyBlue, 16, FontWeight.normal),
+                                      style: glowingTextStyle(
+                                          babyBlue, 16, FontWeight.normal),
                                       overflow: TextOverflow.ellipsis,
                                       maxLines: 1,
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      DateFormat.yMMMd().add_jm().format(scheduled),
-                                      style: const TextStyle(color: Colors.white54, fontSize: 12),
+                                      DateFormat.yMMMd()
+                                          .add_jm()
+                                          .format(scheduled),
+                                      style: const TextStyle(
+                                          color: Colors.white54, fontSize: 12),
                                     ),
                                   ],
                                 ),
                               ),
                               IconButton(
-                                icon: const Icon(Icons.edit, color: Colors.lightBlueAccent),
+                                icon: const Icon(Icons.edit,
+                                    color: Colors.lightBlueAccent),
                                 onPressed: () => _rescheduleReminder(n),
                               ),
                               IconButton(
-                                icon: const Icon(Icons.delete, color: Colors.red),
-                                onPressed: () => _cancelReminder(n.content!.id!),
+                                icon:
+                                    const Icon(Icons.delete, color: Colors.red),
+                                onPressed: () =>
+                                    _cancelReminder(n.content!.id!),
                               ),
                             ],
                           ),
@@ -515,4 +527,4 @@ class _WorkoutReminderSettingsPageState extends State<WorkoutReminderSettingsPag
       ),
     );
   }
-}  
+}

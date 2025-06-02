@@ -109,7 +109,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
               onPressed: _isResending ? null : _handleResendVerification,
               child: _isResending
                   ? const CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white))
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white))
                   : const Text('Resend Verification Email'),
             ),
           ],

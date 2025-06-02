@@ -44,18 +44,14 @@ Future<int> _getStreak() async {
 
 class PastWorkoutsCalendar extends StatefulWidget {
   final String? buddyId;
-  final String? buddyName;
-  const PastWorkoutsCalendar({
-    super.key,
-    this.buddyId,
-    this.buddyName,
-  });
+  const PastWorkoutsCalendar({super.key, this.buddyId});
 
   @override
   _PastWorkoutsCalendarState createState() => _PastWorkoutsCalendarState();
 }
 
 class _PastWorkoutsCalendarState extends State<PastWorkoutsCalendar> {
+  late Future<String> _pageTitleFuture;
   final List<Map<String, dynamic>> months = const [
     {"name": "January", "days": 31},
     {"name": "February", "days": 28},
@@ -79,6 +75,13 @@ class _PastWorkoutsCalendarState extends State<PastWorkoutsCalendar> {
   @override
   void initState() {
     super.initState();
+
+    if (widget.buddyId != null) {
+      _pageTitleFuture = ApiService.getUserProfile(widget.buddyId!)
+          .then((profileMap) => (profileMap['name'] as String?) ?? 'Unknown');
+    } else {
+      _pageTitleFuture = _fetchOwnName();
+    }
     _fetchWorkoutsForCalendar();
   }
 
@@ -90,13 +93,27 @@ class _PastWorkoutsCalendarState extends State<PastWorkoutsCalendar> {
     weightController?.dispose();
     super.dispose();
   }
-    
+
+  Future<String> _fetchOwnName() async {
+    String? currentUserId = await getUserId();
+    if (currentUserId == null) return "Unknown";
+
+    try {
+      final profileMap = await ApiService.getUserProfile(currentUserId);
+      final name = profileMap['name'] as String? ?? "Unknown";
+      return name;
+    } catch (_) {
+      return "Unknown";
+    }
+  }
 
   Future<void> _fetchWorkoutsForCalendar() async {
     final String? userId = widget.buddyId ?? await getUserId();
     if (userId == null) return;
     try {
-      final List<dynamic> allWorkouts = await ApiService.getPastWorkouts(userId);
+      // Assume ApiService.getPastWorkouts(userId) returns all workouts for the user.
+      final List<dynamic> allWorkouts =
+          await ApiService.getPastWorkouts(userId);
       Map<String, List<dynamic>> grouped = {};
       for (var workout in allWorkouts) {
         final DateTime dt = DateTime.parse(workout['date']);
@@ -114,7 +131,8 @@ class _PastWorkoutsCalendarState extends State<PastWorkoutsCalendar> {
     }
   }
 
-  void _showWorkoutsForDate(BuildContext context, String monthName, int day) async {
+  void _showWorkoutsForDate(
+      BuildContext context, String monthName, int day) async {
     final dateStr = getDateString(monthName, day);
     final String? userId = widget.buddyId ?? await getUserId();
     if (userId == null) {
@@ -134,37 +152,39 @@ class _PastWorkoutsCalendarState extends State<PastWorkoutsCalendar> {
             padding: const EdgeInsets.all(20.0),
             child: workouts.isEmpty
                 ? const Center(
-              child: Text(
-                'No workouts recorded for this day.',
-                style: TextStyle(color: Colors.white, fontSize: 18),
-              ),
-            )
+                    child: Text(
+                      'No workouts recorded for this day.',
+                      style: TextStyle(color: Colors.white, fontSize: 18),
+                    ),
+                  )
                 : ListView.builder(
-              itemCount: workouts.length,
-              itemBuilder: (context, index) {
-                final workout = workouts[index];
-                final utcDate = DateTime.parse(workout['date'] as String);
-                final String timeStr = DateFormat.jm().format(utcDate);
-                final String details = "${workout['exercise_type']} - ${workout['sets']} sets x ${workout['reps']} reps, ${workout['weight']} ${workout['weightUnit']} at $timeStr";
-                final String notes = (workout['notes'] != null && workout['notes'].toString().trim().isNotEmpty)
-                    ? "\n${workout['notes']}"
-                    : "";
-                return ListTile(
-                  title: Text(
-                    workout['exercise_name'] ?? "Unknown Exercise",
-                    style: const TextStyle(color: Colors.white),
+                    itemCount: workouts.length,
+                    itemBuilder: (context, index) {
+                      final workout = workouts[index];
+                      final utcDate = DateTime.parse(workout['date'] as String);
+                      final String timeStr = DateFormat.jm().format(utcDate);
+                      final String details =
+                          "${workout['exercise_type']} - ${workout['sets']} sets x ${workout['reps']} reps, ${workout['weight']} ${workout['weightUnit']} at $timeStr";
+                      final String notes = (workout['notes'] != null &&
+                              workout['notes'].toString().trim().isNotEmpty)
+                          ? "\n${workout['notes']}"
+                          : "";
+                      return ListTile(
+                        title: Text(
+                          workout['exercise_name'] ?? "Unknown Exercise",
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                        subtitle: Text(
+                          details + notes,
+                          style: const TextStyle(color: Colors.white70),
+                        ),
+                        // Show options only if we are viewing our own workouts (buddyId is null)
+                        onTap: widget.buddyId == null
+                            ? () => _showWorkoutOptions(context, workout)
+                            : null,
+                      );
+                    },
                   ),
-                  subtitle: Text(
-                    details + notes,
-                    style: const TextStyle(color: Colors.white70),
-                  ),
-                  // Show options only if we are viewing our own workouts (buddyId is null)
-                  onTap: widget.buddyId == null
-                      ? () => _showWorkoutOptions(context, workout)
-                      : null,
-                );
-              },
-            ),
           );
         },
       );
@@ -174,10 +194,12 @@ class _PastWorkoutsCalendarState extends State<PastWorkoutsCalendar> {
   }
 
   void _showWorkoutOptions(BuildContext context, Map<String, dynamic> workout) {
-    exerciseNameController = TextEditingController(text: workout['exercise_name']);
+    exerciseNameController =
+        TextEditingController(text: workout['exercise_name']);
     setsController = TextEditingController(text: workout['sets'].toString());
     repsController = TextEditingController(text: workout['reps'].toString());
-    weightController = TextEditingController(text: workout['weight'].toString());
+    weightController =
+        TextEditingController(text: workout['weight'].toString());
     String localWeightUnit = workout['weightUnit'] ?? 'lbs';
     showDialog(
       context: context,
@@ -292,11 +314,17 @@ class _PastWorkoutsCalendarState extends State<PastWorkoutsCalendar> {
         // Show a back arrow only if buddyId is provided.
         automaticallyImplyLeading: widget.buddyId != null,
         backgroundColor: Colors.black,
-        title: Text(
-          widget.buddyName != null
-              ? '${widget.buddyName}\'s Past Workouts'
-              : 'Past Workouts',
-          style: glowingTextStyle(Colors.lightBlue, size: 26),
+        title: FutureBuilder<String>(
+          future: _pageTitleFuture,
+          builder: (context, snapshot) {
+            final rawName = snapshot.data ?? "...";
+            final displayName = rawName.split(' ').first;
+
+            return Text(
+              "$displayName’s Workouts",
+              style: glowingTextStyle(Colors.lightBlue, size: 26),
+            );
+          },
         ),
         leading: IconButton(
           icon: glowingIcon(Icons.arrow_back, babyBlue, 24),
@@ -344,7 +372,8 @@ class _PastWorkoutsCalendarState extends State<PastWorkoutsCalendar> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: Text(
                   month['name'],
                   style: const TextStyle(
@@ -361,13 +390,15 @@ class _PastWorkoutsCalendarState extends State<PastWorkoutsCalendar> {
                   runSpacing: 8.0,
                   children: List.generate(month['days'], (dayIndex) {
                     final int dayNumber = dayIndex + 1;
-                    final String dateKey = getDateString(month['name'], dayNumber);
+                    final String dateKey =
+                        getDateString(month['name'], dayNumber);
                     final bool hasWorkout = workoutsByDate.containsKey(dateKey);
                     final isToday = _isToday(index, dayNumber);
 
                     return GestureDetector(
                       key: Key('${month['name']}-date-${dayIndex + 1}'),
-                      onTap: () => _showWorkoutsForDate(context, month['name'], dayIndex + 1),
+                      onTap: () => _showWorkoutsForDate(
+                          context, month['name'], dayIndex + 1),
                       child: Container(
                         width: 40,
                         height: 40,
@@ -375,17 +406,23 @@ class _PastWorkoutsCalendarState extends State<PastWorkoutsCalendar> {
                         decoration: BoxDecoration(
                           color: isToday ? Colors.lightBlue : Colors.grey[900],
                           borderRadius: BorderRadius.circular(5),
-                          border: isToday ? Border.all(color: Colors.white, width: 2) : null,
+                          border: isToday
+                              ? Border.all(color: Colors.white, width: 2)
+                              : null,
                         ),
                         child: () {
                           if (hasWorkout) {
                             final DateTime now = DateTime.now();
-                            final bool isFutureWorkout = workoutsByDate[dateKey]!.any((workout) {
-                              final DateTime wDate = DateTime.parse(workout['date'] as String);
+                            final bool isFutureWorkout =
+                                workoutsByDate[dateKey]!.any((workout) {
+                              final DateTime wDate =
+                                  DateTime.parse(workout['date'] as String);
                               return wDate.isAfter(now);
                             });
                             return Icon(
-                              isFutureWorkout ? Icons.fastfood : Icons.fitness_center,
+                              isFutureWorkout
+                                  ? Icons.fastfood
+                                  : Icons.fitness_center,
                               size: 20,
                               color: isToday ? Colors.black : Colors.white,
                             );
@@ -395,7 +432,9 @@ class _PastWorkoutsCalendarState extends State<PastWorkoutsCalendar> {
                               style: TextStyle(
                                 fontSize: 16,
                                 color: isToday ? Colors.black : Colors.white,
-                                fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
+                                fontWeight: isToday
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
                               ),
                             );
                           }

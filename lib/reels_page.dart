@@ -132,29 +132,29 @@ class _ReelsPageState extends State<ReelsPage> with WidgetsBindingObserver {
       ),
       body: _selectedTab == 0
           ? (_showReels
-          ? PageView.builder(
-        scrollDirection: Axis.vertical,
-        controller: _pageController,
-        itemCount: _demoVideoPaths.length,
-        onPageChanged: (index) {
-          setState(() => _currentReelIndex = index);
-        },
-        itemBuilder: (context, index) {
-          return _VideoTile(
-            key: ValueKey(index),
-            assetPath: _demoVideoPaths[index],
-            index: index,
-            playOnLoad: index == _currentReelIndex,
-          );
-        },
-      )
-          : Center(
-        child: Text(
-          'Reels are hidden.\nTap the eye icon to show.',
-          textAlign: TextAlign.center,
-          style: TextStyle(color: Colors.white70, fontSize: 16),
-        ),
-      ))
+              ? PageView.builder(
+                  scrollDirection: Axis.vertical,
+                  controller: _pageController,
+                  itemCount: _demoVideoPaths.length,
+                  onPageChanged: (index) {
+                    setState(() => _currentReelIndex = index);
+                  },
+                  itemBuilder: (context, index) {
+                    return _VideoTile(
+                      key: ValueKey(index),
+                      assetPath: _demoVideoPaths[index],
+                      index: index,
+                      playOnLoad: index == _currentReelIndex,
+                    );
+                  },
+                )
+              : Center(
+                  child: Text(
+                    'Reels are hidden.\nTap the eye icon to show.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.white70, fontSize: 16),
+                  ),
+                ))
           : SharedDashboard(userId: widget.userId),
     );
   }
@@ -185,6 +185,7 @@ class __VideoTileState extends State<_VideoTile> {
   void initState() {
     super.initState();
     _controller = VideoPlayerController.asset(widget.assetPath)
+      ..setVolume(1.0)
       ..setLooping(true)
       ..initialize().then((_) {
         if (!mounted) return;
@@ -246,7 +247,8 @@ class __VideoTileState extends State<_VideoTile> {
             child: AnimatedOpacity(
               opacity: _isPlaying ? 0.0 : 1.0,
               duration: const Duration(milliseconds: 300),
-              child: const Icon(Icons.play_arrow, size: 80, color: Colors.white70),
+              child:
+                  const Icon(Icons.play_arrow, size: 80, color: Colors.white70),
             ),
           ),
           Positioned(
@@ -256,22 +258,26 @@ class __VideoTileState extends State<_VideoTile> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 IconButton(
-                  icon: const Icon(Icons.favorite_border, size: 32, color: Colors.redAccent),
+                  icon: const Icon(Icons.favorite_border,
+                      size: 32, color: Colors.redAccent),
                   onPressed: () {},
                 ),
                 const SizedBox(height: 12),
                 IconButton(
-                  icon: const Icon(Icons.comment, size: 32, color: Colors.lightBlueAccent),
+                  icon: const Icon(Icons.comment,
+                      size: 32, color: Colors.lightBlueAccent),
                   onPressed: () {},
                 ),
                 const SizedBox(height: 12),
                 IconButton(
-                  icon: const Icon(Icons.bookmark_border, size: 32, color: Colors.amber),
+                  icon: const Icon(Icons.bookmark_border,
+                      size: 32, color: Colors.amber),
                   onPressed: () {},
                 ),
                 const SizedBox(height: 12),
                 IconButton(
-                  icon: const Icon(Icons.share, size: 32, color: Colors.greenAccent),
+                  icon: const Icon(Icons.share,
+                      size: 32, color: Colors.greenAccent),
                   onPressed: () {},
                 ),
               ],
