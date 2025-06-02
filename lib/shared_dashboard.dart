@@ -62,10 +62,8 @@ class _SharedDashboardState extends State<SharedDashboard> {
   void _initSocket() {
     socket = IO.io(
       ApiService.BASE_URL,
-      IO.OptionBuilder()
-          .setTransports(['websocket'])
-          .setQuery({'userId': widget.userId})
-          .build(),
+      IO.OptionBuilder().setTransports(['websocket']).setQuery(
+          {'userId': widget.userId}).build(),
     );
 
     // Explicitly connect
@@ -123,13 +121,15 @@ class _SharedDashboardState extends State<SharedDashboard> {
           decoration: const InputDecoration(hintText: 'Enter post description'),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
           ElevatedButton(
             onPressed: () async {
               final desc = postController!.text.trim();
               if (desc.isEmpty) return;
               try {
-                final newPost = await ApiService.createPost(widget.userId, description: desc);
+                final newPost = await ApiService.createPost(widget.userId,
+                    description: desc);
                 // we’ll also get it via socket—but insert locally immediately:
                 setState(() => posts.insert(0, newPost));
                 Navigator.pop(ctx);
@@ -171,35 +171,41 @@ class _SharedDashboardState extends State<SharedDashboard> {
                   final id = w['_id'] as String;
                   final name = w['exercise_name'] ?? 'Workout';
                   final dateStr = _formatDateTime(w['date'] as String);
-                  return DropdownMenuItem(value: id, child: Text('$name on $dateStr'));
+                  return DropdownMenuItem(
+                      value: id, child: Text('$name on $dateStr'));
                 }).toList(),
                 onChanged: (v) => setDlg(() => selectedId = v),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: descCtrl,
-                decoration: const InputDecoration(hintText: 'Optional description'),
+                decoration:
+                    const InputDecoration(hintText: 'Optional description'),
               ),
             ],
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx2), child: const Text('Cancel')),
+            TextButton(
+                onPressed: () => Navigator.pop(ctx2),
+                child: const Text('Cancel')),
             ElevatedButton(
               onPressed: selectedId == null
                   ? null
                   : () async {
-                try {
-                  final newPost = await ApiService.createPost(
-                    widget.userId,
-                    workoutId: selectedId,
-                    description: descCtrl.text.trim().isEmpty ? null : descCtrl.text.trim(),
-                  );
-                  setState(() => posts.insert(0, newPost));
-                  Navigator.pop(ctx2);
-                } catch (e) {
-                  showShortFadeSnack(ctx, 'Error sharing workout: $e');
-                }
-              },
+                      try {
+                        final newPost = await ApiService.createPost(
+                          widget.userId,
+                          workoutId: selectedId,
+                          description: descCtrl.text.trim().isEmpty
+                              ? null
+                              : descCtrl.text.trim(),
+                        );
+                        setState(() => posts.insert(0, newPost));
+                        Navigator.pop(ctx2);
+                      } catch (e) {
+                        showShortFadeSnack(ctx, 'Error sharing workout: $e');
+                      }
+                    },
               child: const Text('Share'),
             )
           ],
@@ -233,9 +239,10 @@ class _SharedDashboardState extends State<SharedDashboard> {
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : ListView.builder(
-        itemCount: posts.length,
-        itemBuilder: (_, i) => WorkoutPostCard(post: posts[i], userId: widget.userId),
-      ),
+              itemCount: posts.length,
+              itemBuilder: (_, i) =>
+                  WorkoutPostCard(post: posts[i], userId: widget.userId),
+            ),
     );
   }
 }
@@ -259,7 +266,6 @@ class _WorkoutPostCardState extends State<WorkoutPostCard> {
     currentPost = widget.post;
   }
 
-
   @override
   void dispose() {
     editController?.dispose();
@@ -269,8 +275,8 @@ class _WorkoutPostCardState extends State<WorkoutPostCard> {
   // Compute liked/disliked state dynamically from currentPost.
   bool get isLiked =>
       (currentPost['likedBy'] as List<dynamic>? ?? []).contains(widget.userId);
-  bool get isDisliked =>
-      (currentPost['dislikedBy'] as List<dynamic>? ?? []).contains(widget.userId);
+  bool get isDisliked => (currentPost['dislikedBy'] as List<dynamic>? ?? [])
+      .contains(widget.userId);
 
   Widget _buildPostContent() {
     final workout = currentPost['workoutId'];
@@ -290,7 +296,8 @@ class _WorkoutPostCardState extends State<WorkoutPostCard> {
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               child: Text(
                 currentPost['description'],
-                style: const TextStyle(fontSize: 14, fontStyle: FontStyle.italic),
+                style:
+                    const TextStyle(fontSize: 14, fontStyle: FontStyle.italic),
               ),
             ),
           Text(
@@ -325,8 +332,7 @@ class _WorkoutPostCardState extends State<WorkoutPostCard> {
   }
 
   void _showEditDialog() {
-    editController =
-    TextEditingController(text: currentPost['description']);
+    editController = TextEditingController(text: currentPost['description']);
     showDialog(
       context: context,
       builder: (context) {
@@ -339,20 +345,22 @@ class _WorkoutPostCardState extends State<WorkoutPostCard> {
             ),
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+            TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel')),
             ElevatedButton(
               onPressed: () async {
                 final newDesc = editController!.text.trim();
                 if (newDesc.isNotEmpty) {
                   try {
-                    final updatedPost =
-                    await ApiService.updatePost(currentPost['_id'], newDesc);
+                    final updatedPost = await ApiService.updatePost(
+                        currentPost['_id'], newDesc);
                     setState(() {
                       currentPost = updatedPost;
                     });
                     Navigator.pop(context);
                   } catch (e) {
-                     showShortFadeSnack(context, 'Error updating post: $e');
+                    showShortFadeSnack(context, 'Error updating post: $e');
                   }
                 }
               },
@@ -393,7 +401,8 @@ class _WorkoutPostCardState extends State<WorkoutPostCard> {
                     CircleAvatar(
                       backgroundColor: Colors.blue,
                       child: Text(
-                        currentPost['userId']?['name'] != null && currentPost['userId']['name'].isNotEmpty
+                        currentPost['userId']?['name'] != null &&
+                                currentPost['userId']['name'].isNotEmpty
                             ? currentPost['userId']['name'][0]
                             : 'U',
                         style: const TextStyle(color: Colors.white),
@@ -402,7 +411,8 @@ class _WorkoutPostCardState extends State<WorkoutPostCard> {
                     const SizedBox(width: 8),
                     Text(
                       currentPost['userId']?['name'] ?? 'Unknown',
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                          fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
@@ -419,11 +429,13 @@ class _WorkoutPostCardState extends State<WorkoutPostCard> {
             Row(
               children: [
                 IconButton(
-                  icon: Icon(isLiked ? Icons.thumb_up : Icons.thumb_up_alt_outlined,
+                  icon: Icon(
+                      isLiked ? Icons.thumb_up : Icons.thumb_up_alt_outlined,
                       color: isLiked ? Colors.blue : Colors.grey),
                   onPressed: () async {
                     try {
-                      final updatedPost = await ApiService.likePost(currentPost['_id'], widget.userId);
+                      final updatedPost = await ApiService.likePost(
+                          currentPost['_id'], widget.userId);
                       setState(() {
                         currentPost = updatedPost;
                       });
@@ -432,14 +444,19 @@ class _WorkoutPostCardState extends State<WorkoutPostCard> {
                     }
                   },
                 ),
-                Text(((currentPost['likedBy'] as List<dynamic>?)?.length ?? 0).toString()),
+                Text(((currentPost['likedBy'] as List<dynamic>?)?.length ?? 0)
+                    .toString()),
                 const SizedBox(width: 20),
                 IconButton(
-                  icon: Icon(isDisliked ? Icons.thumb_down : Icons.thumb_down_alt_outlined,
+                  icon: Icon(
+                      isDisliked
+                          ? Icons.thumb_down
+                          : Icons.thumb_down_alt_outlined,
                       color: isDisliked ? Colors.red : Colors.grey),
                   onPressed: () async {
                     try {
-                      final updatedPost = await ApiService.dislikePost(currentPost['_id'], widget.userId);
+                      final updatedPost = await ApiService.dislikePost(
+                          currentPost['_id'], widget.userId);
                       setState(() {
                         currentPost = updatedPost;
                       });
@@ -448,13 +465,16 @@ class _WorkoutPostCardState extends State<WorkoutPostCard> {
                     }
                   },
                 ),
-                Text(((currentPost['dislikedBy'] as List<dynamic>?)?.length ?? 0).toString()),
+                Text(
+                    ((currentPost['dislikedBy'] as List<dynamic>?)?.length ?? 0)
+                        .toString()),
               ],
             ),
             const SizedBox(height: 10),
             const Divider(),
             Column(
-              children: (currentPost['comments'] as List<dynamic>).map((comment) {
+              children:
+                  (currentPost['comments'] as List<dynamic>).map((comment) {
                 return ListTile(
                   contentPadding: EdgeInsets.zero,
                   title: Text(comment['userId']?['name'] ?? 'Anonymous'),
@@ -467,16 +487,18 @@ class _WorkoutPostCardState extends State<WorkoutPostCard> {
               decoration: const InputDecoration(
                 labelText: 'Add a comment...',
                 border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                contentPadding:
+                    EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               ),
               onSubmitted: (text) async {
                 try {
-                  final updatedPost = await ApiService.commentOnPost(currentPost['_id'], widget.userId, text);
+                  final updatedPost = await ApiService.commentOnPost(
+                      currentPost['_id'], widget.userId, text);
                   setState(() {
                     currentPost['comments'] = updatedPost['comments'];
                   });
                 } catch (e) {
-                    showShortFadeSnack(context, 'Error adding comment: $e');
+                  showShortFadeSnack(context, 'Error adding comment: $e');
                 }
               },
             ),

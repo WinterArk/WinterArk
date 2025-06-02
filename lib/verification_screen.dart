@@ -8,7 +8,7 @@ import 'button_effects/ui_helpers.dart';
 
 class VerificationScreen extends StatefulWidget {
   final String email;
-  final String userId; // <-- Add userId to constructor so we can go directly to HomePage
+  final String userId;
 
   const VerificationScreen({
     super.key,
@@ -113,7 +113,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
               onPressed: _isResending ? null : _handleResendVerification,
               child: _isResending
                   ? const CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white))
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white))
                   : const Text('Resend Verification Email'),
             ),
           ],

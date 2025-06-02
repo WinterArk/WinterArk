@@ -26,34 +26,33 @@ class WorkoutTrackerLandingPage extends StatelessWidget {
   }
 
   TextStyle glowingTextStyle(Color color) => TextStyle(
-    fontSize: 16,
-    fontWeight: FontWeight.bold,
-    color: color,
-    shadows: [
-      Shadow(color: color.withOpacity(0.9), blurRadius: 12),
-      Shadow(color: color.withOpacity(0.6), blurRadius: 24),
-      Shadow(color: color.withOpacity(0.3), blurRadius: 36),
-      Shadow(color: color.withOpacity(0.2), blurRadius: 48),
-    ],
-  );
+        fontSize: 16,
+        fontWeight: FontWeight.bold,
+        color: color,
+        shadows: [
+          Shadow(color: color.withOpacity(0.9), blurRadius: 12),
+          Shadow(color: color.withOpacity(0.6), blurRadius: 24),
+          Shadow(color: color.withOpacity(0.3), blurRadius: 36),
+          Shadow(color: color.withOpacity(0.2), blurRadius: 48),
+        ],
+      );
 
   @override
   Widget build(BuildContext context) {
     double buttonSize = MediaQuery.of(context).size.width * 0.3;
-    final babyBlue   = const Color.fromARGB(255, 212, 242, 255);  // #D6E2E8
-    final aquamarine = const Color.fromARGB(255, 167, 223, 248);  // #91C1D8
-    final blueGrotto = const Color.fromARGB(255, 45, 178, 250);  // #0070AC
-    final navyBlue   = const Color(0xFF003371);  // #003371
+    final babyBlue = const Color.fromARGB(255, 212, 242, 255); // #D6E2E8
+    final aquamarine = const Color.fromARGB(255, 167, 223, 248); // #91C1D8
+    final blueGrotto = const Color.fromARGB(255, 45, 178, 250); // #0070AC
+    final navyBlue = const Color(0xFF003371); // #003371
     return Scaffold(
       appBar: AppBar(
         title: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-        ],
-      ),
-      backgroundColor: Colors.black,
-      centerTitle: true,
-      automaticallyImplyLeading: false,
+          mainAxisSize: MainAxisSize.min,
+          children: [],
+        ),
+        backgroundColor: Colors.black,
+        centerTitle: true,
+        automaticallyImplyLeading: false,
       ),
       body: Center(
         child: Column(
@@ -67,7 +66,8 @@ class WorkoutTrackerLandingPage extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const WorkoutTrackerScreen()),
+                  MaterialPageRoute(
+                      builder: (context) => const WorkoutTrackerScreen()),
                 );
               },
               child: Container(
@@ -99,7 +99,8 @@ class WorkoutTrackerLandingPage extends StatelessWidget {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const PlanWorkoutPage()),
+                      MaterialPageRoute(
+                          builder: (context) => const PlanWorkoutPage()),
                     );
                   },
                   child: Container(
@@ -114,7 +115,8 @@ class WorkoutTrackerLandingPage extends StatelessWidget {
                       children: [
                         glowingIcon(Icons.event_note, aquamarine, 32),
                         const SizedBox(height: 0),
-                        Text('Plan Workout', style: glowingTextStyle(aquamarine)),
+                        Text('Plan Workout',
+                            style: glowingTextStyle(aquamarine)),
                         const SizedBox(height: 8),
                       ],
                     ),
@@ -129,7 +131,8 @@ class WorkoutTrackerLandingPage extends StatelessWidget {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const WorkoutReusePage()),
+                      MaterialPageRoute(
+                          builder: (context) => const WorkoutReusePage()),
                     );
                   },
                   child: Container(
@@ -144,7 +147,8 @@ class WorkoutTrackerLandingPage extends StatelessWidget {
                       children: [
                         glowingIcon(Icons.history, babyBlue, 32),
                         const SizedBox(height: 0),
-                        Text('Reuse Workout', style: glowingTextStyle(babyBlue)),
+                        Text('Reuse Workout',
+                            style: glowingTextStyle(babyBlue)),
                         const SizedBox(height: 8),
                       ],
                     ),

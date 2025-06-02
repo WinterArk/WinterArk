@@ -24,7 +24,7 @@ class _HomePageState extends State<HomePage> {
     final List<Widget> pages = [
       ReelsPage(userId: widget.userId),
       const WorkoutTrackerLandingPage(),
-      UploadPage(userId: widget.userId),  
+      UploadPage(userId: widget.userId),
       GymBuddyScreen(currentUserId: widget.userId),
       ProfilePage(userId: widget.userId),
     ];
@@ -37,15 +37,15 @@ class _HomePageState extends State<HomePage> {
         elevation: 12,
         shadowColor: blueGrotto.withOpacity(0.4),
         child: BottomNavigationBar(
-          type: BottomNavigationBarType.fixed,        
-          backgroundColor: const Color.fromARGB(3, 255, 255, 255),       
+          type: BottomNavigationBarType.fixed,
+          backgroundColor: const Color.fromARGB(3, 255, 255, 255),
           selectedItemColor: blueGrotto,
           unselectedItemColor: Colors.white70,
-          selectedIconTheme: IconThemeData(size: 32), 
+          selectedIconTheme: IconThemeData(size: 32),
           unselectedIconTheme: IconThemeData(size: 28),
           showSelectedLabels: true,
           showUnselectedLabels: false,
-          elevation: 0,                               
+          elevation: 0,
           currentIndex: _currentIndex,
           onTap: (i) => setState(() => _currentIndex = i),
           items: [

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class LandingButton extends StatefulWidget {
   final VoidCallback onTap;
   final Widget child;
-  const LandingButton({super.key,  required this.onTap, required this.child });
+  const LandingButton({super.key, required this.onTap, required this.child});
 
   @override
   _LandingButtonState createState() => _LandingButtonState();
@@ -15,7 +15,7 @@ class _LandingButtonState extends State<LandingButton> {
   Widget build(BuildContext ctx) {
     return GestureDetector(
       onTapDown: (_) => setState(() => _pressed = true),
-      onTapUp:   (_) => setState(() => _pressed = false),
+      onTapUp: (_) => setState(() => _pressed = false),
       onTapCancel: () => setState(() => _pressed = false),
       onTap: widget.onTap,
       child: AnimatedScale(

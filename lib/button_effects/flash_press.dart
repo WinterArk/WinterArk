@@ -4,16 +4,16 @@ class FlashOnPress extends StatefulWidget {
   final Widget child;
   final VoidCallback onTap;
   final Duration flashDuration;
-  final Color glowColor;   
-  final Color flashColor;  
+  final Color glowColor;
+  final Color flashColor;
 
   const FlashOnPress({
     super.key,
     required this.child,
     required this.onTap,
     this.flashDuration = const Duration(milliseconds: 200),
-    this.glowColor   = Colors.blueAccent,
-    this.flashColor  = Colors.white,
+    this.glowColor = Colors.blueAccent,
+    this.flashColor = Colors.white,
   });
 
   @override
@@ -52,7 +52,7 @@ class _FlashOnPressState extends State<FlashOnPress> {
 
   @override
   Widget build(BuildContext context) {
-    final blueGlow = glowShadows(widget.glowColor, radii: [8,16,24])
+    final blueGlow = glowShadows(widget.glowColor, radii: [8, 16, 24])
         .map((s) => BoxShadow(
               color: s.color,
               blurRadius: s.blurRadius,
@@ -79,7 +79,7 @@ class _FlashOnPressState extends State<FlashOnPress> {
             ),
           ]
         ],
-        color: Colors.transparent, 
+        color: Colors.transparent,
       ),
       child: GestureDetector(
         onTap: _handleTap,

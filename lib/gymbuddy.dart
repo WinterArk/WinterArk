@@ -6,6 +6,7 @@ import 'chat_screen.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'button_effects/ui_helpers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'profile_page.dart';
 
 class GymBuddyScreen extends StatefulWidget {
   final String currentUserId;
@@ -13,7 +14,7 @@ class GymBuddyScreen extends StatefulWidget {
   const GymBuddyScreen({
     Key? key,
     required this.currentUserId,
-    this.showBackArrow = false,  
+    this.showBackArrow = false,
   }) : super(key: key);
 
   @override
@@ -132,7 +133,8 @@ class _GymBuddyScreenState extends State<GymBuddyScreen> {
   Widget _buildSectionHeader(String title) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Text(title, style: const TextStyle(color: Colors.white, fontSize: 18)),
+      child: Text(title,
+          style: const TextStyle(color: Colors.white, fontSize: 18)),
     );
   }
 
@@ -146,17 +148,20 @@ class _GymBuddyScreenState extends State<GymBuddyScreen> {
         final user = doc['userId'];
         return ListTile(
           tileColor: Colors.grey[850],
-          title: Text(user['name'] ?? '', style: const TextStyle(color: Colors.white)),
+          title: Text(user['name'] ?? '',
+              style: const TextStyle(color: Colors.white)),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               IconButton(
                 icon: const Icon(Icons.check, color: Colors.green),
-                onPressed: () => ApiService.updateBuddyStatus(id, 'connected').then((_) => _loadUserBuddies()),
+                onPressed: () => ApiService.updateBuddyStatus(id, 'connected')
+                    .then((_) => _loadUserBuddies()),
               ),
               IconButton(
                 icon: const Icon(Icons.close, color: Colors.red),
-                onPressed: () => ApiService.updateBuddyStatus(id, 'removed').then((_) => _loadUserBuddies()),
+                onPressed: () => ApiService.updateBuddyStatus(id, 'removed')
+                    .then((_) => _loadUserBuddies()),
               ),
             ],
           ),
@@ -175,10 +180,12 @@ class _GymBuddyScreenState extends State<GymBuddyScreen> {
         final buddy = doc['buddyId'];
         return ListTile(
           tileColor: Colors.grey[850],
-          title: Text(buddy['name'] ?? '', style: const TextStyle(color: Colors.white)),
+          title: Text(buddy['name'] ?? '',
+              style: const TextStyle(color: Colors.white)),
           trailing: IconButton(
             icon: const Icon(Icons.close, color: Colors.red),
-            onPressed: () => ApiService.updateBuddyStatus(id, 'removed').then((_) => _loadUserBuddies()),
+            onPressed: () => ApiService.updateBuddyStatus(id, 'removed')
+                .then((_) => _loadUserBuddies()),
           ),
         );
       }).toList(),
@@ -233,36 +240,35 @@ class _GymBuddyScreenState extends State<GymBuddyScreen> {
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
         title: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const SizedBox(width: 8),
-          Text(
-            "Gym Buddies",
-            style: glowingTextStyle(
-              Colors.white,
-              size: 26,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(width: 8),
+            Text(
+              "Gym Buddies",
+              style: glowingTextStyle(
+                Colors.white,
+                size: 26,
+              ),
             ),
-          ),
-        ],
-      ),
-      automaticallyImplyLeading: false, // hide the back-arrow here
-      backgroundColor: Colors.black,
-      centerTitle: true,
-      elevation: 0,
+          ],
+        ),
+        automaticallyImplyLeading: false, // hide the back-arrow here
+        backgroundColor: Colors.black,
+        centerTitle: true,
+        elevation: 0,
         // <-- Conditionally show a back arrow:
         leading: widget.showBackArrow
-          ? IconButton(
-              icon: glowingIcon(Icons.arrow_back, Colors.white, 24),
-              onPressed: () => Navigator.of(context).pop(),
-            )
-          : null,
+            ? IconButton(
+                icon: glowingIcon(Icons.arrow_back, Colors.white, 24),
+                onPressed: () => Navigator.of(context).pop(),
+              )
+            : null,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -298,7 +304,8 @@ class _GymBuddyScreenState extends State<GymBuddyScreen> {
                   style: const TextStyle(color: Colors.white),
                   underline: Container(height: 2, color: Colors.blueAccent),
                   items: ['both', 'name', 'username']
-                      .map((v) => DropdownMenuItem(value: v, child: Text(v.toUpperCase())))
+                      .map((v) => DropdownMenuItem(
+                          value: v, child: Text(v.toUpperCase())))
                       .toList(),
                   onChanged: (v) => setState(() => searchFilter = v!),
                 ),
@@ -317,9 +324,11 @@ class _GymBuddyScreenState extends State<GymBuddyScreen> {
                         children: searchResults.map((u) {
                           return ListTile(
                             tileColor: Colors.grey[900],
-                            title: Text(u['name'] ?? '', style: const TextStyle(color: Colors.white)),
+                            title: Text(u['name'] ?? '',
+                                style: const TextStyle(color: Colors.white)),
                             trailing: IconButton(
-                              icon: const Icon(Icons.person_add, color: Colors.blueAccent),
+                              icon: const Icon(Icons.person_add,
+                                  color: Colors.blueAccent),
                               onPressed: () => _addGymBuddy(u['_id']),
                             ),
                           );
@@ -383,9 +392,8 @@ class _ConnectedBuddyCardState extends State<ConnectedBuddyCard> {
     super.initState();
     _setupChatAndSocket();
     // take the first letter
-    _initial = widget.buddyName.isNotEmpty
-        ? widget.buddyName[0].toUpperCase()
-        : '?';
+    _initial =
+        widget.buddyName.isNotEmpty ? widget.buddyName[0].toUpperCase() : '?';
 
     // pick a color based on the name’s hash
     final hash = widget.buddyName.hashCode;
@@ -395,22 +403,29 @@ class _ConnectedBuddyCardState extends State<ConnectedBuddyCard> {
 
   Future<void> _setupChatAndSocket() async {
     try {
-      final chat = await ApiService.createChat(widget.currentUserId, widget.buddy['_id']);
+      final chat = await ApiService.createChat(
+          widget.currentUserId, widget.buddy['_id']);
       chatId = chat['_id'];
-      final count = await ApiService.getUnreadCount(chatId!, widget.currentUserId);
+      final count =
+          await ApiService.getUnreadCount(chatId!, widget.currentUserId);
       setState(() => unreadCount = count);
       socket = IO.io(
         'http://18.234.214.233:3000',
-        {'transports': ['websocket'], 'autoConnect': true},
+        {
+          'transports': ['websocket'],
+          'autoConnect': true
+        },
       );
       socket?.onConnect((_) => socket?.emit('join', chatId));
       socket?.on('new_message', (data) {
-        if (data['chatId'] == chatId && data['senderId'] == widget.buddy['_id']) {
+        if (data['chatId'] == chatId &&
+            data['senderId'] == widget.buddy['_id']) {
           setState(() => unreadCount++);
         }
       });
       socket?.on('message_read', (data) {
-        if (data['chatId'] == chatId && data['readerId'] == widget.currentUserId) {
+        if (data['chatId'] == chatId &&
+            data['readerId'] == widget.currentUserId) {
           setState(() => unreadCount = 0);
         }
       });
@@ -435,17 +450,32 @@ class _ConnectedBuddyCardState extends State<ConnectedBuddyCard> {
         ListTile(
           contentPadding: EdgeInsets.zero,
           tileColor: Colors.black,
-          leading: CircleAvatar(
-            backgroundColor: _avatarColor,
-            radius: 18,
-            child: Text(
-              _initial,
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          leading: InkWell(
+            borderRadius: BorderRadius.circular(18),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ProfilePage(userId: widget.buddy['_id']),
+                ),
+              );
+            },
+            child: CircleAvatar(
+              backgroundColor: _avatarColor,
+              radius: 18,
+              child: Text(
+                _initial,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ),
           title: Row(
             children: [
-              Text(widget.buddyName, style: const TextStyle(color: Colors.white)),
+              Text(widget.buddyName,
+                  style: const TextStyle(color: Colors.white)),
               const SizedBox(width: 8),
               FutureBuilder<int>(
                 future: ApiService.getUserStreak(widget.buddy['_id']),
@@ -453,18 +483,22 @@ class _ConnectedBuddyCardState extends State<ConnectedBuddyCard> {
                   final streak = snap.data ?? 0;
                   return streak > 0
                       ? Row(
-                    children: [
-                      const Icon(Icons.local_fire_department, color: Colors.orange, size: 16),
-                      const SizedBox(width: 4),
-                      Text(streak.toString(), style: const TextStyle(color: Colors.white, fontSize: 12)),
-                    ],
-                  )
+                          children: [
+                            const Icon(Icons.local_fire_department,
+                                color: Colors.orange, size: 16),
+                            const SizedBox(width: 4),
+                            Text(streak.toString(),
+                                style: const TextStyle(
+                                    color: Colors.white, fontSize: 12)),
+                          ],
+                        )
                       : const SizedBox.shrink();
                 },
               ),
             ],
           ),
-          subtitle: Text(widget.buddyUsername, style: const TextStyle(color: Colors.white70)),
+          subtitle: Text(widget.buddyUsername,
+              style: const TextStyle(color: Colors.white70)),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -477,8 +511,10 @@ class _ConnectedBuddyCardState extends State<ConnectedBuddyCard> {
                       if (chatId != null) {
                         final msgs = await ApiService.getMessages(chatId!);
                         for (var m in msgs) {
-                          if (m['senderId'] == widget.buddy['_id'] && m['read'] == false) {
-                            await ApiService.markMessageAsRead(chatId!, m['_id']);
+                          if (m['senderId'] == widget.buddy['_id'] &&
+                              m['read'] == false) {
+                            await ApiService.markMessageAsRead(
+                                chatId!, m['_id']);
                             socket?.emit('message_read', {
                               'chatId': chatId,
                               'messageId': m['_id'],
@@ -510,24 +546,25 @@ class _ConnectedBuddyCardState extends State<ConnectedBuddyCard> {
                         backgroundColor: Colors.red,
                         child: Text(
                           unreadCount.toString(),
-                          style: const TextStyle(color: Colors.white, fontSize: 10),
+                          style: const TextStyle(
+                              color: Colors.white, fontSize: 10),
                         ),
                       ),
                     ),
                 ],
               ),
-              IconButton(
-                icon: const Icon(Icons.calendar_today, color: Colors.blueAccent),
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => PastWorkoutsCalendar(
-                      buddyId: widget.buddy['_id'],
-                      buddyName: widget.buddyName,
-                    ),
-                  ),
-                ),
-              ),
+              // IconButton(
+              //   icon: const Icon(Icons.calendar_today, color: Colors.blueAccent),
+              //   onPressed: () => Navigator.push(
+              //     context,
+              //     MaterialPageRoute(
+              //       builder: (_) => PastWorkoutsCalendar(
+              //         buddyId: widget.buddy['_id'],
+              //         buddyName: widget.buddyName,
+              //       ),
+              //     ),
+              //   ),
+              // ),
             ],
           ),
         ),

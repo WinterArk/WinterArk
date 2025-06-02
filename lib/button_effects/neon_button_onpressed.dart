@@ -16,7 +16,7 @@ class NeonButton extends StatefulWidget {
     this.glowColor = Colors.blueAccent,
     this.backgroundColor = Colors.black,
     this.textColor = Colors.white,
-    this.flashDuration = const Duration(milliseconds: 500), 
+    this.flashDuration = const Duration(milliseconds: 500),
   });
 
   @override

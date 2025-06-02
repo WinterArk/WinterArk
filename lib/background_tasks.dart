@@ -19,15 +19,15 @@ class _RoastLoader {
     return _cache!;
   }
 }
+
 // Returns a random roast message based on a randomly chosen muscle group
 Future<String> getRandomRoastMessage(
   List<String>? muscleGroups,
   String selectedDifficulty,
 ) async {
-  
   final roastByLevel = await _RoastLoader.load();
-  final levelMap = (roastByLevel[selectedDifficulty]
-      ?? roastByLevel['Soft Serve Roasts 🍦😋']) as Map<String, dynamic>;
+  final levelMap = (roastByLevel[selectedDifficulty] ??
+      roastByLevel['Soft Serve Roasts 🍦😋']) as Map<String, dynamic>;
   final rnd = Random();
   if (muscleGroups == null || muscleGroups.isEmpty) {
     return 'You skipped your workout, pathetic!';
@@ -35,23 +35,26 @@ Future<String> getRandomRoastMessage(
 
   List<dynamic> messages;
   if (muscleGroups.isNotEmpty) {
-    final chosenMuscle = muscleGroups[rnd.nextInt(muscleGroups.length)].toLowerCase();
-    messages = (levelMap[chosenMuscle] as List<dynamic>?)
-        ?? levelMap.values.expand((l) => (l as List).cast<dynamic>()).toList();
+    final chosenMuscle =
+        muscleGroups[rnd.nextInt(muscleGroups.length)].toLowerCase();
+    messages = (levelMap[chosenMuscle] as List<dynamic>?) ??
+        levelMap.values.expand((l) => (l as List).cast<dynamic>()).toList();
   } else {
-    messages = levelMap.values.expand((l) => (l as List).cast<dynamic>()).toList();
+    messages =
+        levelMap.values.expand((l) => (l as List).cast<dynamic>()).toList();
   }
   return messages[rnd.nextInt(messages.length)] as String;
 }
+
 void callbackDispatcher() {
-   AwesomeNotifications().initialize(
+  AwesomeNotifications().initialize(
     null,
     [
       NotificationChannel(
         channelKey: 'workout_reminder',
         channelName: 'Workout Reminders',
         channelDescription: 'Reminders for scheduled workouts',
-        defaultColor: Color(0xFF00BFFF),   
+        defaultColor: Color(0xFF00BFFF),
         ledColor: Color(0xFF00BFFF),
         importance: NotificationImportance.High,
         enableLights: true,
@@ -90,8 +93,10 @@ void callbackDispatcher() {
       return Future.value(true);
     }
 
-    List<String>? plannedMuscleGroups = prefs.getStringList('plannedMuscleGroups');
-    String? roastLevel = prefs.getString('roastLevel') ?? 'Soft Serve Roasts 🍦😋';
+    List<String>? plannedMuscleGroups =
+        prefs.getStringList('plannedMuscleGroups');
+    String? roastLevel =
+        prefs.getString('roastLevel') ?? 'Soft Serve Roasts 🍦😋';
     String? plannedWorkoutDateStr = prefs.getString('plannedWorkoutDate');
     String? plannedWorkoutName = prefs.getString('plannedWorkoutName');
 
@@ -130,25 +135,25 @@ void callbackDispatcher() {
     );
 
     try {
-      List<dynamic> workouts = await ApiService.getWorkoutsForDay(userId, dateKey);
+      List<dynamic> workouts =
+          await ApiService.getWorkoutsForDay(userId, dateKey);
       if (workouts.isEmpty) {
-        final roastMessage = await getRandomRoastMessage(plannedMuscleGroups, roastLevel);
+        final roastMessage =
+            await getRandomRoastMessage(plannedMuscleGroups, roastLevel);
         await AwesomeNotifications().createNotification(
-          content: NotificationContent(
-            id: 200,
-            channelKey: 'roast_notifications',
-            title: '🔥 You Missed Your $plannedWorkoutName Workout!',
-            body: roastMessage,
-            notificationLayout: NotificationLayout.BigText, 
-            color: Colors.deepOrangeAccent,  
-            autoDismissible: true,
-            displayOnBackground: true,
-            displayOnForeground: true, 
-          ),
-          schedule: notificationSchedule
-        );
-      }
-      else{
+            content: NotificationContent(
+              id: 200,
+              channelKey: 'roast_notifications',
+              title: '🔥 You Missed Your $plannedWorkoutName Workout!',
+              body: roastMessage,
+              notificationLayout: NotificationLayout.BigText,
+              color: Colors.deepOrangeAccent,
+              autoDismissible: true,
+              displayOnBackground: true,
+              displayOnForeground: true,
+            ),
+            schedule: notificationSchedule);
+      } else {
         print("Workouts logged for the day: $workouts");
       }
     } catch (error) {

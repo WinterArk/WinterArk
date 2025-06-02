@@ -15,7 +15,8 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _oldPasswordController = TextEditingController();
   final TextEditingController _newPasswordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
   bool _isLoading = false;
   String _message = '';
 
@@ -44,7 +45,8 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
   }
 
   Future<void> _updatePassword() async {
-    if (_newPasswordController.text.trim() != _confirmPasswordController.text.trim()) {
+    if (_newPasswordController.text.trim() !=
+        _confirmPasswordController.text.trim()) {
       setState(() {
         _message = 'New passwords do not match.';
       });
@@ -111,25 +113,25 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
     return Scaffold(
       appBar: AppBar(
         title: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const SizedBox(width: 8),
-          Text(
-            "Account Settings",
-            style: glowingTextStyle(
-              Colors.white,
-              size: 26,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(width: 8),
+            Text(
+              "Account Settings",
+              style: glowingTextStyle(
+                Colors.white,
+                size: 26,
+              ),
             ),
-          ),
-        ],
-      ),
+          ],
+        ),
         backgroundColor: Colors.black,
         centerTitle: true,
         leading: IconButton(
           icon: glowingIcon(Icons.arrow_back, Colors.white, 24),
           onPressed: () => Navigator.of(context).maybePop(),
           tooltip: 'Back',
-        ),  
+        ),
       ),
       backgroundColor: Colors.black,
       body: SingleChildScrollView(

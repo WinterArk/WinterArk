@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'api_service.dart';
-import 'workout_reminders.dart'; 
-import 'roast_notifications.dart'; 
+import 'workout_reminders.dart';
+import 'roast_notifications.dart';
 import 'package:workmanager/workmanager.dart';
 import 'button_effects/flash_press.dart';
 import 'button_effects/ui_helpers.dart';
@@ -20,17 +20,17 @@ class _PlanWorkoutPageState extends State<PlanWorkoutPage> {
   DateTime? scheduledDate;
   TimeOfDay? scheduledTime;
   bool roastEnabled = false;
-  final blueGrotto = const Color.fromARGB(255, 45, 178, 250); 
-  final aquamarine = const Color.fromARGB(255, 167, 223, 248); 
-  final babyBlue   = const Color.fromARGB(255, 212, 242, 255);
+  final blueGrotto = const Color.fromARGB(255, 45, 178, 250);
+  final aquamarine = const Color.fromARGB(255, 167, 223, 248);
+  final babyBlue = const Color.fromARGB(255, 212, 242, 255);
 
   List<String> workoutSplitOptions = [
-  'Legs',
-  'Back',
-  'Core',
-  'Delts',
-  'Arms',
-  'Chest',
+    'Legs',
+    'Back',
+    'Core',
+    'Delts',
+    'Arms',
+    'Chest',
   ];
   List<String> selectedWorkoutSplits = [];
 
@@ -48,6 +48,7 @@ class _PlanWorkoutPageState extends State<PlanWorkoutPage> {
       if (mounted) setState(() => _addFlashing = false);
     });
   }
+
   void _flashChip(String split) {
     setState(() => _flashingSplits.add(split));
     Future.delayed(_flashDuration, () {
@@ -55,6 +56,7 @@ class _PlanWorkoutPageState extends State<PlanWorkoutPage> {
       setState(() => _flashingSplits.remove(split));
     });
   }
+
   void _startFlash() {
     setState(() => _addPressed = true);
     Future.delayed(_flashDuration, () {
@@ -62,7 +64,7 @@ class _PlanWorkoutPageState extends State<PlanWorkoutPage> {
       setState(() => _addPressed = false);
     });
   }
-  
+
   @override
   void initState() {
     super.initState();
@@ -114,14 +116,18 @@ class _PlanWorkoutPageState extends State<PlanWorkoutPage> {
       return;
     }
     if (workoutNameController.text.isEmpty ||
-      selectedWorkoutSplits.isEmpty ||
-      getScheduledDateTime() == null) {
+        selectedWorkoutSplits.isEmpty ||
+        getScheduledDateTime() == null) {
       showShortFadeSnack(context, "Please complete all fields.");
       return;
     }
 
     try {
-      _storePlannedWorkoutSettings(workoutNameController.text.trim(), getScheduledDateTime().toString(), selectedWorkoutSplits, roastEnabled);
+      _storePlannedWorkoutSettings(
+          workoutNameController.text.trim(),
+          getScheduledDateTime().toString(),
+          selectedWorkoutSplits,
+          roastEnabled);
       await ApiService.addPlannedWorkout(
         userId: userId,
         workoutName: workoutNameController.text.trim(),
@@ -133,21 +139,22 @@ class _PlanWorkoutPageState extends State<PlanWorkoutPage> {
       _resetForm();
       // Schedule the background task for roast notifications.
       await Workmanager().registerOneOffTask(
-        "roast_notification_task", 
-        "roastNotificationTask",   
+        "roast_notification_task",
+        "roastNotificationTask",
         // set to 1 minutes for immediate testing; change to 24 hours for production
-        initialDelay: const Duration(hours: 24),  
+        initialDelay: const Duration(hours: 24),
         inputData: {},
       );
-    } 
-  
-    catch (e) {
+    } catch (e) {
       showShortFadeSnack(context, "Error: $e");
     }
-    
   }
 
-  Future<void> _storePlannedWorkoutSettings(String workoutName, String workoutDateIso, List<String> muscleGroups, bool roastEnabled) async {
+  Future<void> _storePlannedWorkoutSettings(
+      String workoutName,
+      String workoutDateIso,
+      List<String> muscleGroups,
+      bool roastEnabled) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('plannedWorkoutName', workoutName);
     await prefs.setString('plannedWorkoutDate', workoutDateIso);
@@ -214,7 +221,7 @@ class _PlanWorkoutPageState extends State<PlanWorkoutPage> {
         ),
         selected: isSelected,
         onSelected: (on) {
-          _flashChip(split);  
+          _flashChip(split);
           _saveSelectedSplits();
           setState(() {
             if (on) {
@@ -234,7 +241,7 @@ class _PlanWorkoutPageState extends State<PlanWorkoutPage> {
       ),
     );
   }
-  
+
   Future<void> _pickDate() async {
     final picked = await showDatePicker(
       context: context,
@@ -263,23 +270,23 @@ class _PlanWorkoutPageState extends State<PlanWorkoutPage> {
       builder: (ctx, child) => Theme(
         data: ThemeData.dark().copyWith(
           colorScheme: ColorScheme.dark(
-            primary:   Colors.grey[900]!,  
-            onPrimary: Colors.white,      
-            surface:   Colors.black,       
-            onSurface: Colors.white70,     
+            primary: Colors.grey[900]!,
+            onPrimary: Colors.white,
+            surface: Colors.black,
+            onSurface: Colors.white70,
           ),
           timePickerTheme: TimePickerThemeData(
-            dialBackgroundColor: Colors.black,  
-            dialTextColor:       aquamarine,
+            dialBackgroundColor: Colors.black,
+            dialTextColor: aquamarine,
             hourMinuteTextColor: aquamarine,
-            dayPeriodColor:     Colors.grey[900]!,
+            dayPeriodColor: Colors.grey[900]!,
             dayPeriodTextColor: aquamarine,
             dayPeriodBorderSide: BorderSide(color: Colors.black, width: 0),
             entryModeIconColor: aquamarine,
           ),
           textButtonTheme: TextButtonThemeData(
             style: TextButton.styleFrom(
-              foregroundColor: aquamarine, 
+              foregroundColor: aquamarine,
             ),
           ),
         ),
@@ -313,7 +320,7 @@ class _PlanWorkoutPageState extends State<PlanWorkoutPage> {
           icon: glowingIcon(Icons.arrow_back, babyBlue, 24),
           onPressed: () => Navigator.of(context).maybePop(),
           tooltip: 'Back',
-        ), 
+        ),
         actions: [
           IconButton(
             icon: glowingIcon(Icons.check, babyBlue, 25),
@@ -327,53 +334,53 @@ class _PlanWorkoutPageState extends State<PlanWorkoutPage> {
         child: ListView(
           children: [
             Center(
-            child: Text(
-              "Select Your Split!",
-              style: Theme.of(context)
-                .textTheme
-                .titleMedium!
-                .copyWith(color: babyBlue),
+              child: Text(
+                "Select Your Split!",
+                style: Theme.of(context)
+                    .textTheme
+                    .titleMedium!
+                    .copyWith(color: babyBlue),
+              ),
             ),
-          ),
-          const SizedBox(height: 8),
-          Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _splitChip(workoutSplitOptions[0]),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _splitChip(workoutSplitOptions[1]),
-                  const SizedBox(width: 8),
-                  _splitChip(workoutSplitOptions[2]),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _splitChip(workoutSplitOptions[3]),
-                  const SizedBox(width: 8),
-                  _splitChip(workoutSplitOptions[4]),
-                  const SizedBox(width: 8),
-                  _splitChip(workoutSplitOptions[5]),
-                ],
-              ),
-            ],
-          ),
+            const SizedBox(height: 8),
+            Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _splitChip(workoutSplitOptions[0]),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _splitChip(workoutSplitOptions[1]),
+                    const SizedBox(width: 8),
+                    _splitChip(workoutSplitOptions[2]),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _splitChip(workoutSplitOptions[3]),
+                    const SizedBox(width: 8),
+                    _splitChip(workoutSplitOptions[4]),
+                    const SizedBox(width: 8),
+                    _splitChip(workoutSplitOptions[5]),
+                  ],
+                ),
+              ],
+            ),
             const SizedBox(height: 30),
             Center(
               child: Text(
                 "Name Your Workout!",
                 style: Theme.of(context)
-                  .textTheme
-                  .titleMedium!
-                  .copyWith(color: babyBlue),
+                    .textTheme
+                    .titleMedium!
+                    .copyWith(color: babyBlue),
               ),
             ),
             Padding(
@@ -389,7 +396,7 @@ class _PlanWorkoutPageState extends State<PlanWorkoutPage> {
                     borderSide: BorderSide.none,
                   ),
                   prefixIcon: Padding(
-                    padding: const EdgeInsets.fromLTRB(12,6,0,8),
+                    padding: const EdgeInsets.fromLTRB(12, 6, 0, 8),
                     child: glowingIcon(Icons.edit, babyBlue, 26),
                   ),
                   suffixIcon: Row(
@@ -400,7 +407,8 @@ class _PlanWorkoutPageState extends State<PlanWorkoutPage> {
                         customBorder: const CircleBorder(),
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8),
-                          child: glowingIcon(Icons.calendar_today, babyBlue, 24),
+                          child:
+                              glowingIcon(Icons.calendar_today, babyBlue, 24),
                         ),
                       ),
                       const SizedBox(width: 5),
@@ -418,7 +426,6 @@ class _PlanWorkoutPageState extends State<PlanWorkoutPage> {
                     minHeight: 0,
                     minWidth: 0,
                   ),
-
                   hintText: 'Workout Name',
                   hintStyle: const TextStyle(color: Colors.white70),
                   contentPadding: const EdgeInsets.symmetric(vertical: 16),
@@ -432,14 +439,16 @@ class _PlanWorkoutPageState extends State<PlanWorkoutPage> {
                 children: [
                   // Roast
                   SizedBox(
-                    width:  150,
+                    width: 150,
                     height: 48,
                     child: FlashOnPress(
                       glowColor: blueGrotto,
                       flashColor: Colors.white,
                       onTap: () => Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => const RoastNotificationsSettingsPage()),
+                        MaterialPageRoute(
+                            builder: (_) =>
+                                const RoastNotificationsSettingsPage()),
                       ),
                       child: Container(
                         decoration: BoxDecoration(
@@ -453,7 +462,8 @@ class _PlanWorkoutPageState extends State<PlanWorkoutPage> {
                           children: [
                             glowingIcon(Icons.whatshot, blueGrotto, 20),
                             const SizedBox(width: 6),
-                            Text("Roast Me", style: glowingTextStyle(blueGrotto, size: 14)),
+                            Text("Roast Me",
+                                style: glowingTextStyle(blueGrotto, size: 14)),
                           ],
                         ),
                       ),
@@ -462,14 +472,16 @@ class _PlanWorkoutPageState extends State<PlanWorkoutPage> {
                   const SizedBox(width: 30),
                   // Reminder
                   SizedBox(
-                    width:  150,
+                    width: 150,
                     height: 48,
                     child: FlashOnPress(
                       glowColor: aquamarine,
                       flashColor: Colors.white,
                       onTap: () => Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => const WorkoutReminderSettingsPage()),
+                        MaterialPageRoute(
+                            builder: (_) =>
+                                const WorkoutReminderSettingsPage()),
                       ),
                       child: Container(
                         decoration: BoxDecoration(
@@ -483,13 +495,14 @@ class _PlanWorkoutPageState extends State<PlanWorkoutPage> {
                           children: [
                             glowingIcon(Icons.alarm, aquamarine, 20),
                             const SizedBox(width: 6),
-                            Text("Set Reminder", style: glowingTextStyle(aquamarine, size: 14)),
+                            Text("Set Reminder",
+                                style: glowingTextStyle(aquamarine, size: 14)),
                           ],
                         ),
                       ),
                     ),
                   ),
-                const SizedBox(height: 40),
+                  const SizedBox(height: 40),
                 ],
               ),
             ),

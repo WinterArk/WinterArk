@@ -18,20 +18,20 @@ class ProfilePost {
   factory ProfilePost.fromJson(Map<String, dynamic> json) {
     return ProfilePost(
       id: json['_id'] as String,
-      userId: json['userId'] as String,               // ← pull in userId
+      userId: json['userId'] as String, // ← pull in userId
       mediaUrl: json['mediaUrl'] as String,
       mediaType: json['mediaType'] as String,
-      caption: (json['caption'] as String?) ?? '',      // safe null-to-empty
+      caption: (json['caption'] as String?) ?? '', // safe null-to-empty
       createdAt: DateTime.parse(json['createdAt'] as String),
     );
   }
 
   Map<String, dynamic> toJson() => {
-    '_id': id,
-    'userId': userId,
-    'mediaUrl': mediaUrl,
-    'mediaType': mediaType,
-    'caption': caption,
-    'createdAt': createdAt.toIso8601String(),
-  };
+        '_id': id,
+        'userId': userId,
+        'mediaUrl': mediaUrl,
+        'mediaType': mediaType,
+        'caption': caption,
+        'createdAt': createdAt.toIso8601String(),
+      };
 }

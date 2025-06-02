@@ -21,19 +21,21 @@ class _ExerciseSelectionWidgetState extends State<ExerciseSelectionWidget> {
 
   // Controllers for search and custom entry
   final TextEditingController searchController = TextEditingController();
-  final TextEditingController customExerciseController = TextEditingController();
+  final TextEditingController customExerciseController =
+      TextEditingController();
 
-   @override
-    void initState() {
-      super.initState();
-    }
+  @override
+  void initState() {
+    super.initState();
+  }
 
-    @override
-    void dispose() {
-      searchController.dispose();
-      customExerciseController.dispose();  
-      super.dispose();
-    }
+  @override
+  void dispose() {
+    searchController.dispose();
+    customExerciseController.dispose();
+    super.dispose();
+  }
+
   // Primary dropdown options
   final List<String> muscleGroups = [
     'Chest',
@@ -48,11 +50,47 @@ class _ExerciseSelectionWidgetState extends State<ExerciseSelectionWidget> {
   // Mapping muscle groups to standard exercises
   final Map<String, List<String>> exercisesByMuscle = {
     'Chest': ['Press', 'Fly', 'Dips', 'Pushups'],
-    'Shoulders': ['Shoulder Press', 'Lateral Raise', 'Rear Delt Fly', 'Front Raise'],
-    'Arms': ['Curl', 'Triceps Overhead', 'Triceps Pushdowns', 'Triceps Kickback', 'Dips'],
-    'Back': ['Deadlift', 'Lat Pulldown', 'Pull Ups', 'Row', 'Back Extension', 'Pullover'],
-    'Legs': ['Squat', 'Leg Press', 'Leg Extension', 'Hamstring Curls', 'Deadlift', 'RDL', 'Good Mornings', 'Calves', 'Hip Thrust', 'Lunge'],
-    'Core': ['Leg Raise', 'Cable Crunches', 'Plank', 'Crunches', 'Situps', 'Russian Twists'],
+    'Shoulders': [
+      'Shoulder Press',
+      'Lateral Raise',
+      'Rear Delt Fly',
+      'Front Raise'
+    ],
+    'Arms': [
+      'Curl',
+      'Triceps Overhead',
+      'Triceps Pushdowns',
+      'Triceps Kickback',
+      'Dips'
+    ],
+    'Back': [
+      'Deadlift',
+      'Lat Pulldown',
+      'Pull Ups',
+      'Row',
+      'Back Extension',
+      'Pullover'
+    ],
+    'Legs': [
+      'Squat',
+      'Leg Press',
+      'Leg Extension',
+      'Hamstring Curls',
+      'Deadlift',
+      'RDL',
+      'Good Mornings',
+      'Calves',
+      'Hip Thrust',
+      'Lunge'
+    ],
+    'Core': [
+      'Leg Raise',
+      'Cable Crunches',
+      'Plank',
+      'Crunches',
+      'Situps',
+      'Russian Twists'
+    ],
   };
 
   // Variation options for specific exercises
@@ -76,7 +114,14 @@ class _ExerciseSelectionWidgetState extends State<ExerciseSelectionWidget> {
   ];
 
   // Equipment options common to all exercises in this example
-  final List<String> equipmentOptions = ['Barbell', 'Dumbbell', 'Machine', 'Cable', 'Weighted Belt', 'Bodyweight'];
+  final List<String> equipmentOptions = [
+    'Barbell',
+    'Dumbbell',
+    'Machine',
+    'Cable',
+    'Weighted Belt',
+    'Bodyweight'
+  ];
 
   // Build the final exercise name
   String _buildFinalExerciseName() {
@@ -115,7 +160,8 @@ class _ExerciseSelectionWidgetState extends State<ExerciseSelectionWidget> {
           decoration: const InputDecoration(labelText: 'Select Muscle Group'),
           value: selectedMuscleGroup,
           items: muscleGroups
-              .map((group) => DropdownMenuItem(value: group, child: Text(group)))
+              .map(
+                  (group) => DropdownMenuItem(value: group, child: Text(group)))
               .toList(),
           onChanged: (value) {
             setState(() {
@@ -181,7 +227,8 @@ class _ExerciseSelectionWidgetState extends State<ExerciseSelectionWidget> {
           )
         else if (selectedMuscleGroup == 'Arms' && selectedExercise == 'Curl')
           DropdownButtonFormField<String>(
-            decoration: const InputDecoration(labelText: 'Select Curl Variation'),
+            decoration:
+                const InputDecoration(labelText: 'Select Curl Variation'),
             value: selectedVariation,
             items: armCurlVariations
                 .map((variation) =>
@@ -196,7 +243,8 @@ class _ExerciseSelectionWidgetState extends State<ExerciseSelectionWidget> {
           )
         else if (selectedMuscleGroup == 'Back' && selectedExercise == 'Row')
           DropdownButtonFormField<String>(
-            decoration: const InputDecoration(labelText: 'Select Row Variation'),
+            decoration:
+                const InputDecoration(labelText: 'Select Row Variation'),
             value: selectedVariation,
             items: backRowVariations
                 .map((variation) =>
@@ -211,7 +259,8 @@ class _ExerciseSelectionWidgetState extends State<ExerciseSelectionWidget> {
           )
         else if (selectedMuscleGroup == 'Legs' && selectedExercise == 'Squat')
           DropdownButtonFormField<String>(
-            decoration: const InputDecoration(labelText: 'Select Squat Variation'),
+            decoration:
+                const InputDecoration(labelText: 'Select Squat Variation'),
             value: selectedVariation,
             items: squatVariations
                 .map((variation) =>
