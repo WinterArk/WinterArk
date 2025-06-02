@@ -10,7 +10,6 @@ class ExerciseSelectionWidget extends StatefulWidget {
 }
 
 class _ExerciseSelectionWidgetState extends State<ExerciseSelectionWidget> {
-  // State variables for selections
   String? selectedMuscleGroup;
   String? selectedExercise;
   String? selectedVariation;
@@ -47,7 +46,6 @@ class _ExerciseSelectionWidgetState extends State<ExerciseSelectionWidget> {
     'Custom Exercise'
   ];
 
-  // Mapping muscle groups to standard exercises
   final Map<String, List<String>> exercisesByMuscle = {
     'Chest': ['Press', 'Fly', 'Dips', 'Pushups'],
     'Shoulders': [
@@ -93,7 +91,6 @@ class _ExerciseSelectionWidgetState extends State<ExerciseSelectionWidget> {
     ],
   };
 
-  // Variation options for specific exercises
   final List<String> chestVariations = ['Decline', 'Flat', 'Incline'];
   final List<String> armCurlVariations = ['Standard', 'Incline', 'Preacher'];
   final List<String> backRowVariations = [
@@ -123,7 +120,6 @@ class _ExerciseSelectionWidgetState extends State<ExerciseSelectionWidget> {
     'Bodyweight'
   ];
 
-  // Build the final exercise name
   String _buildFinalExerciseName() {
     if (isCustom) {
       return customExerciseController.text.trim();
@@ -136,7 +132,6 @@ class _ExerciseSelectionWidgetState extends State<ExerciseSelectionWidget> {
     return '$base$varPart$equipPart$saPart$slPart'.trim();
   }
 
-  // Update parent's callback
   void _updateExerciseName() {
     widget.onSelectionChanged(_buildFinalExerciseName());
   }

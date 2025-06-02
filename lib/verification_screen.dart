@@ -30,16 +30,13 @@ class _VerificationScreenState extends State<VerificationScreen> {
       _isLoading = true;
     });
     try {
-      // 1) Attempt to verify on the backend
       await ApiService.verify(
         widget.email,
         _codeController.text.trim(),
       );
 
-      // 2) If successful, show a success message
       showShortFadeSnack(context, 'Account verified successfully!');
 
-      // 3) Navigate directly to HomePage, passing userId
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -55,7 +52,6 @@ class _VerificationScreenState extends State<VerificationScreen> {
     }
   }
 
-  // Handle resending verification code
   Future<void> _handleResendVerification() async {
     setState(() {
       _isResending = true;

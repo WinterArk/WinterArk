@@ -8,7 +8,6 @@ import 'package:intl/intl.dart';
 import 'streak_leaderboard.dart';
 import 'button_effects/ui_helpers.dart';
 
-// Helper function to convert month/day to YYYY-MM-DD format.
 String getDateString(String monthName, int day) {
   final currentYear = DateTime.now().year;
   final monthsMap = {

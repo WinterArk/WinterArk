@@ -2,9 +2,7 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 
-/// ───────────────────────────
-/// 1.  Notification channels
-/// ───────────────────────────
+
 const AndroidNotificationChannel chatChannel = AndroidNotificationChannel(
   'chat_message_channel',
   'Chat Messages',
@@ -19,20 +17,13 @@ const AndroidNotificationChannel workoutChannel = AndroidNotificationChannel(
   importance: Importance.max,
 );
 
-/// ───────────────────────────
-/// 2.  Plugin instance
-/// ───────────────────────────
 final FlutterLocalNotificationsPlugin notificationsPlugin =
     FlutterLocalNotificationsPlugin();
 
-/// ───────────────────────────
-/// 3.  Initialization
-/// ───────────────────────────
 Future<void> initializeNotifications() async {
   const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
   const initSettings = InitializationSettings(android: androidInit);
 
-  // Initialise the plugin
   await notificationsPlugin.initialize(initSettings);
 
   // Explicitly create the two channels on Android
@@ -43,9 +34,6 @@ Future<void> initializeNotifications() async {
   await android?.createNotificationChannel(workoutChannel);
 }
 
-/// ───────────────────────────
-/// 4.  Chat notification
-/// ───────────────────────────
 Future<void> showChatNotification({
   required String title,
   required String body,
@@ -68,9 +56,6 @@ Future<void> showChatNotification({
   );
 }
 
-/// ───────────────────────────
-/// 5.  Workout reminder helpers
-/// ───────────────────────────
 Future<void> scheduleWorkoutReminder(
   DateTime workoutDateTime,
   String muscleGroup,

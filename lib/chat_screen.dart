@@ -54,10 +54,8 @@ class _ChatScreenState extends State<ChatScreen> {
     });
 
     socket!.on('new_message', (data) async {
-      // 1) drop your own echoes
       if (data['senderId'] == widget.currentUserId) return;
 
-      // 2) format & show it
       final raw = data['timestamp'] as String;
       final dt = DateTime.parse(raw).toUtc().toLocal();
       data['pacificTimestamp'] = DateFormat.jm().format(dt);
@@ -65,9 +63,7 @@ class _ChatScreenState extends State<ChatScreen> {
       setState(() => messages.add(data));
       _scrollToBottom();
 
-      // 3) immediately mark it as read on the server
       await ApiService.markMessageAsRead(chatId!, data['_id']);
-      // 4) let the other side know you’ve seen it
       socket!.emit('message_read', {
         'chatId': chatId,
         'messageId': data['_id'],
@@ -153,7 +149,6 @@ class _ChatScreenState extends State<ChatScreen> {
     if (chatId == null || text.isEmpty) return;
     _messageController.clear();
 
-    // 1) local echo
     final now = DateTime.now();
     final pacific = now.toLocal();
     final newMsg = {
@@ -168,14 +163,12 @@ class _ChatScreenState extends State<ChatScreen> {
     setState(() => messages.add(newMsg));
     _scrollToBottom();
 
-    // 2) emit over socket
     socket?.emit('send_message', {
       'chatId': chatId,
       'senderId': widget.currentUserId,
       'content': text,
     });
 
-    // 3) persist via HTTP
     ApiService.sendMessage(chatId!, widget.currentUserId, text).catchError((e) {
       debugPrint('HTTP send error: $e');
     });

@@ -70,26 +70,26 @@ class _SharedDashboardState extends State<SharedDashboard> {
     socket.connect();
 
     socket.onConnect((_) {
-      debugPrint('⚡ Socket connected as ${socket.id}');
+      debugPrint('Socket connected as ${socket.id}');
       // join your personal room
       socket.emit('join', widget.userId);
-      debugPrint('📥 Emitted join for room ${widget.userId}');
+      debugPrint('Emitted join for room ${widget.userId}');
     });
 
     socket.onConnectError((err) {
-      debugPrint('❌ Socket connect error: $err');
+      debugPrint('Socket connect error: $err');
     });
 
     socket.onError((err) {
-      debugPrint('⚠️ Socket error: $err');
+      debugPrint('Socket error: $err');
     });
 
     socket.onDisconnect((_) {
-      debugPrint('🔌 Socket disconnected');
+      debugPrint('Socket disconnected');
     });
 
     socket.on('new_post', (data) {
-      debugPrint('📨 new_post received: ${data['description']}');
+      debugPrint('new_post received: ${data['description']}');
       setState(() {
         posts.insert(0, data);
       });
@@ -272,7 +272,6 @@ class _WorkoutPostCardState extends State<WorkoutPostCard> {
     super.dispose();
   }
 
-  // Compute liked/disliked state dynamically from currentPost.
   bool get isLiked =>
       (currentPost['likedBy'] as List<dynamic>? ?? []).contains(widget.userId);
   bool get isDisliked => (currentPost['dislikedBy'] as List<dynamic>? ?? [])
